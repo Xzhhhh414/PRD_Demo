@@ -30,7 +30,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: TapTap%20%E5%8D%81%E5%91%A8%E5%B9%B4/taptap-10y-h5-demo
+          path: TapTap-10y/taptap-10y-h5-demo
 
       - name: Deploy to GitHub Pages
         id: deployment
