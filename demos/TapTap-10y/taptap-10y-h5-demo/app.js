@@ -11,12 +11,16 @@ const STORAGE_KEY = "taptap10y_state_v1";
  *   enteredAt?: number;
  *   careerSnapshotPreset?: "test";
  *   careerSnapshot?: { recap: any; grants: Record<string, { points: number; coupons: number }> };
+ *   profile?: { nickname: string; id: string };
  *   points: number;
  *   walletCoupons: number;
  *   claimedRewardIds: string[];
  *   inventory: { frames: string[]; badges: string[]; };
  *   equipped: { frame?: string; badge?: string; };
- *   playtest: { completed: string[]; feedback: Record<string,string> };
+ *   playtest: { completed: string[]; feedback: Record<string,string>; claimed: string[] };
+ *   memorial?: { tab: "color" | "sticker" | "avatar"; colorId: string; stickerId: string; avatarId: string };
+ *   memorialUnlocks?: { colors: string[]; stickers: string[]; avatars: string[] };
+ *   daily?: { lotteryDayKey?: string };
  *   mutualMessages?: Record<string, { text: string; ts: number; likes?: number }[]>;
  * }} PhaseState */
 
@@ -310,9 +314,15 @@ const GROWTH_GAMES = [
 ];
 
 const PLAYTEST_GAMES = [
-  { id: "p1", title: "《雾灯之下》", desc: "10 分钟试玩 · 轻解谜 · 叙事氛围", points: 25 },
-  { id: "p2", title: "《纸片机甲工坊》", desc: "10 分钟试玩 · 组装 · 轻战斗", points: 25 },
-  { id: "p3", title: "《夜行列车：第7节车厢》", desc: "10 分钟试玩 · 推理 · 多结局", points: 30 },
+  { id: "p1", title: "《雾灯之下》", desc: "10 分钟试玩 · 轻解谜 · 叙事氛围", tags: ["轻解谜", "叙事", "氛围感", "10分钟"], heat: 128600, points: 25 },
+  { id: "p2", title: "《纸片机甲工坊》", desc: "10 分钟试玩 · 组装 · 轻战斗", tags: ["组装", "轻战斗", "机甲", "10分钟"], heat: 96400, points: 25 },
+  { id: "p3", title: "《夜行列车·7号车厢》", desc: "10 分钟试玩 · 推理 · 多结局", tags: ["推理", "多结局", "悬疑", "10分钟"], heat: 183200, points: 30 },
+  { id: "p4", title: "《像素海盗电台》", desc: "10 分钟试玩 · 节奏 · 轻 Roguelike", tags: ["节奏", "Roguelike", "像素", "10分钟"], heat: 152300, points: 25 },
+  { id: "p5", title: "《月面快递》", desc: "10 分钟试玩 · 经营 · 轻策略", tags: ["经营", "轻策略", "治愈", "10分钟"], heat: 110800, points: 20 },
+  { id: "p6", title: "《玻璃花园》", desc: "10 分钟试玩 · 叙事 · 互动选择", tags: ["叙事", "互动选择", "情感", "10分钟"], heat: 97200, points: 20 },
+  { id: "p7", title: "《重力回廊》", desc: "10 分钟试玩 · 动作 · 平台跳跃", tags: ["动作", "平台跳跃", "挑战", "10分钟"], heat: 206500, points: 30 },
+  { id: "p8", title: "《纸上迷宫》", desc: "10 分钟试玩 · 解谜 · 手绘风", tags: ["解谜", "手绘", "烧脑", "10分钟"], heat: 87500, points: 25 },
+  { id: "p9", title: "《喵喵合唱团》", desc: "10 分钟试玩 · 音游 · 合作", tags: ["音游", "合作", "可爱", "10分钟"], heat: 169900, points: 30 },
 ];
 
 const MUTUAL_GAMES = [
@@ -356,20 +366,57 @@ const MUTUAL_GAMES = [
 
 const SHOP_ITEMS = {
   frames: [
-    { id: "f_ten_years", title: "头像框：十年同行", cost: 120, icon: "🟩" },
-    { id: "f_discover", title: "头像框：发现者", cost: 180, icon: "🧭" },
+    { id: "f_ten_years", title: "头像框：TapTap十周年", cost: 120, icon: "🟩" },
   ],
   badges: [
-    { id: "b_fair", title: "徽章：公正评审", cost: 160, icon: "⚖️" },
-    { id: "b_maker", title: "徽章：TapMaker", cost: 200, icon: "🛠️" },
+    { id: "b_maker", title: "徽章：TapTap十周年", cost: 200, icon: "🛠️" },
   ],
   lottery: {
     id: "lot_points",
-    title: "积分抽点券",
+    title: "每日抽点券",
     cost: 30,
     prize: { kind: "coupon", value: 10 },
-    winRate: 0.08,
   },
+};
+
+const MEM_CARD_COLORS = [
+  { id: "mc_cream", label: "奶油", bg: "#F7E3C5", panel: "#FFF7EB", accent: "#F2B46B" },
+  { id: "mc_pink", label: "樱桃", bg: "#F6C4C8", panel: "#FFECEF", accent: "#E97D87" },
+  { id: "mc_mint", label: "薄荷", bg: "#C7F0E4", panel: "#EFFFFA", accent: "#42C6A6" },
+  { id: "mc_sky", label: "晴空", bg: "#CFE5FF", panel: "#EDF5FF", accent: "#5A94FF" },
+  { id: "mc_lav", label: "薰衣草", bg: "#E3D7FF", panel: "#F4F0FF", accent: "#8B6BFF" },
+  { id: "mc_sand", label: "沙丘", bg: "#F2D9B8", panel: "#FFF2E1", accent: "#C98F4C" },
+];
+
+const MEM_STICKERS = [
+  { id: "ms_star", icon: "⭐", label: "星星" },
+  { id: "ms_heart", icon: "💛", label: "爱心" },
+  { id: "ms_bulb", icon: "💡", label: "灵感" },
+  { id: "ms_crown", icon: "👑", label: "王冠" },
+  { id: "ms_note", icon: "📝", label: "评价" },
+  { id: "ms_cat", icon: "🐾", label: "猫爪" },
+  { id: "ms_trophy", icon: "🏆", label: "奖杯" },
+  { id: "ms_cloud", icon: "☁️", label: "云朵" },
+];
+
+const MEM_AVATARS = [
+  { id: "ma_bunny", icon: "🐰", label: "兔帽" },
+  { id: "ma_cat", icon: "🐱", label: "猫猫" },
+  { id: "ma_robot", icon: "🤖", label: "机甲" },
+  { id: "ma_fox", icon: "🦊", label: "小狐" },
+  { id: "ma_panda", icon: "🐼", label: "熊猫" },
+  { id: "ma_penguin", icon: "🐧", label: "企鹅" },
+];
+
+const MEM_SHOP = {
+  frame: SHOP_ITEMS.frames[0],
+  badge: SHOP_ITEMS.badges[0],
+  unlocks: [
+    { id: "u_colors_pack", title: "纪念卡配色包", desc: "解锁更多卡片颜色", cost: 80, kind: "colors", unlockIds: ["mc_pink", "mc_mint", "mc_sky", "mc_lav", "mc_sand"] },
+    { id: "u_stickers_pack", title: "纪念卡贴纸包", desc: "解锁更多小贴纸", cost: 80, kind: "stickers", unlockIds: ["ms_heart", "ms_bulb", "ms_crown", "ms_note", "ms_cat", "ms_trophy", "ms_cloud"] },
+    { id: "u_avatars_pack", title: "纪念卡角色包", desc: "解锁更多角色形象", cost: 100, kind: "avatars", unlockIds: ["ma_cat", "ma_robot", "ma_fox", "ma_panda", "ma_penguin"] },
+  ],
+  lottery: { cost: SHOP_ITEMS.lottery.cost, prize: SHOP_ITEMS.lottery.prize.value },
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -386,12 +433,21 @@ function loadState() {
     enteredAt: 0,
     careerSnapshotPreset: DEFAULT_PRESET_KEY,
     careerSnapshot: null,
+    profile: {
+      nickname: "我是昵称",
+      id: "88888888",
+      identity: "聚光灯GameJam开发者",
+      bio: "我是个人主页的个人介绍我是个人主页的个人介绍",
+    },
     points: 0,
     walletCoupons: 0,
     claimedRewardIds: [],
     inventory: { frames: [], badges: [] },
     equipped: {},
-    playtest: { completed: [], feedback: {} },
+    playtest: { completed: [], feedback: {}, claimed: [] },
+    memorial: { tab: "color", colorId: "mc_cream", stickerId: "ms_star", avatarId: "ma_bunny" },
+    memorialUnlocks: { colors: ["mc_cream"], stickers: ["ms_star"], avatars: ["ma_bunny"] },
+    daily: { lotteryDayKey: "" },
     mutualMessages: {
       m1: [
         { text: "音游党狂喜，谱面真的太有创意了", ts: Date.now() - 86400000 * 3, likes: 128 },
@@ -413,7 +469,38 @@ function loadState() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return fallback;
     const parsed = JSON.parse(raw);
-    return { ...fallback, ...parsed };
+    const merged = { ...fallback, ...parsed };
+    // Deep-merge playtest so new fields (e.g. claimed[]) stay compatible with old saved state.
+    merged.playtest = { ...fallback.playtest, ...(parsed?.playtest || {}) };
+    if (!Array.isArray(merged.playtest.completed)) merged.playtest.completed = [];
+    if (!merged.playtest.feedback || typeof merged.playtest.feedback !== "object") merged.playtest.feedback = {};
+    if (!Array.isArray(merged.playtest.claimed)) merged.playtest.claimed = [];
+
+    merged.profile = { ...fallback.profile, ...(parsed?.profile || {}) };
+    if (!merged.profile || typeof merged.profile !== "object") merged.profile = { ...fallback.profile };
+    if (!String(merged.profile.nickname || "").trim()) merged.profile.nickname = fallback.profile.nickname;
+    if (!String(merged.profile.id || "").trim()) merged.profile.id = fallback.profile.id;
+    if (merged.profile.identity == null) merged.profile.identity = fallback.profile.identity || "";
+    if (merged.profile.bio == null) merged.profile.bio = fallback.profile.bio || "";
+    // Allow empty identity/bio (means "do not display")
+
+    merged.memorial = { ...fallback.memorial, ...(parsed?.memorial || {}) };
+    if (!merged.memorial || typeof merged.memorial !== "object") merged.memorial = { ...fallback.memorial };
+    if (!["color", "sticker", "avatar"].includes(String(merged.memorial.tab || ""))) merged.memorial.tab = fallback.memorial.tab;
+    if (!String(merged.memorial.colorId || "").trim()) merged.memorial.colorId = fallback.memorial.colorId;
+    if (!String(merged.memorial.stickerId || "").trim()) merged.memorial.stickerId = fallback.memorial.stickerId;
+    if (!String(merged.memorial.avatarId || "").trim()) merged.memorial.avatarId = fallback.memorial.avatarId;
+
+    merged.memorialUnlocks = { ...fallback.memorialUnlocks, ...(parsed?.memorialUnlocks || {}) };
+    if (!merged.memorialUnlocks || typeof merged.memorialUnlocks !== "object") merged.memorialUnlocks = { ...fallback.memorialUnlocks };
+    if (!Array.isArray(merged.memorialUnlocks.colors)) merged.memorialUnlocks.colors = [...fallback.memorialUnlocks.colors];
+    if (!Array.isArray(merged.memorialUnlocks.stickers)) merged.memorialUnlocks.stickers = [...fallback.memorialUnlocks.stickers];
+    if (!Array.isArray(merged.memorialUnlocks.avatars)) merged.memorialUnlocks.avatars = [...fallback.memorialUnlocks.avatars];
+
+    merged.daily = { ...fallback.daily, ...(parsed?.daily || {}) };
+    if (!merged.daily || typeof merged.daily !== "object") merged.daily = { ...fallback.daily };
+    if (!String(merged.daily.lotteryDayKey || "").trim()) merged.daily.lotteryDayKey = "";
+    return merged;
   } catch {
     return fallback;
   }
@@ -729,6 +816,98 @@ function scheduleScrollToCard(trackId, idx, behavior = "auto") {
   }, 80);
 }
 
+function wireCarousel(trackId, dotsId, { cardSelector = ".mini-card", activeCardClass = "mini-card--active" } = {}) {
+  const track = document.getElementById(trackId);
+  const dotsWrap = document.getElementById(dotsId);
+  if (!track || !dotsWrap) return;
+  const cards = Array.from(track.querySelectorAll(cardSelector));
+  const dots = Array.from(dotsWrap.querySelectorAll("[data-dot]"));
+  if (!cards.length || !dots.length) return;
+
+  const setActive = (idx) => {
+    dots.forEach((d, i) => d.classList.toggle("dot--active", i === idx));
+    if (activeCardClass) cards.forEach((c, i) => c.classList.toggle(activeCardClass, i === idx));
+  };
+  dots.forEach((d) =>
+    d.addEventListener("click", () => {
+      const idx = Math.max(0, Math.min(Number(d.dataset.dot || 0), cards.length - 1));
+      const el = cards[idx];
+      if (!el) return;
+      el.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      setActive(idx);
+    }),
+  );
+
+  // Init at requested index to avoid “flash to first card” animation after render
+  const req = carouselInitRequests[trackId];
+  const initIdx = Math.max(0, Math.min(req?.idx ?? 0, cards.length - 1));
+  track.classList.add("no-anim");
+  setActive(initIdx);
+  scrollTrackToCard(track, cards[initIdx], "auto");
+  delete carouselInitRequests[trackId];
+  requestAnimationFrame(() => track.classList.remove("no-anim"));
+
+  // Desktop: left-mouse drag to scroll
+  let isDragging = false;
+  let startX = 0;
+  let startScroll = 0;
+  let moved = false;
+  track.addEventListener("pointerdown", (e) => {
+    if (e.pointerType !== "mouse") return;
+    if (e.button !== 0) return;
+    // Don't hijack interactions inside the carousel (buttons/links/inputs)
+    if (e.target?.closest?.("button, a, input, textarea, select, [role='button'], [data-bind], [data-claim], [data-play-go], [data-play-claim]")) return;
+    isDragging = true;
+    moved = false;
+    startX = e.clientX;
+    startScroll = track.scrollLeft;
+    track.classList.add("is-dragging");
+    track.setPointerCapture?.(e.pointerId);
+    e.preventDefault();
+  });
+  track.addEventListener("pointermove", (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    if (Math.abs(dx) > 3) moved = true;
+    track.scrollLeft = startScroll - dx;
+    e.preventDefault();
+  });
+  const endDrag = (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+    track.classList.remove("is-dragging");
+    try {
+      track.releasePointerCapture?.(e.pointerId);
+    } catch {}
+  };
+  track.addEventListener("pointerup", endDrag);
+  track.addEventListener("pointercancel", endDrag);
+  track.addEventListener(
+    "click",
+    (e) => {
+      if (!moved) return;
+      e.preventDefault();
+      e.stopPropagation();
+      moved = false;
+    },
+    true,
+  );
+
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          const idx = Number(e.target.getAttribute("data-card-idx") || 0);
+          setActive(idx);
+        });
+      },
+      { root: track, threshold: 0.65 },
+    );
+    cards.forEach((c) => io.observe(c));
+  }
+}
+
 function pillClass(type) {
   if (type === "ok") return "pill pill--ok";
   if (type === "brand") return "pill pill--brand";
@@ -739,6 +918,454 @@ function pillClass(type) {
 
 function fmt(n) {
   return new Intl.NumberFormat("zh-CN").format(n);
+}
+
+// ---------- QR (pure JS, SVG output) ----------
+// Minimal embed from Nayuki QR Code generator (public domain): https://www.nayuki.io/page/qr-code-generator-library
+// We only use encodeText() + toSvgString().
+const qrcodegen = (() => {
+  "use strict";
+  class QrCode {
+    static encodeText(text, ecl) {
+      const segs = QrSegment.makeSegments(text);
+      return QrCode.encodeSegments(segs, ecl);
+    }
+    static encodeSegments(segs, ecl, minVersion = 1, maxVersion = 40, mask = -1, boostEcl = true) {
+      if (!(QrCode.MIN_VERSION <= minVersion && minVersion <= maxVersion && maxVersion <= QrCode.MAX_VERSION) || mask < -1 || mask > 7) {
+        throw new RangeError("Invalid value");
+      }
+      let version, dataUsedBits;
+      for (version = minVersion; ; version++) {
+        const dataCapacityBits = QrCode.getNumDataCodewords(version, ecl) * 8;
+        const bb = new BitBuffer();
+        for (const seg of segs) {
+          bb.appendBits(seg.mode.modeBits, 4);
+          bb.appendBits(seg.numChars, seg.mode.numCharCountBits(version));
+          bb.appendData(seg.data);
+        }
+        dataUsedBits = bb.bitLength;
+        if (dataUsedBits <= dataCapacityBits) {
+          if (boostEcl) {
+            for (const newEcl of [QrCode.Ecc.MEDIUM, QrCode.Ecc.QUARTILE, QrCode.Ecc.HIGH]) {
+              if (newEcl.ordinal > ecl.ordinal) continue;
+              if (dataUsedBits <= QrCode.getNumDataCodewords(version, newEcl) * 8) ecl = newEcl;
+            }
+          }
+          break;
+        }
+        if (version >= maxVersion) throw new RangeError("Data too long");
+      }
+      const dataCapacityBits = QrCode.getNumDataCodewords(version, ecl) * 8;
+      const bb = new BitBuffer();
+      for (const seg of segs) {
+        bb.appendBits(seg.mode.modeBits, 4);
+        bb.appendBits(seg.numChars, seg.mode.numCharCountBits(version));
+        bb.appendData(seg.data);
+      }
+      bb.appendBits(0, Math.min(4, dataCapacityBits - bb.bitLength));
+      bb.appendBits(0, (8 - bb.bitLength % 8) % 8);
+      for (let padByte = 0xEC; bb.bitLength < dataCapacityBits; padByte ^= 0xEC ^ 0x11) bb.appendBits(padByte, 8);
+      const dataCodewords = [];
+      while (dataCodewords.length * 8 < bb.bitLength) dataCodewords.push(bb.getByte(dataCodewords.length));
+      const allCodewords = QrCode.addEccAndInterleave(dataCodewords, version, ecl);
+      const size = version * 4 + 17;
+      const modules = Array.from({ length: size }, () => Array(size).fill(false));
+      const isFunction = Array.from({ length: size }, () => Array(size).fill(false));
+      const qr = new QrCode(version, ecl, modules, isFunction);
+      qr.drawFunctionPatterns();
+      qr.drawCodewords(allCodewords);
+      qr.applyMask(mask === -1 ? qr.handleConstructorMasking(mask) : mask);
+      qr.drawFormatBits(mask === -1 ? qr.mask : mask);
+      qr.drawVersion();
+      return qr;
+    }
+    static getNumDataCodewords(ver, ecl) {
+      return QrCode.getNumRawDataModules(ver) / 8 - QrCode.ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][ver] * QrCode.NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver];
+    }
+    static getNumRawDataModules(ver) {
+      if (ver < 1 || ver > 40) throw new RangeError("Version out of range");
+      let result = (16 * ver + 128) * ver + 64;
+      if (ver >= 2) {
+        const numAlign = Math.floor(ver / 7) + 2;
+        result -= (25 * numAlign - 10) * numAlign - 55;
+        if (ver >= 7) result -= 36;
+      }
+      return result;
+    }
+    static addEccAndInterleave(data, ver, ecl) {
+      const numBlocks = QrCode.NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal][ver];
+      const blockEccLen = QrCode.ECC_CODEWORDS_PER_BLOCK[ecl.ordinal][ver];
+      const rawCodewords = QrCode.getNumRawDataModules(ver) / 8;
+      const numShortBlocks = numBlocks - rawCodewords % numBlocks;
+      const shortBlockLen = Math.floor(rawCodewords / numBlocks);
+      const blocks = [];
+      const rsDiv = QrCode.reedSolomonComputeDivisor(blockEccLen);
+      let k = 0;
+      for (let i = 0; i < numBlocks; i++) {
+        const datLen = shortBlockLen - blockEccLen + (i < numShortBlocks ? 0 : 1);
+        const dat = data.slice(k, k + datLen);
+        k += datLen;
+        const ecc = QrCode.reedSolomonComputeRemainder(dat, rsDiv);
+        if (i < numShortBlocks) dat.push(0);
+        blocks.push(dat.concat(ecc));
+      }
+      const result = [];
+      for (let i = 0; i < blocks[0].length; i++) {
+        for (let j = 0; j < blocks.length; j++) {
+          if (i !== shortBlockLen - blockEccLen || j >= numShortBlocks) result.push(blocks[j][i]);
+        }
+      }
+      return result;
+    }
+    static reedSolomonComputeDivisor(degree) {
+      const result = [1];
+      for (let i = 0; i < degree; i++) {
+        result.push(0);
+        for (let j = result.length - 1; j > 0; j--) result[j] = result[j] ^ QrCode.reedSolomonMultiply(result[j - 1], QrCode.EXP_TABLE[i]);
+        result[0] = QrCode.reedSolomonMultiply(result[0], QrCode.EXP_TABLE[i]);
+      }
+      return result;
+    }
+    static reedSolomonComputeRemainder(data, divisor) {
+      const result = Array(divisor.length).fill(0);
+      for (const b of data) {
+        const factor = b ^ result.shift();
+        result.push(0);
+        divisor.forEach((coef, i) => (result[i] ^= QrCode.reedSolomonMultiply(coef, factor)));
+      }
+      result.shift();
+      return result;
+    }
+    static reedSolomonMultiply(x, y) {
+      if (x === 0 || y === 0) return 0;
+      return QrCode.LOG_TABLE[x] + QrCode.LOG_TABLE[y] >= 255
+        ? QrCode.EXP_TABLE[QrCode.LOG_TABLE[x] + QrCode.LOG_TABLE[y] - 255]
+        : QrCode.EXP_TABLE[QrCode.LOG_TABLE[x] + QrCode.LOG_TABLE[y]];
+    }
+    constructor(ver, ecl, modules, isFunction) {
+      this.version = ver;
+      this.errorCorrectionLevel = ecl;
+      this.size = ver * 4 + 17;
+      this.modules = modules;
+      this.isFunction = isFunction;
+      this.mask = 0;
+    }
+    drawFunctionPatterns() {
+      for (let i = 0; i < this.size; i++) {
+        this.setFunctionModule(6, i, i % 2 === 0);
+        this.setFunctionModule(i, 6, i % 2 === 0);
+      }
+      this.drawFinderPattern(3, 3);
+      this.drawFinderPattern(this.size - 4, 3);
+      this.drawFinderPattern(3, this.size - 4);
+      const alignPatPos = QrCode.getAlignmentPatternPositions(this.version);
+      const numAlign = alignPatPos.length;
+      for (let i = 0; i < numAlign; i++) {
+        for (let j = 0; j < numAlign; j++) {
+          if ((i === 0 && j === 0) || (i === 0 && j === numAlign - 1) || (i === numAlign - 1 && j === 0)) continue;
+          this.drawAlignmentPattern(alignPatPos[i], alignPatPos[j]);
+        }
+      }
+      this.drawFormatBits(0);
+      this.drawVersion();
+    }
+    drawFormatBits(mask) {
+      const data = (this.errorCorrectionLevel.formatBits << 3) | mask;
+      let rem = data;
+      for (let i = 0; i < 10; i++) rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
+      const bits = ((data << 10) | rem) ^ 0x5412;
+      for (let i = 0; i <= 5; i++) this.setFunctionModule(8, i, ((bits >>> i) & 1) !== 0);
+      this.setFunctionModule(8, 7, ((bits >>> 6) & 1) !== 0);
+      this.setFunctionModule(8, 8, ((bits >>> 7) & 1) !== 0);
+      this.setFunctionModule(7, 8, ((bits >>> 8) & 1) !== 0);
+      for (let i = 9; i < 15; i++) this.setFunctionModule(14 - i, 8, ((bits >>> i) & 1) !== 0);
+      for (let i = 0; i < 8; i++) this.setFunctionModule(this.size - 1 - i, 8, ((bits >>> i) & 1) !== 0);
+      for (let i = 8; i < 15; i++) this.setFunctionModule(8, this.size - 15 + i, ((bits >>> i) & 1) !== 0);
+      this.setFunctionModule(8, this.size - 8, true);
+    }
+    drawVersion() {
+      if (this.version < 7) return;
+      let rem = this.version;
+      for (let i = 0; i < 12; i++) rem = (rem << 1) ^ ((rem >>> 11) * 0x1F25);
+      const bits = (this.version << 12) | rem;
+      for (let i = 0; i < 18; i++) {
+        const bit = ((bits >>> i) & 1) !== 0;
+        const a = this.size - 11 + (i % 3);
+        const b = Math.floor(i / 3);
+        this.setFunctionModule(a, b, bit);
+        this.setFunctionModule(b, a, bit);
+      }
+    }
+    drawFinderPattern(x, y) {
+      for (let dy = -4; dy <= 4; dy++) {
+        for (let dx = -4; dx <= 4; dx++) {
+          const dist = Math.max(Math.abs(dx), Math.abs(dy));
+          const xx = x + dx, yy = y + dy;
+          if (0 <= xx && xx < this.size && 0 <= yy && yy < this.size) this.setFunctionModule(xx, yy, dist !== 2 && dist !== 4);
+        }
+      }
+    }
+    drawAlignmentPattern(x, y) {
+      for (let dy = -2; dy <= 2; dy++) {
+        for (let dx = -2; dx <= 2; dx++) this.setFunctionModule(x + dx, y + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
+      }
+    }
+    setFunctionModule(x, y, isDark) {
+      this.modules[y][x] = isDark;
+      this.isFunction[y][x] = true;
+    }
+    drawCodewords(data) {
+      let i = 0;
+      for (let right = this.size - 1; right >= 1; right -= 2) {
+        if (right === 6) right = 5;
+        for (let vert = 0; vert < this.size; vert++) {
+          for (let j = 0; j < 2; j++) {
+            const x = right - j;
+            const y = ((right + 1) & 2) === 0 ? this.size - 1 - vert : vert;
+            if (!this.isFunction[y][x] && i < data.length * 8) {
+              this.modules[y][x] = ((data[i >>> 3] >>> (7 - (i & 7))) & 1) !== 0;
+              i++;
+            }
+          }
+        }
+      }
+    }
+    handleConstructorMasking(mask) {
+      let minPenalty = Infinity;
+      let bestMask = 0;
+      for (let i = 0; i < 8; i++) {
+        this.applyMask(i);
+        this.drawFormatBits(i);
+        const penalty = this.getPenaltyScore();
+        this.applyMask(i);
+        if (penalty < minPenalty) {
+          minPenalty = penalty;
+          bestMask = i;
+        }
+      }
+      this.mask = bestMask;
+      this.applyMask(bestMask);
+      return bestMask;
+    }
+    applyMask(mask) {
+      for (let y = 0; y < this.size; y++) {
+        for (let x = 0; x < this.size; x++) {
+          if (this.isFunction[y][x]) continue;
+          let invert = false;
+          switch (mask) {
+            case 0: invert = (x + y) % 2 === 0; break;
+            case 1: invert = y % 2 === 0; break;
+            case 2: invert = x % 3 === 0; break;
+            case 3: invert = (x + y) % 3 === 0; break;
+            case 4: invert = (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0; break;
+            case 5: invert = (x * y) % 2 + (x * y) % 3 === 0; break;
+            case 6: invert = ((x * y) % 2 + (x * y) % 3) % 2 === 0; break;
+            case 7: invert = ((x + y) % 2 + (x * y) % 3) % 2 === 0; break;
+            default: throw new RangeError("Mask");
+          }
+          this.modules[y][x] ^= invert;
+        }
+      }
+    }
+    getPenaltyScore() {
+      let result = 0;
+      const size = this.size;
+      for (let y = 0; y < size; y++) {
+        let runColor = false;
+        let runX = 0;
+        const runHistory = [0, 0, 0, 0, 0, 0, 0];
+        for (let x = 0; x < size; x++) {
+          const color = this.modules[y][x];
+          if (x === 0) {
+            runColor = color;
+            runX = 1;
+          } else if (color === runColor) {
+            runX++;
+            if (runX === 5) result += 3;
+            else if (runX > 5) result++;
+          } else {
+            QrCode.finderPenaltyAddHistory(runX, runHistory);
+            if (!runColor) result += QrCode.finderPenaltyCountPatterns(runHistory) * 40;
+            runColor = color;
+            runX = 1;
+          }
+        }
+        QrCode.finderPenaltyAddHistory(runX, runHistory);
+        if (!runColor) result += QrCode.finderPenaltyCountPatterns(runHistory) * 40;
+      }
+      for (let x = 0; x < size; x++) {
+        let runColor = false;
+        let runY = 0;
+        const runHistory = [0, 0, 0, 0, 0, 0, 0];
+        for (let y = 0; y < size; y++) {
+          const color = this.modules[y][x];
+          if (y === 0) {
+            runColor = color;
+            runY = 1;
+          } else if (color === runColor) {
+            runY++;
+            if (runY === 5) result += 3;
+            else if (runY > 5) result++;
+          } else {
+            QrCode.finderPenaltyAddHistory(runY, runHistory);
+            if (!runColor) result += QrCode.finderPenaltyCountPatterns(runHistory) * 40;
+            runColor = color;
+            runY = 1;
+          }
+        }
+        QrCode.finderPenaltyAddHistory(runY, runHistory);
+        if (!runColor) result += QrCode.finderPenaltyCountPatterns(runHistory) * 40;
+      }
+      for (let y = 0; y < size - 1; y++) {
+        for (let x = 0; x < size - 1; x++) {
+          const c = this.modules[y][x];
+          if (c === this.modules[y][x + 1] && c === this.modules[y + 1][x] && c === this.modules[y + 1][x + 1]) result += 3;
+        }
+      }
+      let dark = 0;
+      for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (this.modules[y][x]) dark++;
+      const total = size * size;
+      const k = Math.abs(dark * 20 - total * 10) / total;
+      result += Math.floor(k) * 10;
+      return result;
+    }
+    static finderPenaltyAddHistory(currentRunLength, runHistory) {
+      if (runHistory[0] === 0) currentRunLength += 1;
+      runHistory.pop();
+      runHistory.unshift(currentRunLength);
+    }
+    static finderPenaltyCountPatterns(runHistory) {
+      const n = runHistory[1];
+      if (n > 0 && runHistory[2] === n && runHistory[3] === n * 3 && runHistory[4] === n && runHistory[5] === n && runHistory[0] >= n * 4 && runHistory[6] >= n) return 1;
+      if (n > 0 && runHistory[2] === n && runHistory[3] === n * 3 && runHistory[4] === n && runHistory[5] === n && runHistory[6] >= n * 4 && runHistory[0] >= n) return 1;
+      return 0;
+    }
+    toSvgString(border = 4) {
+      if (border < 0) throw new RangeError("Border");
+      const parts = [];
+      for (let y = 0; y < this.size; y++) {
+        for (let x = 0; x < this.size; x++) {
+          if (this.modules[y][x]) parts.push(`M${x + border},${y + border}h1v1h-1z`);
+        }
+      }
+      return `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${this.size + border * 2} ${this.size + border * 2}" shape-rendering="crispEdges">
+  <rect width="100%" height="100%" fill="#fff"/>
+  <path d="${parts.join(" ")}" fill="#111827"/>
+</svg>`.trim();
+    }
+    static getAlignmentPatternPositions(ver) {
+      if (ver === 1) return [];
+      const numAlign = Math.floor(ver / 7) + 2;
+      const step = ver === 32 ? 26 : Math.ceil((ver * 4 + 4) / (numAlign * 2 - 2)) * 2;
+      const result = [6];
+      for (let pos = ver * 4 + 10; result.length < numAlign; pos -= step) result.splice(1, 0, pos);
+      return result;
+    }
+  }
+  QrCode.MIN_VERSION = 1;
+  QrCode.MAX_VERSION = 40;
+  QrCode.ECC_CODEWORDS_PER_BLOCK = [
+    [-1, 7, 10, 15, 20, 26, 18, 20, 24, 30, 18, 20, 24, 26, 30, 22, 24, 28, 30, 28, 28, 28, 28, 30, 30, 26, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+    [-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28, 28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28],
+    [-1, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24, 28, 26, 24, 20, 30, 24, 28, 28, 26, 30, 28, 30, 30, 30, 30, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+    [-1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+  ];
+  QrCode.NUM_ERROR_CORRECTION_BLOCKS = [
+    [-1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 6, 6, 6, 6, 7, 8, 8, 9, 9, 10, 12, 12, 12, 13, 14, 15, 16, 17, 18, 19, 19, 20, 21, 22, 24, 25],
+    [-1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16, 17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43, 45, 47, 49],
+    [-1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8, 8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 23, 23, 25, 27, 29, 34, 34, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65, 68],
+    [-1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35, 37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77, 81],
+  ];
+  QrCode.EXP_TABLE = (() => {
+    const table = new Array(256);
+    let x = 1;
+    for (let i = 0; i < 256; i++) {
+      table[i] = x;
+      x <<= 1;
+      if (x & 0x100) x ^= 0x11D;
+    }
+    return table;
+  })();
+  QrCode.LOG_TABLE = (() => {
+    const table = new Array(256).fill(0);
+    for (let i = 0; i < 255; i++) table[QrCode.EXP_TABLE[i]] = i;
+    return table;
+  })();
+
+  class QrSegment {
+    constructor(mode, numChars, data) {
+      this.mode = mode;
+      this.numChars = numChars;
+      this.data = data;
+    }
+    static makeSegments(text) {
+      return [QrSegment.makeBytes(Array.from(new TextEncoder().encode(String(text || ""))))];
+    }
+    static makeBytes(data) {
+      const bb = new BitBuffer();
+      data.forEach((b) => bb.appendBits(b, 8));
+      return new QrSegment(QrSegment.Mode.BYTE, data.length, bb);
+    }
+  }
+  QrSegment.Mode = class {
+    constructor(modeBits, cc0, cc1, cc2) {
+      this.modeBits = modeBits;
+      this.cc0 = cc0;
+      this.cc1 = cc1;
+      this.cc2 = cc2;
+    }
+    numCharCountBits(ver) {
+      return ver <= 9 ? this.cc0 : ver <= 26 ? this.cc1 : this.cc2;
+    }
+  };
+  QrSegment.Mode.BYTE = new QrSegment.Mode(0x4, 8, 16, 16);
+
+  class BitBuffer {
+    constructor() {
+      this.data = [];
+      this.bitLength = 0;
+    }
+    getByte(i) {
+      return this.data[i] >>> 0;
+    }
+    appendBits(val, len) {
+      if (len < 0 || len > 31 || (val >>> len) !== 0) throw new RangeError("Value out of range");
+      for (let i = len - 1; i >= 0; i--) {
+        this.data[this.bitLength >>> 3] = (this.data[this.bitLength >>> 3] || 0) | (((val >>> i) & 1) << (7 - (this.bitLength & 7)));
+        this.bitLength++;
+      }
+    }
+    appendData(bb) {
+      for (let i = 0; i < bb.bitLength; i++) this.appendBits((bb.data[i >>> 3] >>> (7 - (i & 7))) & 1, 1);
+    }
+  }
+
+  QrCode.Ecc = class {
+    constructor(ordinal, formatBits) {
+      this.ordinal = ordinal;
+      this.formatBits = formatBits;
+    }
+  };
+  QrCode.Ecc.LOW = new QrCode.Ecc(0, 1);
+  QrCode.Ecc.MEDIUM = new QrCode.Ecc(1, 0);
+  QrCode.Ecc.QUARTILE = new QrCode.Ecc(2, 3);
+  QrCode.Ecc.HIGH = new QrCode.Ecc(3, 2);
+
+  return { QrCode, QrSegment };
+})();
+
+function shareUrlForRoute(route) {
+  // Keep current origin/path/search so GH Pages subpath works
+  return `${location.origin}${location.pathname}${location.search || ""}#/${route}`;
+}
+
+function qrSvgHtml(text) {
+  try {
+    return qrcodegen.QrCode.encodeText(String(text || ""), qrcodegen.QrCode.Ecc.MEDIUM).toSvgString(3);
+  } catch {
+    return `<div class="muted small">二维码生成失败</div>`;
+  }
 }
 
 function parseCnDateToTs(str) {
@@ -768,7 +1395,8 @@ function calcDaysSince(ts) {
 function routeTitle(route) {
   const map = {
     home: "首页",
-    shop: "积分商店",
+    sharememorial: "分享纪念卡",
+    sharerecap: "分享回顾",
   };
   return map[route] || "TapTap 十周年";
 }
@@ -785,11 +1413,16 @@ function getRoute() {
 
 function render() {
   const route = getRoute();
-  // Home-only for “回顾/好游戏/试玩”；仅保留商店为单独页面
-  if (route === "discover" || route === "recap") {
+  // Home-only for “回顾/好游戏/试玩/纪念卡”
+  if (route === "discover" || route === "recap" || route === "shop") {
     navigate("home");
     // wait for render, then scroll
-    setTimeout(() => scrollToId(route === "recap" ? "section-recap" : "section-discover"), 60);
+    setTimeout(() => {
+      if (route === "recap") return scrollToId("section-recap");
+      if (route === "discover") return scrollToId("section-discover");
+      if (route === "shop") return scrollToId("section-memorial");
+      return;
+    }, 60);
     return;
   }
 
@@ -797,6 +1430,15 @@ function render() {
   document.title = `TapTap 十周年 · ${routeTitle(route)}`;
   const main = $("#main");
   const recap = state.careerSnapshot?.recap || recapDataForState(state);
+
+  // Sticky stats (points & coupons) for the whole app
+  setTopbarHeightVar();
+  const sticky = document.getElementById("stickyStats");
+  if (sticky) {
+    sticky.innerHTML = stickyStatsView(state);
+    sticky.classList.remove("hidden");
+    wireStickyStats();
+  }
 
   // Header UI
   const backBtn = $("#btnBack");
@@ -809,9 +1451,14 @@ function render() {
     wireHome();
     return;
   }
-  if (route === "shop") {
-    main.innerHTML = shopView(state);
-    wireShop();
+  if (route === "sharememorial") {
+    main.innerHTML = shareMemorialView(state, recap);
+    wireSharePage();
+    return;
+  }
+  if (route === "sharerecap") {
+    main.innerHTML = shareRecapView(state, recap);
+    wireSharePage();
     return;
   }
 
@@ -824,18 +1471,29 @@ function scrollToId(id) {
   el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function homeView(s, recap) {
+function setTopbarHeightVar() {
+  try {
+    const el = document.querySelector(".topbar");
+    if (!el) return;
+    const h = Math.max(0, Math.round(el.getBoundingClientRect().height || el.offsetHeight || 0));
+    if (h) document.documentElement.style.setProperty("--topbar-h", `${h}px`);
+  } catch {
+    // ignore
+  }
+}
+
+function stickyStatsView(s) {
   return `
-    <section class="card">
+    <section class="card sticky-stats__card" style="border-radius:0; box-shadow:none;">
       <div class="row" style="gap:12px">
         <div style="flex:1">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px">
             <div class="pill pill--brand">
               积分 <b>${fmt(s.points)}</b>
             </div>
-            <button class="link-btn" id="btnGoShop" type="button">兑换奖励</button>
+            <button class="link-btn" id="btnGoShop" type="button">装饰我的十周年卡片</button>
           </div>
-          <div class="muted small">可兑换个人装饰和参与点券抽奖</div>
+          <div class="muted small">积分兑换装饰和参与点券抽奖</div>
         </div>
         <div style="flex:1">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px">
@@ -848,21 +1506,458 @@ function homeView(s, recap) {
         </div>
       </div>
     </section>
+  `;
+}
 
+function wireStickyStats() {
+  $("#btnGoShop")?.addEventListener("click", () => {
+    if (getRoute() !== "home") navigate("home");
+    setTimeout(() => scrollToId("section-memorial"), 60);
+  });
+  $("#btnWallet")?.addEventListener("click", openWalletModal);
+}
+
+function homeView(s, recap) {
+  return `
     <div id="section-recap"></div>
     ${recapInlineView(s, recap)}
 
     <div id="section-discover"></div>
     ${discoverInlineView(s)}
+
+    <div id="section-memorial"></div>
+    ${memorialInlineView(s, recap)}
   `;
 }
 
 function wireHome() {
-  $("#btnGoShop")?.addEventListener("click", () => navigate("shop"));
-  $("#btnWallet")?.addEventListener("click", openWalletModal);
-
   wireRecapInline();
   wireDiscoverInline();
+  wireMemorialInline();
+}
+
+function dayKeyLocal(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${dd}`;
+}
+
+function identityTitleForRecap(recap) {
+  const ys = recap?.taptapCriticYears;
+  const hasCritic = Array.isArray(ys) ? ys.some((x) => Number(x) > 0) : String(ys || "").trim().length > 0;
+  if (hasCritic) return "TapTap 玩赏家";
+  return "";
+}
+
+function memorialInlineView(s, recap) {
+  const prof = s.profile || { nickname: "玩家", id: "—", identity: "", bio: "" };
+  const nickname = String(prof.nickname || "").trim() || "玩家";
+  const pid = String(prof.id || "").trim() || "—";
+  const title = String(prof.identity || "").trim() || identityTitleForRecap(recap);
+  const bio = String(prof.bio || "").trim();
+
+  const color = MEM_CARD_COLORS.find((c) => c.id === s.memorial?.colorId) || MEM_CARD_COLORS[0];
+  const sticker = MEM_STICKERS.find((x) => x.id === s.memorial?.stickerId) || MEM_STICKERS[0];
+  const avatar = MEM_AVATARS.find((x) => x.id === s.memorial?.avatarId) || MEM_AVATARS[0];
+
+  const frameOwned = s.inventory.frames.includes(MEM_SHOP.frame.id);
+  const badgeOwned = s.inventory.badges.includes(MEM_SHOP.badge.id);
+  const frameEquipped = s.equipped.frame === MEM_SHOP.frame.id;
+  const badgeEquipped = s.equipped.badge === MEM_SHOP.badge.id;
+
+  const unlocks = s.memorialUnlocks || { colors: [], stickers: [], avatars: [] };
+  const tab = s.memorial?.tab || "color";
+  const MEM_PRICING = { color: 20, sticker: 15, avatar: 30 };
+  const isUnlocked = (kind, id) => (unlocks?.[kind] || []).includes(id);
+  const costFor = (kind, id) => (isUnlocked(kind, id) ? 0 : (MEM_PRICING[kind] || 0));
+
+  const tabBtn = (id, label) =>
+    `<button class="mem-tab ${tab === id ? "mem-tab--active" : ""}" type="button" data-mem-tab="${id}">${label}</button>`;
+
+  const optionBtn = ({ id, label, icon, active, locked, kind, style, cost }) => `
+    <button class="mem-opt ${active ? "mem-opt--active" : ""} ${locked ? "mem-opt--locked" : ""}" type="button" data-mem-${kind}="${id}" ${locked ? "aria-disabled='true'" : ""} style="${style || ""}">
+      ${icon ? `<span class="mem-opt__ico" aria-hidden="true">${icon}</span>` : ""}
+      ${label ? `<span class="mem-opt__t">${escapeHtml(label)}</span>` : ""}
+      ${locked && cost ? `<span class="mem-opt__price" aria-hidden="true">${fmt(cost)}</span>` : ""}
+      ${locked ? `<span class="mem-opt__lock" aria-hidden="true">🔒</span>` : ""}
+    </button>
+  `;
+
+  const colorOpts = MEM_CARD_COLORS.map((c) =>
+    optionBtn({
+      id: c.id,
+      kind: "color",
+      active: (s.memorial?.colorId || "") === c.id,
+      locked: !isUnlocked("colors", c.id),
+      cost: costFor("color", c.id),
+      style: `--sw:${c.bg};`,
+    }),
+  ).join("");
+
+  const stickerOpts = MEM_STICKERS.map((st) =>
+    optionBtn({
+      id: st.id,
+      kind: "sticker",
+      icon: st.icon,
+      label: st.label,
+      active: (s.memorial?.stickerId || "") === st.id,
+      locked: !isUnlocked("stickers", st.id),
+      cost: costFor("sticker", st.id),
+    }),
+  ).join("");
+
+  const avatarOpts = MEM_AVATARS.map((av) =>
+    optionBtn({
+      id: av.id,
+      kind: "avatar",
+      icon: av.icon,
+      label: av.label,
+      active: (s.memorial?.avatarId || "") === av.id,
+      locked: !isUnlocked("avatars", av.id),
+      cost: costFor("avatar", av.id),
+    }),
+  ).join("");
+
+  const frameBtn = frameOwned
+    ? `<button class="btn ${frameEquipped ? "" : "btn--brand"}" data-mem-equip="frame">${frameEquipped ? "已装备" : "装备"}</button>`
+    : `<button class="btn btn--brand" data-mem-buy="frame">${fmt(MEM_SHOP.frame.cost)}积分兑换</button>`;
+
+  const badgeBtn = badgeOwned
+    ? `<button class="btn ${badgeEquipped ? "" : "btn--brand"}" data-mem-equip="badge">${badgeEquipped ? "已装备" : "装备"}</button>`
+    : `<button class="btn btn--brand" data-mem-buy="badge">${fmt(MEM_SHOP.badge.cost)}积分兑换</button>`;
+
+  const todayKey = dayKeyLocal();
+  const alreadyDrawn = String(s.daily?.lotteryDayKey || "") === todayKey;
+  const lotBtn = alreadyDrawn
+    ? `<button class="btn" id="btnMemLottery" disabled>今日已抽</button>`
+    : `<button class="btn btn--brand" id="btnMemLottery">${fmt(MEM_SHOP.lottery.cost)}积分抽</button>`;
+
+  return `
+    <section class="card">
+      <div class="row">
+        <p class="h1 grow">十周年纪念卡</p>
+        <button class="btn btn--brand" id="btnShareMemorial" type="button" style="min-height:36px; padding:8px 10px">分享</button>
+      </div>
+      <p class="muted small" style="margin:6px 0 0">用积分兑换装饰，DIY 一张属于你的纪念卡。</p>
+
+      <div class="divider"></div>
+
+      <div class="mem-card-shell" style="--mem-bg:${color.bg}; --mem-panel:${color.panel}; --mem-accent:${color.accent};">
+        <div class="mem-cat" aria-hidden="true">
+          <div class="mem-ear mem-ear--l"></div>
+          <div class="mem-ear mem-ear--r"></div>
+          <div class="mem-eyes"><span></span><span></span></div>
+        </div>
+
+        <div class="mem-card">
+          <div class="mem-sticker" aria-hidden="true">${escapeHtml(sticker.icon)}</div>
+          <div class="mem-top">
+            <div class="mem-brand">TAPTAP · 10Y</div>
+            <div class="mem-mini">
+              ${frameEquipped ? `<span class="tag">🟩 头像框</span>` : ""}
+              ${badgeEquipped ? `<span class="tag">🛠️ 徽章</span>` : ""}
+            </div>
+          </div>
+
+          <div class="mem-photo">
+            <div class="mem-avatar" aria-label="角色">${escapeHtml(avatar.icon)}</div>
+          </div>
+
+          <div class="mem-fields">
+            <div class="mem-field">
+              <span class="mem-k">昵称</span>
+              <span class="mem-v mem-v--grow">${escapeHtml(nickname)}</span>
+              <span class="mem-idpill">ID:${escapeHtml(pid)}</span>
+            </div>
+            ${title ? `
+              <div class="mem-field">
+                <span class="mem-k">身份</span>
+                <span class="mem-v">${escapeHtml(title)}</span>
+              </div>
+            ` : ""}
+          </div>
+
+          ${bio ? `<div class="mem-slogan">${escapeHtml(bio)}</div>` : ""}
+        </div>
+      </div>
+
+      <div class="mem-diy">
+        <div class="mem-tabs" role="tablist" aria-label="DIY 选项">
+          ${tabBtn("color", "颜色")}
+          ${tabBtn("sticker", "贴纸")}
+          ${tabBtn("avatar", "角色")}
+        </div>
+
+        <div class="mem-panel ${tab === "color" ? "" : "hidden"}" data-mem-panel="color">
+          <div class="mem-swatches">${colorOpts}</div>
+        </div>
+        <div class="mem-panel ${tab === "sticker" ? "" : "hidden"}" data-mem-panel="sticker">
+          <div class="mem-grid">${stickerOpts}</div>
+        </div>
+        <div class="mem-panel ${tab === "avatar" ? "" : "hidden"}" data-mem-panel="avatar">
+          <div class="mem-grid">${avatarOpts}</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="h2" style="margin:0 0 8px">兑换装饰</div>
+      <div class="list">
+        <div class="item">
+          <div class="row">
+            <div class="equip equip--frame">${escapeHtml(MEM_SHOP.frame.icon)}</div>
+            <div class="grow">
+              <div class="item__title">${escapeHtml(MEM_SHOP.frame.title)}</div>
+            </div>
+          </div>
+          <div class="item__meta">
+            ${frameBtn}
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="row">
+            <div class="equip equip--badge">${escapeHtml(MEM_SHOP.badge.icon)}</div>
+            <div class="grow">
+              <div class="item__title">${escapeHtml(MEM_SHOP.badge.title)}</div>
+            </div>
+          </div>
+          <div class="item__meta">
+            ${badgeBtn}
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="row">
+            <div class="grow">
+              <div class="item__title">每日抽点券</div>
+              <div class="item__desc">每日限 1 次，抽取后点券自动入账。</div>
+            </div>
+          </div>
+          <div class="item__meta">
+            ${lotBtn}
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function shareMemorialView(s, recap) {
+  const url = shareUrlForRoute("sharememorial");
+  const qr = qrSvgHtml(url);
+  return `
+    <section class="card">
+      <div class="row">
+        <p class="h1 grow">分享 · 十周年纪念卡</p>
+      </div>
+      <p class="muted small" style="margin:6px 0 0">扫码打开分享页（demo：分享内容来自本地演示状态）。</p>
+      <div class="divider"></div>
+      ${memorialInlineView(s, recap).replace('<section class="card">', '<div>').replace("</section>", "</div>")}
+      <div class="divider"></div>
+      <div class="share-qr">
+        <div class="share-qr__box" aria-label="二维码">${qr}</div>
+        <div class="muted small share-qr__txt"><span class="mono">${escapeHtml(url)}</span></div>
+        <div class="row" style="justify-content:flex-end; margin-top:10px">
+          <button class="btn btn--brand" id="btnCopyShareUrl" type="button">复制链接</button>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function shareRecapView(s, recap) {
+  const url = shareUrlForRoute("sharerecap");
+  const qr = qrSvgHtml(url);
+  return `
+    <section class="card">
+      <div class="row">
+        <p class="h1 grow">分享 · 十年回顾</p>
+      </div>
+      <p class="muted small" style="margin:6px 0 0">扫码打开分享页（demo：分享内容来自本地演示状态）。</p>
+      <div class="divider"></div>
+      ${shareCardHtml(s, recap, { variant: "recap" })}
+      <div class="divider"></div>
+      <div class="share-qr">
+        <div class="share-qr__box" aria-label="二维码">${qr}</div>
+        <div class="muted small share-qr__txt"><span class="mono">${escapeHtml(url)}</span></div>
+        <div class="row" style="justify-content:flex-end; margin-top:10px">
+          <button class="btn btn--brand" id="btnCopyShareUrl" type="button">复制链接</button>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function wireSharePage() {
+  $("#btnCopyShareUrl")?.addEventListener("click", async () => {
+    const url = `${location.origin}${location.pathname}${location.search || ""}${location.hash || ""}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast("已复制链接");
+    } catch {
+      toast("复制失败（浏览器权限限制）");
+    }
+  });
+}
+
+function wireMemorialInline() {
+  $("#btnShareMemorial")?.addEventListener("click", () => navigate("sharememorial"));
+
+  const MEM_PRICING = { color: 20, sticker: 15, avatar: 30 };
+  const unlockKindMap = { color: "colors", sticker: "stickers", avatar: "avatars" };
+  const titleOf = {
+    color: (id) => MEM_CARD_COLORS.find((x) => x.id === id)?.label || "配色",
+    sticker: (id) => MEM_STICKERS.find((x) => x.id === id)?.label || "贴纸",
+    avatar: (id) => MEM_AVATARS.find((x) => x.id === id)?.label || "角色",
+  };
+
+  const openSpendModal = ({ title, cost, onConfirm }) => {
+    const enough = (state.points || 0) >= cost;
+    const body = `
+      <div class="small" style="line-height:1.6">
+        <div class="hint">
+          <b>${escapeHtml(title)}</b>
+          <div class="muted small" style="margin-top:6px">消耗 <b>${fmt(cost)}</b> 积分</div>
+        </div>
+        <div class="divider"></div>
+        <div class="muted small">当前积分：<b>${fmt(state.points || 0)}</b></div>
+        ${enough ? "" : `<div class="muted small" style="margin-top:6px">积分不足，去试玩/回顾领奖赚积分吧。</div>`}
+      </div>
+    `;
+    const footer = enough
+      ? `<button class="btn" id="btnSpendCancel">取消</button><button class="btn btn--brand" id="btnSpendOk">${fmt(cost)}积分兑换</button>`
+      : `<button class="btn btn--brand" id="btnSpendOk">知道了</button>`;
+    openModal({ title: enough ? "确认兑换" : "积分不足", bodyHtml: body, footerHtml: footer });
+    $("#btnSpendCancel")?.addEventListener("click", closeModal);
+    $("#btnSpendOk")?.addEventListener("click", () => {
+      if (!enough) return closeModal();
+      onConfirm?.();
+    });
+  };
+
+  $$("[data-mem-tab]").forEach((b) =>
+    b.addEventListener("click", () => {
+      const t = String(b.dataset.memTab || "");
+      if (!["color", "sticker", "avatar"].includes(t)) return;
+      state.memorial.tab = t;
+      saveState();
+      render();
+    }),
+  );
+
+  const ensureUnlockList = (k) => {
+    if (!state.memorialUnlocks || typeof state.memorialUnlocks !== "object") state.memorialUnlocks = { colors: [], stickers: [], avatars: [] };
+    if (!Array.isArray(state.memorialUnlocks[k])) state.memorialUnlocks[k] = [];
+    return state.memorialUnlocks[k];
+  };
+  const setOrBuy = (kind, id) => {
+    const k = unlockKindMap[kind];
+    const list = ensureUnlockList(k);
+    const unlocked = list.includes(id);
+    if (unlocked) {
+      if (kind === "color") state.memorial.colorId = id;
+      if (kind === "sticker") state.memorial.stickerId = id;
+      if (kind === "avatar") state.memorial.avatarId = id;
+      saveState();
+      render();
+      return;
+    }
+    const cost = MEM_PRICING[kind] || 0;
+    openSpendModal({
+      title: `解锁${kind === "color" ? "配色" : kind === "sticker" ? "贴纸" : "角色"}：${titleOf[kind](id)}`,
+      cost,
+      onConfirm: () => {
+        if ((state.points || 0) < cost) return;
+        state.points -= cost;
+        list.push(id);
+        if (kind === "color") state.memorial.colorId = id;
+        if (kind === "sticker") state.memorial.stickerId = id;
+        if (kind === "avatar") state.memorial.avatarId = id;
+        saveState();
+        closeModal();
+        render();
+        toast("已解锁并应用");
+      },
+    });
+  };
+
+  $$("[data-mem-color]").forEach((b) => b.addEventListener("click", () => setOrBuy("color", String(b.dataset.memColor || ""))));
+  $$("[data-mem-sticker]").forEach((b) => b.addEventListener("click", () => setOrBuy("sticker", String(b.dataset.memSticker || ""))));
+  $$("[data-mem-avatar]").forEach((b) => b.addEventListener("click", () => setOrBuy("avatar", String(b.dataset.memAvatar || ""))));
+
+  $$("[data-mem-buy]").forEach((b) =>
+    b.addEventListener("click", () => {
+      const id = String(b.dataset.memBuy || "");
+
+      if (id === "frame") {
+        const item = MEM_SHOP.frame;
+        if (state.inventory.frames.includes(item.id)) return;
+        return openSpendModal({
+          title: `兑换：${item.title}`,
+          cost: item.cost,
+          onConfirm: () => {
+            state.points -= item.cost;
+            state.inventory.frames.push(item.id);
+            state.equipped.frame = item.id;
+            saveState();
+            closeModal();
+            render();
+            toast(`已兑换：${item.title}`);
+          },
+        });
+      }
+      if (id === "badge") {
+        const item = MEM_SHOP.badge;
+        if (state.inventory.badges.includes(item.id)) return;
+        return openSpendModal({
+          title: `兑换：${item.title}`,
+          cost: item.cost,
+          onConfirm: () => {
+            state.points -= item.cost;
+            state.inventory.badges.push(item.id);
+            state.equipped.badge = item.id;
+            saveState();
+            closeModal();
+            render();
+            toast(`已兑换：${item.title}`);
+          },
+        });
+      }
+    }),
+  );
+
+  $$("[data-mem-equip]").forEach((b) =>
+    b.addEventListener("click", () => {
+      const kind = String(b.dataset.memEquip || "");
+      if (kind === "frame") state.equipped.frame = MEM_SHOP.frame.id;
+      if (kind === "badge") state.equipped.badge = MEM_SHOP.badge.id;
+      saveState();
+      render();
+      toast("已设置为当前");
+    }),
+  );
+
+  $("#btnMemLottery")?.addEventListener("click", () => {
+    const today = dayKeyLocal();
+    if (String(state.daily?.lotteryDayKey || "") === today) return toast("今天已经抽过了");
+    openSpendModal({
+      title: "每日抽点券",
+      cost: MEM_SHOP.lottery.cost,
+      onConfirm: () => {
+        state.points -= MEM_SHOP.lottery.cost;
+        state.daily.lotteryDayKey = today;
+        // Safe demo: always give 1 coupon, small chance to get full prize
+        const big = Math.random() < 0.18;
+        const add = big ? MEM_SHOP.lottery.prize : 1;
+        addCoupons(state, add);
+        saveState();
+        closeModal();
+        render();
+        toast(big ? `恭喜你：点券 +${MEM_SHOP.lottery.prize}` : "点券 +1（保底）");
+      },
+    });
+  });
 }
 
 function recapInlineView(s, recap) {
@@ -1761,7 +2856,17 @@ function recapInlineView(s, recap) {
         Number(snap.creatorWorks || 0) > 0,
     },
   ];
-  const snapshotCards = snapshotCardsAll.filter((c) => c.visible);
+  const snapshotCards = snapshotCardsAll
+    .filter((c) => c.visible)
+    .map((c, i) => ({ c, i }))
+    // Sort: unclaimed first, claimed last; keep original order within group.
+    .sort((a, b) => {
+      const ac = !!hasClaimed(s, a.c.rewardId);
+      const bc = !!hasClaimed(s, b.c.rewardId);
+      if (ac !== bc) return Number(ac) - Number(bc);
+      return a.i - b.i;
+    })
+    .map((x) => x.c);
 
   const bindCards = [
     {
@@ -2133,6 +3238,13 @@ function shareCardHtml(s, recap, { variant }) {
 
 function wireRecapInline() {
   $("#btnToggleShare")?.addEventListener("click", () => {
+    navigate("sharerecap");
+  });
+
+  // (旧逻辑保留在代码中以便需要时回滚/参考)
+  return;
+
+  $("#btnToggleShare")?.addEventListener("click", () => {
     const recap = state.careerSnapshot?.recap || recapDataForState(state);
     const body = `
       <div class="small" style="line-height:1.55">
@@ -2239,98 +3351,6 @@ function wireRecapInline() {
       toast("已下载分享卡");
     });
   });
-
-  const wireCarousel = (trackId, dotsId) => {
-    const track = document.getElementById(trackId);
-    const dotsWrap = document.getElementById(dotsId);
-    if (!track || !dotsWrap) return;
-    const cards = Array.from(track.querySelectorAll(".mini-card"));
-    const dots = Array.from(dotsWrap.querySelectorAll("[data-dot]"));
-    if (!cards.length || !dots.length) return;
-
-    const setActive = (idx) => {
-      dots.forEach((d, i) => d.classList.toggle("dot--active", i === idx));
-      cards.forEach((c, i) => c.classList.toggle("mini-card--active", i === idx));
-    };
-    dots.forEach((d) =>
-      d.addEventListener("click", () => {
-        const idx = Number(d.dataset.dot || 0);
-        const el = cards[idx];
-        if (!el) return;
-        el.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-        setActive(idx);
-      }),
-    );
-    // Init at requested index to avoid “flash to first card” animation after render
-    const req = carouselInitRequests[trackId];
-    const initIdx = Math.max(0, Math.min(req?.idx ?? 0, cards.length - 1));
-    // Temporarily disable card transitions during init restore
-    track.classList.add("no-anim");
-    setActive(initIdx);
-    scrollTrackToCard(track, cards[initIdx], "auto");
-    delete carouselInitRequests[trackId];
-    requestAnimationFrame(() => track.classList.remove("no-anim"));
-
-    // Desktop: left-mouse drag to scroll
-    let isDragging = false;
-    let startX = 0;
-    let startScroll = 0;
-    let moved = false;
-    track.addEventListener("pointerdown", (e) => {
-      if (e.pointerType !== "mouse") return;
-      if (e.button !== 0) return;
-      // Don't hijack interactions inside the carousel (buttons/links/inputs)
-      if (e.target?.closest?.("button, a, input, textarea, select, [role='button'], [data-bind], [data-claim]")) return;
-      isDragging = true;
-      moved = false;
-      startX = e.clientX;
-      startScroll = track.scrollLeft;
-      track.classList.add("is-dragging");
-      track.setPointerCapture?.(e.pointerId);
-      e.preventDefault();
-    });
-    track.addEventListener("pointermove", (e) => {
-      if (!isDragging) return;
-      const dx = e.clientX - startX;
-      if (Math.abs(dx) > 3) moved = true;
-      track.scrollLeft = startScroll - dx;
-      e.preventDefault();
-    });
-    const endDrag = (e) => {
-      if (!isDragging) return;
-      isDragging = false;
-      track.classList.remove("is-dragging");
-      try {
-        track.releasePointerCapture?.(e.pointerId);
-      } catch {}
-    };
-    track.addEventListener("pointerup", endDrag);
-    track.addEventListener("pointercancel", endDrag);
-    track.addEventListener(
-      "click",
-      (e) => {
-        if (!moved) return;
-        e.preventDefault();
-        e.stopPropagation();
-        moved = false;
-      },
-      true,
-    );
-
-    if ("IntersectionObserver" in window) {
-      const io = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((e) => {
-            if (!e.isIntersecting) return;
-            const idx = Number(e.target.getAttribute("data-card-idx") || 0);
-            setActive(idx);
-          });
-        },
-        { root: track, threshold: 0.65 },
-      );
-      cards.forEach((c) => io.observe(c));
-    }
-  };
 
   wireCarousel("recapCarouselSnap", "recapDotsSnap");
   wireCarousel("recapCarouselBind", "recapDotsBind");
@@ -2497,7 +3517,6 @@ function openBindRolesModal() {
 }
 
 function discoverInlineView(s) {
-  const completedCount = s.playtest.completed.length;
   const getTopLiked = (gameId) => {
     const arr = s.mutualMessages?.[gameId] || [];
     return arr
@@ -2568,24 +3587,72 @@ function discoverInlineView(s) {
     `;
   }).join("");
 
-  const play = PLAYTEST_GAMES.map((p) => {
-    const done = s.playtest.completed.includes(p.id);
-    return `
-      <div class="item" data-play="${p.id}">
-        <div class="row">
-          <div class="grow">
-            <div class="item__title">${p.title}</div>
-            <div class="item__desc">${p.desc}</div>
-          </div>
-          <span class="${pillClass(done ? "ok" : "warn")}">${done ? "已完成" : `+${p.points} 积分`}</span>
+  const playStates = PLAYTEST_GAMES.map((p, idx) => {
+    const feedback = String(s.playtest.feedback?.[p.id] || "").trim();
+    const playedAndRated = s.playtest.completed.includes(p.id) && !!feedback;
+    const claimed = (s.playtest.claimed || []).includes(p.id);
+    const claimable = playedAndRated && !claimed;
+    const group = claimable ? 0 : claimed ? 2 : 1;
+    const heat = Math.max(0, Number(p.heat || 0));
+    return { p, idx, feedback, playedAndRated, claimed, claimable, group, heat };
+  })
+    .sort((a, b) => (a.group - b.group) || (b.heat - a.heat) || (a.idx - b.idx));
+
+  const chunk3 = (arr) => {
+    const pages = [];
+    for (let i = 0; i < arr.length; i += 3) pages.push(arr.slice(i, i + 3));
+    return pages;
+  };
+
+  const playPages = chunk3(playStates);
+  const playPagesHtml = playPages
+    .map((page, pageIdx) => {
+      const items = page
+        .map(({ p, claimable, claimed }) => {
+          const icon = iconChar(p.title);
+          const tags = (p.tags || []).slice(0, 4).map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join("");
+          const heat = Math.max(0, Number(p.heat || 0));
+          const btn = claimable
+            ? `<button class="btn btn--brand" type="button" data-play-claim="${p.id}">领奖</button>`
+            : claimed
+              ? `<button class="btn" type="button" disabled>已领取</button>`
+              : `<button class="btn btn--brand" type="button" data-play-go="${p.id}">前往游玩并评价</button>`;
+          const cardClass = claimable ? "play-card--claim" : claimed ? "play-card--claimed" : "";
+          return `
+            <div class="item play-card ${cardClass}">
+              <div class="row play-row" style="align-items:flex-start">
+                <div class="grow" style="min-width:0">
+                  <div class="play-titleline">
+                    <span class="game-ico play-ico" aria-hidden="true">${escapeHtml(icon)}</span>
+                    <span class="play-title">${escapeHtml(p.title)}</span>
+                    <span class="play-heat" aria-label="热度">🔥 ${fmt(heat)}</span>
+                  </div>
+                  <div class="play-tags" aria-label="标签">${tags}</div>
+                </div>
+                <div class="play-right">
+                  ${btn}
+                  <div class="muted small play-points">可获得 <b>${fmt(p.points)}</b> 积分</div>
+                </div>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+
+      return `
+        <div class="play-page" data-card-idx="${pageIdx}" role="listitem" aria-label="第 ${pageIdx + 1} 页">
+          <div class="play-page__stack">${items}</div>
         </div>
-        <div class="item__meta">
-          <span class="tag">TapMaker 试玩</span>
-          <button class="btn ${done ? "" : "btn--brand"}">${done ? "查看反馈" : "进入试玩"}</button>
-        </div>
-      </div>
-    `;
-  }).join("");
+      `;
+    })
+    .join("");
+
+  const playDotsHtml = playPages
+    .map(
+      (_, i) =>
+        `<button class="dot ${i === 0 ? "dot--active" : ""}" type="button" data-dot="${i}" aria-label="第 ${i + 1} 页"></button>`,
+    )
+    .join("");
 
   return `
     <section class="card">
@@ -2601,18 +3668,41 @@ function discoverInlineView(s) {
 
     <section class="card">
       <div class="row">
-        <p class="h2 grow">TapMaker GameJam 试玩场地</p>
-        <span class="pill">已完成：<b>${completedCount}</b> / ${PLAYTEST_GAMES.length}</span>
+        <p class="h2 grow">TapTap制造 GameJam 游戏展出</p>
       </div>
       <p class="muted small" style="margin:6px 0 0">
-        试玩获取积分，支持优秀作品在 TapTap 发行。
+        玩游戏写评价领取积分，请友善交流，支持开发者发布作品。
       </p>
-      <div class="list">${play}</div>
+      <div style="margin-top:10px" class="carousel" aria-label="GameJam 试玩列表">
+        <div class="hscroll carousel__track" id="playCarousel" role="list">
+          ${playPagesHtml}
+        </div>
+        <div class="carousel__dots" id="playDots" aria-label="试玩分页">
+          ${playDotsHtml}
+        </div>
+      </div>
     </section>
   `;
 }
 
 function wireDiscoverInline() {
+  const playOrderList = (st) =>
+    PLAYTEST_GAMES.map((p, idx) => {
+      const feedback = String(st.playtest.feedback?.[p.id] || "").trim();
+      const playedAndRated = st.playtest.completed.includes(p.id) && !!feedback;
+      const claimed = (st.playtest.claimed || []).includes(p.id);
+      const claimable = playedAndRated && !claimed;
+      const group = claimable ? 0 : claimed ? 2 : 1;
+      const heat = Math.max(0, Number(p.heat || 0));
+      return { id: p.id, idx, group, heat };
+    }).sort((a, b) => (a.group - b.group) || (b.heat - a.heat) || (a.idx - b.idx));
+
+  const playPageIndexOf = (st, gameId) => {
+    const arr = playOrderList(st);
+    const pos = arr.findIndex((x) => x.id === gameId);
+    return pos < 0 ? 0 : Math.floor(pos / 3);
+  };
+
   const wireStepMarquees = () => {
     const prefersReduce = !!window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
     if (prefersReduce) return;
@@ -2762,50 +3852,71 @@ function wireDiscoverInline() {
     }),
   );
 
-  $$("[data-play]").forEach((el) =>
-    el.addEventListener("click", () => {
-      const p = PLAYTEST_GAMES.find((x) => x.id === el.dataset.play);
+  wireCarousel("playCarousel", "playDots", { cardSelector: ".play-page", activeCardClass: "play-page--active" });
+
+  $$("[data-play-go]").forEach((b) =>
+    b.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const id = String(b.dataset.playGo || "");
+      const p = PLAYTEST_GAMES.find((x) => x.id === id);
       if (!p) return;
-      const done = state.playtest.completed.includes(p.id);
-      const existing = state.playtest.feedback[p.id] || "";
+
+      const pageIdx = Number(b.closest?.(".play-page")?.getAttribute("data-card-idx") || 0);
+      requestCarouselInit("playCarousel", pageIdx);
 
       const body = `
-        <div class="small" style="line-height:1.55">
-          <div class="h2">${p.title}</div>
-          <div class="item__desc" style="margin-top:8px">${p.desc}</div>
-          <div class="divider"></div>
-          <div class="muted small">试玩流程：完成试玩 → 写一句反馈 → 获得积分。</div>
-          <div style="margin-top:10px">
-            <div class="small"><b>一句反馈</b></div>
-            <textarea id="txtFeedback" rows="3" style="width:100%; margin-top:6px; border-radius:12px; border:1px solid var(--border); background: rgba(255,255,255,.02); color: var(--text); padding:10px; resize:none;">${escapeHtml(existing)}</textarea>
+        <div class="small" style="line-height:1.6">
+          <div class="hint">
+            <b>前往游玩并评价</b>：会跳转到游戏详情页，填写评价后可领取积分。
+            <div class="muted small" style="margin-top:6px">此 demo 为测试机制：点击下方按钮即可视为“已玩过且已评价”，解锁“领奖”。</div>
           </div>
+          <div class="divider"></div>
+          <div class="small"><b>${escapeHtml(p.title)}</b></div>
+          <div class="muted small" style="margin-top:6px">${escapeHtml(p.desc)}</div>
         </div>
       `;
-
       const footer = `
-        ${done ? "" : `<button class="btn btn--brand" id="btnCompletePlay">完成试玩 +${p.points}积分</button>`}
-        <button class="btn" id="btnSaveFeedback">${done ? "更新反馈" : "先保存反馈"}</button>
-        <button class="btn" id="btnClosePlay">关闭</button>
+        <button class="btn btn--brand" id="btnSubmitPlayReview">已写好评价</button>
+        <button class="btn" id="btnCancelPlayReview">稍后再说</button>
       `;
-
-      openModal({ title: "试玩详情", bodyHtml: body, footerHtml: footer });
-
-      $("#btnClosePlay")?.addEventListener("click", closeModal);
-      $("#btnSaveFeedback")?.addEventListener("click", () => {
-        const v = $("#txtFeedback")?.value?.trim() || "";
-        state.playtest.feedback[p.id] = v;
-        saveState();
-        toast("已保存反馈");
-      });
-      $("#btnCompletePlay")?.addEventListener("click", () => {
-        const v = $("#txtFeedback")?.value?.trim() || "";
-        state.playtest.feedback[p.id] = v;
+      openModal({ title: "试玩", bodyHtml: body, footerHtml: footer });
+      $("#btnCancelPlayReview")?.addEventListener("click", closeModal);
+      $("#btnSubmitPlayReview")?.addEventListener("click", () => {
+        state.playtest.feedback[p.id] = String(state.playtest.feedback?.[p.id] || "").trim() || "（测试）已评价";
         if (!state.playtest.completed.includes(p.id)) state.playtest.completed.push(p.id);
-        addPoints(state, p.points);
         saveState();
         closeModal();
+        requestCarouselInit("playCarousel", playPageIndexOf(state, p.id));
         render();
-        toast(`试玩完成，获得 ${p.points} 积分`);
+        toast("已提交评价，可领奖");
+      });
+    }),
+  );
+
+  $$("[data-play-claim]").forEach((b) =>
+    b.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const id = String(b.dataset.playClaim || "");
+      const p = PLAYTEST_GAMES.find((x) => x.id === id);
+      if (!p) return;
+
+      const pageIdx = Number(b.closest?.(".play-page")?.getAttribute("data-card-idx") || 0);
+      requestCarouselInit("playCarousel", pageIdx);
+
+      const feedback = String(state.playtest.feedback?.[p.id] || "").trim();
+      const playedAndRated = state.playtest.completed.includes(p.id) && !!feedback;
+      if (!playedAndRated) return toast("请先试玩并写一句评价");
+      if ((state.playtest.claimed || []).includes(p.id)) return toast("已领取过该奖励");
+
+      state.playtest.claimed.push(p.id);
+      addPoints(state, p.points);
+      saveState();
+      requestCarouselInit("playCarousel", 0);
+      render();
+      openRewardModal({
+        title: "领取成功",
+        grant: { points: p.points, coupons: 0 },
+        subtitle: p.title,
       });
     }),
   );
@@ -2816,6 +3927,8 @@ function wireDiscoverInline() {
 function shopView(s) {
   const frameCards = SHOP_ITEMS.frames.map((f) => shopItemCard("frame", f, s)).join("");
   const badgeCards = SHOP_ITEMS.badges.map((b) => shopItemCard("badge", b, s)).join("");
+  const today = dayKeyLocal();
+  const already = String(s.daily?.lotteryDayKey || "") === today;
   return `
     <section class="card">
       <div class="row">
@@ -2844,19 +3957,19 @@ function shopView(s) {
     <section class="card">
       <div class="row">
         <p class="h2 grow">抽点券</p>
-        <span class="${pillClass("warn")}">小概率中奖</span>
+        <span class="${pillClass("warn")}">每日一次</span>
       </div>
       <div class="item" style="margin-top:10px">
         <div class="row">
           <div class="grow">
             <div class="item__title">${SHOP_ITEMS.lottery.title}</div>
-            <div class="item__desc">每次消耗 ${SHOP_ITEMS.lottery.cost} 积分，中奖获得点券 ${SHOP_ITEMS.lottery.prize.value}。</div>
+            <div class="item__desc">每日限 1 次，消耗 ${SHOP_ITEMS.lottery.cost} 积分获得点券（demo：保底 1 点券）。</div>
           </div>
           <span class="pill">-${SHOP_ITEMS.lottery.cost} 积分</span>
         </div>
         <div class="item__meta">
-          <span class="tag">中奖率：约 ${(SHOP_ITEMS.lottery.winRate * 100).toFixed(0)}%</span>
-          <button class="btn btn--brand" id="btnLottery">开始抽奖</button>
+          <span class="tag">${already ? "今天已抽" : "今日可抽"}</span>
+          <button class="btn btn--brand" id="btnLottery" ${already ? "disabled" : ""}>${already ? "今日已抽" : "每日抽一次"}</button>
         </div>
       </div>
     </section>
@@ -2921,14 +4034,17 @@ function wireShop() {
   );
 
   $("#btnLottery")?.addEventListener("click", () => {
+    const today = dayKeyLocal();
+    if (String(state.daily?.lotteryDayKey || "") === today) return toast("今天已经抽过了");
     if (state.points < SHOP_ITEMS.lottery.cost) return toast("积分不足");
     state.points -= SHOP_ITEMS.lottery.cost;
-    const win = Math.random() < SHOP_ITEMS.lottery.winRate;
-    if (win) state.walletCoupons = (state.walletCoupons || 0) + SHOP_ITEMS.lottery.prize.value;
+    state.daily.lotteryDayKey = today;
+    const big = Math.random() < 0.18;
+    const add = big ? SHOP_ITEMS.lottery.prize.value : 1;
+    addCoupons(state, add);
     saveState();
     render();
-    if (win) toast(`恭喜你：点券 +${SHOP_ITEMS.lottery.prize.value}`);
-    else toast("这次没抽中，下次再试试");
+    toast(big ? `恭喜你：点券 +${SHOP_ITEMS.lottery.prize.value}` : "点券 +1（保底）");
   });
 }
 
@@ -3016,6 +4132,30 @@ function debugModalHtml() {
       </div>
 
       <div class="divider"></div>
+
+      <div>
+        <div><b>纪念卡：昵称/身份/ID/个性介绍</b></div>
+        <div class="muted small">用于演示纪念卡的展示内容（身份/介绍留空则不显示）。</div>
+
+        <div class="row" style="margin-top:8px">
+          <div class="grow"><div class="muted small">昵称</div></div>
+          <input id="inpNick" type="text" style="width:220px; border-radius:12px; border:1px solid var(--border); background: rgba(255,255,255,.02); color: var(--text); padding:10px" />
+        </div>
+        <div class="row" style="margin-top:8px">
+          <div class="grow"><div class="muted small">ID</div></div>
+          <input id="inpPid" type="text" style="width:220px; border-radius:12px; border:1px solid var(--border); background: rgba(255,255,255,.02); color: var(--text); padding:10px" />
+        </div>
+        <div class="row" style="margin-top:8px">
+          <div class="grow"><div class="muted small">身份（可选）</div></div>
+          <input id="inpIdentity" type="text" style="width:220px; border-radius:12px; border:1px solid var(--border); background: rgba(255,255,255,.02); color: var(--text); padding:10px" />
+        </div>
+        <div style="margin-top:8px">
+          <div class="muted small">个性介绍（可选）</div>
+          <textarea id="txtBio" rows="2" style="width:100%; margin-top:6px; border-radius:12px; border:1px solid var(--border); background: rgba(255,255,255,.02); color: var(--text); padding:10px; resize:vertical;"></textarea>
+        </div>
+      </div>
+
+      <div class="divider"></div>
       <div class="muted small mono">State Key: ${STORAGE_KEY}</div>
     </div>
   `;
@@ -3036,6 +4176,10 @@ function openDebug() {
   const chkSteam = $("#chkSteam");
   const inpRoles = $("#inpRoles");
   const inpRolesClaimed = $("#inpRolesClaimed");
+  const inpNick = $("#inpNick");
+  const inpPid = $("#inpPid");
+  const inpIdentity = $("#inpIdentity");
+  const txtBio = $("#txtBio");
 
   const defaultRecap = () => recapDataForState({ ...state, boundData: false });
   const currentRecap = () => state.careerSnapshot?.recap || defaultRecap();
@@ -3045,6 +4189,10 @@ function openDebug() {
   chkSteam.checked = !!state.boundSteam;
   inpRoles.value = String(state.boundRolesCount ?? 0);
   inpRolesClaimed.value = String(state.claimedRoleRewardsCount ?? 0);
+  if (inpNick) inpNick.value = String(state.profile?.nickname || "");
+  if (inpPid) inpPid.value = String(state.profile?.id || "");
+  if (inpIdentity) inpIdentity.value = String(state.profile?.identity || "");
+  if (txtBio) txtBio.value = String(state.profile?.bio || "");
 
   $("#btnResetRecapJson")?.addEventListener("click", () => {
     txt.value = JSON.stringify(defaultRecap(), null, 2);
@@ -3061,6 +4209,13 @@ function openDebug() {
     state.boundRolesCount = Math.max(0, Number(inpRoles.value || 0));
     state.claimedRoleRewardsCount = Math.max(0, Number(inpRolesClaimed.value || 0));
     state.boundData = state.boundRolesCount > 0; // keep legacy flag for demo enrichment
+
+    // Memorial profile fields
+    if (!state.profile || typeof state.profile !== "object") state.profile = { nickname: "", id: "", identity: "", bio: "" };
+    state.profile.nickname = String(inpNick?.value || "").trim();
+    state.profile.id = String(inpPid?.value || "").trim();
+    state.profile.identity = String(inpIdentity?.value || "").trim();
+    state.profile.bio = String(txtBio?.value || "").trim();
 
     // Apply recap JSON as career snapshot (freeze)
     try {
@@ -3195,6 +4350,7 @@ async function init() {
 
   // Route changes
   window.addEventListener("hashchange", render);
+  window.addEventListener("resize", () => setTopbarHeightVar());
   render();
 }
 
