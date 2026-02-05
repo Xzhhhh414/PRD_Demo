@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#F7F9FC" />
+    <title>TapTap 十周年</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="opening" id="opening" aria-hidden="false">
+      <div class="opening__wrap">
+        <div class="opening__title">TapTap 十周年</div>
+
+        <div class="opening__stage" aria-hidden="true">
+          <div class="opening__ring"></div>
+          <div class="opening__spark s1"></div>
+          <div class="opening__spark s2"></div>
+          <div class="opening__spark s3"></div>
+        </div>
+
+        <div class="opening__hint" id="openingHint">开启动画ing…</div>
+        <button class="btn btn--brand opening__btn hidden" id="btnEnterRecap" type="button">开启我的TapTap十年回顾</button>
+      </div>
+    </div>
+
+    <div id="app">
+      <header class="topbar">
+        <div class="topbar__title">
+          <div class="topbar__left">
+            <button class="icon-btn icon-btn--back hidden" id="btnBack" aria-label="返回首页">返回</button>
+            <div>
+              <div class="brand">
+                TapTap 十周年
+                <span class="subtitle subtitle--inline" id="headerSubtitle"></span>
+              </div>
+            </div>
+          </div>
+          <button class="icon-btn icon-btn--sm" id="btnOpenDebug" aria-label="打开测试设置">测试设置</button>
+        </div>
+      </header>
+
+      <main class="main" id="main"></main>
+    </div>
+
+    <div class="modal-backdrop hidden" id="modalBackdrop" aria-hidden="true"></div>
+    <div class="modal hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal__header">
+        <div class="modal__title" id="modalTitle">标题</div>
+        <button class="icon-btn" id="modalClose" aria-label="关闭">关闭</button>
+      </div>
+      <div class="modal__body" id="modalBody"></div>
+      <div class="modal__footer" id="modalFooter"></div>
+    </div>
+
+    <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
+
