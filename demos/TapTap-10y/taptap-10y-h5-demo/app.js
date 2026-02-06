@@ -770,6 +770,30 @@ function closeModal() {
   }
 }
 
+function openLotteryResultModal({ hit, add, cost } = {}) {
+  const got = Math.max(0, Number(add || 0));
+  const spent = Math.max(0, Number(cost || 0));
+  const wallet = Math.max(0, Number(state.walletCoupons || 0));
+  const body = `
+    <div class="small" style="line-height:1.6">
+      <div class="hint">
+        <b>${hit ? `恭喜你：点券 +${fmt(got || 1)}` : "很遗憾：没抽到点券"}</b>
+        ${spent ? `<div class="muted small" style="margin-top:6px">本次消耗 <b>${fmt(spent)}</b> 积分</div>` : ""}
+      </div>
+      <div class="divider"></div>
+      <div class="muted small">当前点券：<b>${fmt(wallet)}</b></div>
+      <div class="muted small" style="margin-top:6px">点券可在「我的钱包」中查看与使用。</div>
+    </div>
+  `;
+  openModal({
+    title: "抽奖结果",
+    bodyHtml: body,
+    footerHtml: `<button class="btn" id="btnLotteryResultWallet" type="button">查看钱包</button><button class="btn btn--brand" id="btnLotteryResultOk" type="button">知道了</button>`,
+  });
+  $("#btnLotteryResultOk")?.addEventListener("click", closeModal);
+  $("#btnLotteryResultWallet")?.addEventListener("click", openWalletModal);
+}
+
 let _modalDismissWired = false;
 function wireModalDismiss() {
   if (_modalDismissWired) return;
@@ -1718,8 +1742,10 @@ function render() {
     return;
   }
   if (route === "sharememorial") {
-    main.innerHTML = shareMemorialView(state, recap);
-    wireSharePage();
+    // Share memorial is now a modal (keep this route as an entry for QR/links).
+    main.innerHTML = homeView(state, recap);
+    wireHome();
+    openShareMemorialModal({ onClose: () => navigate("home") });
     return;
   }
   if (route === "sharerecap") {
@@ -1883,28 +1909,56 @@ function memorialInlineView(s, recap) {
   const unlocks = s.memorialUnlocks || { colors: [], stickers: [], avatars: [] };
   const tab = s.memorial?.tab || "color";
   const MEM_PRICING = { color: 20, sticker: 15, avatar: 30 };
+  const unlockKindMap = { color: "colors", sticker: "stickers", avatar: "avatars" };
   const isUnlocked = (kind, id) => (unlocks?.[kind] || []).includes(id);
-  const costFor = (kind, id) => (isUnlocked(kind, id) ? 0 : (MEM_PRICING[kind] || 0));
+  const isUnlockedKind = (kind, id) => isUnlocked(unlockKindMap[kind], id);
+  const costFor = (kind, id) => (isUnlockedKind(kind, id) ? 0 : (MEM_PRICING[kind] || 0));
 
   const tabBtn = (id, label) =>
     `<button class="mem-tab ${tab === id ? "mem-tab--active" : ""}" type="button" data-mem-tab="${id}">${label}</button>`;
 
-  const optionBtn = ({ id, label, icon, active, locked, kind, style, cost }) => `
-    <button class="mem-opt ${active ? "mem-opt--active" : ""} ${locked ? "mem-opt--locked" : ""}" type="button" data-mem-${kind}="${id}" ${locked ? "aria-disabled='true'" : ""} style="${style || ""}">
-      ${icon ? `<span class="mem-opt__ico" aria-hidden="true">${icon}</span>` : ""}
-      ${label ? `<span class="mem-opt__t">${escapeHtml(label)}</span>` : ""}
-      ${locked && cost ? `<span class="mem-opt__price" aria-hidden="true">${fmt(cost)}</span>` : ""}
+  const optionBtn = ({ id, label, icon, active, locked, used, kind, style, cost, ariaLabel, compact, swatch, fullSwatch }) => `
+    <button
+      class="mem-opt ${active ? "mem-opt--active" : ""} ${locked ? "mem-opt--locked" : ""} ${compact ? "mem-opt--compact" : ""} ${fullSwatch ? "mem-opt--fullswatch" : ""}"
+      type="button"
+      data-mem-${kind}="${id}"
+      aria-label="${escapeHtml(ariaLabel || label || "")}"
+      ${locked ? "aria-disabled='true'" : ""}
+      style="${style || ""}"
+    >
+      ${
+        fullSwatch
+          ? ""
+          : (swatch ? `<span class="mem-opt__swatch" aria-hidden="true"></span>` : (icon ? `<span class="mem-opt__ico" aria-hidden="true">${icon}</span>` : ""))
+      }
+      ${!compact && label ? `<span class="mem-opt__t">${escapeHtml(label)}</span>` : ""}
+      ${
+        compact
+          ? `<span class="mem-opt__price ${locked && cost ? "" : "mem-opt__price--ghost"}" aria-hidden="true">${fmt(cost || 0)}积分</span>`
+          : (locked && cost ? `<span class="mem-opt__price" aria-hidden="true">${fmt(cost)}积分</span>` : "")
+      }
       ${locked ? `<span class="mem-opt__lock" aria-hidden="true">🔒</span>` : ""}
+      ${used ? `<span class="mem-opt__used" aria-hidden="true">✓</span>` : ""}
     </button>
   `;
+
+  const usedStickerIds = new Set(
+    (Array.isArray(s.memorial?.stickers) ? s.memorial.stickers : [])
+      .map((x) => String(x?.id || "").trim())
+      .filter(Boolean),
+  );
 
   const colorOpts = MEM_CARD_COLORS.map((c) =>
     optionBtn({
       id: c.id,
       kind: "color",
       active: (s.memorial?.colorId || "") === c.id,
-      locked: !isUnlocked("colors", c.id),
+      used: (s.memorial?.colorId || "") === c.id,
+      locked: !isUnlockedKind("color", c.id),
       cost: costFor("color", c.id),
+      ariaLabel: `背景：${c.label}`,
+      compact: true,
+      fullSwatch: true,
       style: `--sw:${c.bg};`,
     }),
   ).join("");
@@ -1914,11 +1968,13 @@ function memorialInlineView(s, recap) {
       id: st.id,
       kind: "sticker",
       icon: st.icon,
-      label: st.label,
       // For multi-stickers, selecting means "add one" rather than "set".
-      active: false,
-      locked: !isUnlocked("stickers", st.id),
+      active: usedStickerIds.has(st.id),
+      used: usedStickerIds.has(st.id),
+      locked: !isUnlockedKind("sticker", st.id),
       cost: costFor("sticker", st.id),
+      ariaLabel: `贴纸：${st.label}`,
+      compact: true,
     }),
   ).join("");
 
@@ -1927,10 +1983,12 @@ function memorialInlineView(s, recap) {
       id: av.id,
       kind: "avatar",
       icon: av.icon,
-      label: av.label,
       active: (s.memorial?.avatarId || "") === av.id,
-      locked: !isUnlocked("avatars", av.id),
+      used: (s.memorial?.avatarId || "") === av.id,
+      locked: !isUnlockedKind("avatar", av.id),
       cost: costFor("avatar", av.id),
+      ariaLabel: `角色：${av.label}`,
+      compact: true,
     }),
   ).join("");
 
@@ -1998,11 +2056,12 @@ function memorialInlineView(s, recap) {
 
           <div class="mem-fields">
             <div class="mem-field">
-              <span class="mem-k">昵称</span>
-              <span class="mem-name">
-                <span class="mem-idpill">ID:${escapeHtml(pid)}</span>
-                <span class="mem-v mem-v--grow">${escapeHtml(nickname)}</span>
-              </span>
+              <span class="mem-k mem-k--inline">昵称</span>
+              <span class="mem-v mem-v--grow">${escapeHtml(nickname)}</span>
+            </div>
+            <div class="mem-field">
+              <span class="mem-k mem-k--inline">ID</span>
+              <span class="mem-v mem-v--grow">${escapeHtml(pid)}</span>
             </div>
             ${title ? `
               <div class="mem-field">
@@ -2200,6 +2259,214 @@ function shareRecapTextForShare(recap) {
   return `我的 TapTap 十年回顾：${parts.join("，") || "一些很酷的数据"}。#十年同行`;
 }
 
+function memorialCardOnlyHtml(s, recap, { hideProfileFields = false } = {}) {
+  const prof = s.profile || { nickname: "玩家", id: "—", identity: "", bio: "" };
+  const nickname = String(prof.nickname || "").trim() || "玩家";
+  const pid = String(prof.id || "").trim() || "—";
+  const title = String(prof.identity || "").trim() || identityTitleForRecap(recap);
+  const bio = String(prof.bio || "").trim();
+
+  const color = MEM_CARD_COLORS.find((c) => c.id === s.memorial?.colorId) || MEM_CARD_COLORS[0];
+  const avatar = MEM_AVATARS.find((x) => x.id === s.memorial?.avatarId) || MEM_AVATARS[0];
+
+  const frameEquipped = s.equipped.frame === MEM_SHOP.frame.id;
+  const badgeEquipped = s.equipped.badge === MEM_SHOP.badge.id;
+
+  return `
+    <div class="mem-card-shell" style="--mem-bg:${color.bg}; --mem-panel:${color.panel}; --mem-accent:${color.accent};">
+      <div class="mem-card">
+        <div class="mem-stickers" aria-label="贴纸">
+          ${(Array.isArray(s.memorial?.stickers) ? s.memorial.stickers : [])
+            .slice(0, 10)
+            .map((st, idx) => {
+              const id = String(st?.id || "").trim();
+              const def = MEM_STICKERS.find((x) => x.id === id) || MEM_STICKERS[0];
+              const x = Math.max(0, Math.min(100, Number(st?.x ?? 50)));
+              const y = Math.max(0, Math.min(100, Number(st?.y ?? 22)));
+              const sc = Math.max(0.6, Math.min(1.8, Number(st?.s ?? 1)));
+              const r = Math.max(-45, Math.min(45, Number(st?.r ?? 0)));
+              const activeIdx = Math.max(0, Number(s.memorial?.activeStickerIdx ?? 0));
+              const active = idx === activeIdx;
+              // In share modal, stickers are only for display (no drag/select)
+              return `
+                <span
+                  class="mem-sticker mem-sticker--placed ${active ? "is-active" : ""}"
+                  aria-label="贴纸：${escapeHtml(def.label)}"
+                  style="left:${x}%; top:${y}%; transform: translate(-50%,-50%) rotate(${r}deg) scale(${sc}); pointer-events:none;"
+                >${escapeHtml(def.icon)}</span>
+              `;
+            })
+            .join("")}
+        </div>
+        <div class="mem-top">
+          <div class="mem-brand"></div>
+          <div class="mem-mini">
+            ${frameEquipped ? `<span class="tag">🟩 头像框</span>` : ""}
+            ${badgeEquipped ? `<span class="tag">🛠️ 徽章</span>` : ""}
+          </div>
+        </div>
+
+        <div class="mem-photo">
+          <div class="mem-avatar" aria-label="角色">${escapeHtml(avatar.icon)}</div>
+        </div>
+
+        <div class="mem-fields">
+          ${
+            hideProfileFields
+              ? ""
+              : `
+                <div class="mem-field">
+                  <span class="mem-k mem-k--inline">昵称</span>
+                  <span class="mem-v mem-v--grow">${escapeHtml(nickname)}</span>
+                </div>
+                <div class="mem-field">
+                  <span class="mem-k mem-k--inline">ID</span>
+                  <span class="mem-v mem-v--grow">${escapeHtml(pid)}</span>
+                </div>
+              `
+          }
+          ${title ? `
+            <div class="mem-field">
+              <span class="mem-k">身份</span>
+              <span class="mem-v">${escapeHtml(title)}</span>
+            </div>
+          ` : ""}
+        </div>
+
+        ${bio ? `<div class="mem-slogan">${escapeHtml(bio)}</div>` : ""}
+      </div>
+    </div>
+  `;
+}
+
+function shareMemorialTextForShare() {
+  const nick = String(state.profile?.nickname || "").trim() || "TapTap 用户";
+  const pid = String(state.profile?.id || "").trim() || "—";
+  return `我的 TapTap 十周年名片：${nick}（ID ${pid}）。#十年同行`;
+}
+
+function openShareMemorialModal({ onClose } = {}) {
+  const recap = state.careerSnapshot?.recap || recapDataForState(state);
+  const url = shareUrlForRoute("sharememorial");
+  const qr = qrSvgHtml(url);
+
+  if (typeof onClose === "function") _modalAfterClose.push(onClose);
+
+  // NOTE: Do NOT show extra nickname/ID text under modal title.
+  // The nickname/ID should stay inside the memorial card itself.
+  const nick = String(state.profile?.nickname || "").trim() || "TapTap 用户";
+  const pid = String(state.profile?.id || "").trim() || "—";
+
+  const body = `
+    <div class="small" style="line-height:1.55">
+      ${memorialCardOnlyHtml(state, recap)}
+      <div class="divider"></div>
+      <div class="share-qr">
+        <div class="share-qr__box" aria-label="二维码">${qr}</div>
+        <div class="muted small share-qr__txt"><span class="mono">${escapeHtml(url)}</span></div>
+      </div>
+    </div>
+  `;
+
+  const footer = `
+    <button class="btn" id="btnShareTo" type="button">分享至</button>
+    <button class="btn btn--brand" id="btnDownloadShareImg" type="button">下载图片</button>
+  `;
+
+  openModal({ title: "TapTap十周年名片", bodyHtml: body, footerHtml: footer });
+
+  $("#btnShareTo")?.addEventListener("click", async () => {
+    const text = shareMemorialTextForShare();
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "TapTap十周年名片", text, url });
+        return;
+      }
+    } catch {
+      // ignore; fallback to copy
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast("已复制链接，可粘贴分享");
+    } catch {
+      toast("分享失败（浏览器权限限制）");
+    }
+  });
+
+  $("#btnDownloadShareImg")?.addEventListener("click", () => {
+    const W = 1080;
+    const H = 1920;
+    const qrSized = String(qr).replace("<svg ", `<svg x="390" y="1320" width="300" height="300" `);
+    const title = "TapTap十周年名片";
+
+    const color = MEM_CARD_COLORS.find((c) => c.id === state.memorial?.colorId) || MEM_CARD_COLORS[0];
+    const avatar = MEM_AVATARS.find((x) => x.id === state.memorial?.avatarId) || MEM_AVATARS[0];
+    const identity = String(state.profile?.identity || "").trim() || identityTitleForRecap(recap);
+    const bio = String(state.profile?.bio || "").trim();
+
+    const cardX = 90;
+    const cardY = 290;
+    const cardW = 900;
+    const cardH = 940;
+
+    const stickers = (Array.isArray(state.memorial?.stickers) ? state.memorial.stickers : []).slice(0, 10).map((st) => {
+      const id = String(st?.id || "").trim();
+      const def = MEM_STICKERS.find((x) => x.id === id) || MEM_STICKERS[0];
+      const x = Math.max(0, Math.min(100, Number(st?.x ?? 50)));
+      const y = Math.max(0, Math.min(100, Number(st?.y ?? 22)));
+      const sc = Math.max(0.6, Math.min(1.8, Number(st?.s ?? 1)));
+      const r = Math.max(-45, Math.min(45, Number(st?.r ?? 0)));
+      const px = cardX + (cardW * x) / 100;
+      const py = cardY + (cardH * y) / 100;
+      const fs = Math.round(46 * sc);
+      return `
+        <g transform="translate(${px} ${py}) rotate(${r})">
+          <text x="0" y="0" text-anchor="middle" dominant-baseline="middle" font-size="${fs}">${escapeXml(def.icon)}</text>
+        </g>
+      `;
+    }).join("");
+
+    const posterSvg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+        <defs>
+          <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#F7F9FC"/>
+            <stop offset="1" stop-color="#FFFFFF"/>
+          </linearGradient>
+        </defs>
+        <rect width="${W}" height="${H}" fill="url(#bg)"/>
+        <circle cx="140" cy="160" r="260" fill="#E7FBF5" opacity="0.9"/>
+        <circle cx="920" cy="220" r="300" fill="#EEF5FF" opacity="0.9"/>
+
+        <text x="90" y="190" font-size="54" font-weight="800" fill="#0F172A">${escapeXml(title)}</text>
+
+        <rect x="${cardX}" y="${cardY}" width="${cardW}" height="${cardH}" rx="36" fill="${escapeXml(color.panel)}" stroke="rgba(15,23,42,0.10)" stroke-width="2"/>
+        <rect x="${cardX + 26}" y="${cardY + 26}" width="${cardW - 52}" height="${cardH - 52}" rx="28" fill="rgba(255,255,255,0.62)"/>
+        <rect x="${cardX + 52}" y="${cardY + 220}" width="${cardW - 104}" height="220" rx="28" fill="${escapeXml(color.accent)}" opacity="0.16"/>
+
+        ${stickers}
+
+        <text x="${cardX + 120}" y="${cardY + 170}" font-size="96">${escapeXml(avatar.icon)}</text>
+        <text x="${cardX + 120}" y="${cardY + 520}" font-size="28" font-weight="800" fill="#0F172A">昵称</text>
+        <text x="${cardX + 120}" y="${cardY + 580}" font-size="44" font-weight="900" fill="#0F172A">${escapeXml(nick)}</text>
+        <text x="${cardX + 120}" y="${cardY + 670}" font-size="28" font-weight="800" fill="#0F172A">ID</text>
+        <text x="${cardX + 120}" y="${cardY + 720}" font-size="36" font-weight="900" fill="#0F172A">${escapeXml(pid)}</text>
+        ${identity ? `<text x="${cardX + 120}" y="${cardY + 810}" font-size="28" font-weight="800" fill="#0F172A">身份</text>
+        <text x="${cardX + 120}" y="${cardY + 860}" font-size="34" font-weight="900" fill="#0F172A">${escapeXml(identity)}</text>` : ""}
+        ${bio ? `<text x="${cardX + 120}" y="${cardY + 920}" font-size="26" font-weight="700" fill="#334155">${escapeXml(bio).slice(0, 36)}</text>` : ""}
+
+        <rect x="90" y="1240" width="900" height="600" rx="36" fill="#FFFFFF" stroke="rgba(15,23,42,0.10)" stroke-width="2"/>
+        ${qrSized}
+        <text x="540" y="1670" text-anchor="middle" font-size="26" font-weight="800" fill="#0F172A">扫码打开分享页</text>
+        <text x="540" y="1720" text-anchor="middle" font-size="22" font-weight="700" fill="#64748B">${escapeXml(url)}</text>
+
+        <text x="540" y="1860" text-anchor="middle" font-size="22" font-weight="800" fill="#00B894">TapTap 十周年 · 十年同行</text>
+      </svg>
+    `.trim();
+    downloadSvgAsPng(posterSvg, "taptap-10y-memorial.png", { scale: 2 });
+  });
+}
+
 function openShareRecapModal({ onClose } = {}) {
   const recap = state.careerSnapshot?.recap || recapDataForState(state);
   const url = shareUrlForRoute("sharerecap");
@@ -2315,7 +2582,7 @@ function wireSharePage() {
 }
 
 function wireMemorialInline() {
-  $("#btnShareMemorial")?.addEventListener("click", () => navigate("sharememorial"));
+  $("#btnShareMemorial")?.addEventListener("click", () => openShareMemorialModal());
 
   const MEM_PRICING = { color: 20, sticker: 15, avatar: 30 };
   const unlockKindMap = { color: "colors", sticker: "stickers", avatar: "avatars" };
@@ -2364,6 +2631,46 @@ function wireMemorialInline() {
     if (!Array.isArray(state.memorialUnlocks[k])) state.memorialUnlocks[k] = [];
     return state.memorialUnlocks[k];
   };
+  const ensureStickers = () => {
+    if (!state.memorial || typeof state.memorial !== "object") state.memorial = { tab: "color", colorId: "mc_cream", stickers: [], activeStickerIdx: 0, stickerId: "", avatarId: "ma_bunny" };
+    if (!Array.isArray(state.memorial.stickers)) state.memorial.stickers = [];
+    return state.memorial.stickers;
+  };
+  const applyStickerOnce = (id) => {
+    const sid = String(id || "").trim();
+    if (!sid) return false;
+    const stickers = ensureStickers();
+    const idx = stickers.findIndex((x) => String(x?.id || "").trim() === sid);
+    if (idx >= 0) {
+      state.memorial.activeStickerIdx = idx;
+      // Keep legacy field updated for debug compatibility
+      state.memorial.stickerId = sid;
+      return false;
+    }
+    if (stickers.length >= 10) {
+      toast("贴纸太多啦，先调整一下再添加");
+      return false;
+    }
+    stickers.push({ id: sid, x: 76, y: 26, s: 1, r: 0 });
+    state.memorial.activeStickerIdx = Math.max(0, stickers.length - 1);
+    // Keep legacy field updated for debug compatibility
+    state.memorial.stickerId = sid;
+    return true;
+  };
+  const toggleSticker = (id) => {
+    const sid = String(id || "").trim();
+    if (!sid) return false;
+    const stickers = ensureStickers();
+    const idx = stickers.findIndex((x) => String(x?.id || "").trim() === sid);
+    if (idx >= 0) {
+      stickers.splice(idx, 1);
+      const next = Math.max(0, Math.min(Number(state.memorial.activeStickerIdx ?? 0), stickers.length - 1));
+      state.memorial.activeStickerIdx = next;
+      state.memorial.stickerId = String(stickers[next]?.id || "").trim();
+      return true;
+    }
+    return applyStickerOnce(sid);
+  };
   const setOrBuy = (kind, id) => {
     const k = unlockKindMap[kind];
     const list = ensureUnlockList(k);
@@ -2371,12 +2678,8 @@ function wireMemorialInline() {
     if (unlocked) {
       if (kind === "color") state.memorial.colorId = id;
       if (kind === "sticker") {
-        if (!Array.isArray(state.memorial.stickers)) state.memorial.stickers = [];
-        if (state.memorial.stickers.length >= 10) return toast("贴纸太多啦，先调整一下再添加");
-        state.memorial.stickers.push({ id, x: 76, y: 26, s: 1, r: 0 });
-        state.memorial.activeStickerIdx = Math.max(0, state.memorial.stickers.length - 1);
-        // Keep legacy field updated for debug compatibility
-        state.memorial.stickerId = id;
+        // Toggle: click used sticker => remove; click unused => add once
+        toggleSticker(id);
       }
       if (kind === "avatar") state.memorial.avatarId = id;
       saveState();
@@ -2393,12 +2696,8 @@ function wireMemorialInline() {
         list.push(id);
         if (kind === "color") state.memorial.colorId = id;
         if (kind === "sticker") {
-          if (!Array.isArray(state.memorial.stickers)) state.memorial.stickers = [];
-          if (state.memorial.stickers.length < 10) {
-            state.memorial.stickers.push({ id, x: 76, y: 26, s: 1, r: 0 });
-            state.memorial.activeStickerIdx = Math.max(0, state.memorial.stickers.length - 1);
-          }
-          state.memorial.stickerId = id;
+          // After purchasing, always apply (add/select) immediately.
+          applyStickerOnce(id);
         }
         if (kind === "avatar") state.memorial.avatarId = id;
         saveState();
@@ -2420,6 +2719,9 @@ function wireMemorialInline() {
     if (card && stickersWrap) {
       let draggingIdx = null;
       let pointerId = null;
+      let draggingBtn = null;
+      let lastClientX = null;
+      let lastClientY = null;
 
       const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
       const posToPct = (clientX, clientY) => {
@@ -2437,53 +2739,73 @@ function wireMemorialInline() {
         render();
       };
 
-      stickersWrap.addEventListener("click", (e) => {
-        const btn = e.target?.closest?.("[data-mem-sticker-idx]");
-        if (!btn) return;
-        const idx = Number(btn.getAttribute("data-mem-sticker-idx") || 0);
-        setActive(idx);
+      // Click-to-select (bind directly to sticker buttons to avoid relying on wrapper events)
+      stickersWrap.querySelectorAll("[data-mem-sticker-idx]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const idx = Number(btn.getAttribute("data-mem-sticker-idx") || 0);
+          setActive(idx);
+        });
       });
 
-      stickersWrap.addEventListener("pointerdown", (e) => {
-        const btn = e.target?.closest?.("[data-mem-sticker-idx]");
-        if (!btn) return;
-        const idx = Number(btn.getAttribute("data-mem-sticker-idx") || 0);
-        if (!Number.isFinite(idx)) return;
-        draggingIdx = idx;
-        pointerId = e.pointerId;
-        try { btn.setPointerCapture(pointerId); } catch {}
-        // Also select on drag start
-        if (state.memorial.activeStickerIdx !== idx) {
-          state.memorial.activeStickerIdx = idx;
-          saveState();
-        }
-        e.preventDefault();
-      });
-
-      stickersWrap.addEventListener("pointermove", (e) => {
+      const onMove = (e) => {
         if (draggingIdx == null) return;
-        const idx = Number(draggingIdx);
-        if (!Array.isArray(state.memorial.stickers) || !state.memorial.stickers[idx]) return;
-        const p = posToPct(e.clientX, e.clientY);
-        state.memorial.stickers[idx].x = p.x;
-        state.memorial.stickers[idx].y = p.y;
+        if (pointerId != null && e.pointerId != null && e.pointerId !== pointerId) return;
+        if (!Array.isArray(state.memorial.stickers) || !state.memorial.stickers[draggingIdx]) return;
+        const cx = Number.isFinite(e.clientX) ? e.clientX : lastClientX;
+        const cy = Number.isFinite(e.clientY) ? e.clientY : lastClientY;
+        if (!Number.isFinite(cx) || !Number.isFinite(cy)) return;
+        lastClientX = cx;
+        lastClientY = cy;
+        const p = posToPct(cx, cy);
+        state.memorial.stickers[draggingIdx].x = p.x;
+        state.memorial.stickers[draggingIdx].y = p.y;
         // Update element position without full render for smoothness
-        const el = stickersWrap.querySelector(`[data-mem-sticker-idx="${idx}"]`);
+        const el = draggingBtn || stickersWrap.querySelector(`[data-mem-sticker-idx="${draggingIdx}"]`);
         if (el) {
           el.style.left = `${p.x}%`;
           el.style.top = `${p.y}%`;
         }
-      });
+        e.preventDefault?.();
+      };
 
       const endDrag = () => {
         if (draggingIdx == null) return;
         draggingIdx = null;
         pointerId = null;
+        draggingBtn = null;
+        lastClientX = null;
+        lastClientY = null;
+        window.removeEventListener("pointermove", onMove);
+        window.removeEventListener("pointerup", endDrag);
+        window.removeEventListener("pointercancel", endDrag);
         saveState();
       };
 
-      stickersWrap.addEventListener("pointerup", endDrag);
-      stickersWrap.addEventListener("pointercancel", endDrag);
+      // Drag start (bind directly to sticker buttons for better browser compatibility)
+      stickersWrap.querySelectorAll("[data-mem-sticker-idx]").forEach((btn) => {
+        btn.addEventListener("pointerdown", (e) => {
+          const idx = Number(btn.getAttribute("data-mem-sticker-idx") || 0);
+          if (!Number.isFinite(idx)) return;
+          draggingIdx = clamp(idx, 0, Math.max(0, (state.memorial?.stickers || []).length - 1));
+          pointerId = e.pointerId;
+          draggingBtn = btn;
+          lastClientX = e.clientX;
+          lastClientY = e.clientY;
+          try {
+            btn.setPointerCapture(pointerId);
+          } catch {}
+          // Also select on drag start
+          if (state.memorial.activeStickerIdx !== draggingIdx) {
+            state.memorial.activeStickerIdx = draggingIdx;
+            saveState();
+          }
+          // Start tracking on window so drag stays responsive even if events don't bubble via wrapper.
+          window.addEventListener("pointermove", onMove, { passive: false });
+          window.addEventListener("pointerup", endDrag, { passive: true });
+          window.addEventListener("pointercancel", endDrag, { passive: true });
+          e.preventDefault();
+        });
+      });
     }
   } catch {
     // ignore
@@ -2548,6 +2870,7 @@ function wireMemorialInline() {
       title: "每日抽点券",
       cost: MEM_SHOP.lottery.cost,
       onConfirm: () => {
+        if (!state.daily || typeof state.daily !== "object") state.daily = { lotteryDayKey: "" };
         state.points -= MEM_SHOP.lottery.cost;
         state.daily.lotteryDayKey = today;
         // No pity: random 1 coupon or none.
@@ -2557,7 +2880,7 @@ function wireMemorialInline() {
         saveState();
         closeModal();
         render();
-        toast(hit ? "恭喜你：点券 +1" : "很遗憾：没抽到点券");
+        openLotteryResultModal({ hit, add, cost: MEM_SHOP.lottery.cost });
       },
     });
   });
@@ -4977,6 +5300,7 @@ function wireShop() {
     const today = dayKeyLocal();
     if (String(state.daily?.lotteryDayKey || "") === today) return toast("今天已经抽过了");
     if (state.points < SHOP_ITEMS.lottery.cost) return toast("积分不足");
+    if (!state.daily || typeof state.daily !== "object") state.daily = { lotteryDayKey: "" };
     state.points -= SHOP_ITEMS.lottery.cost;
     state.daily.lotteryDayKey = today;
     // No pity: random 1 coupon or none.
@@ -4985,7 +5309,7 @@ function wireShop() {
     if (add > 0) addCoupons(state, add);
     saveState();
     render();
-    toast(hit ? "恭喜你：点券 +1" : "很遗憾：没抽到点券");
+    openLotteryResultModal({ hit, add, cost: SHOP_ITEMS.lottery.cost });
   });
 }
 

@@ -804,6 +804,9 @@ html.is-firstrecap .firstrecap-body::before{
 
 /* Memorial card */
 .mem-card-shell{
+  --mem-bg: #F7E3C5;
+  --mem-panel: #FFF7EB;
+  --mem-accent: #F2B46B;
   margin-top: 12px;
   border-radius: 18px;
   border: 1px solid var(--border);
@@ -849,9 +852,6 @@ html.is-firstrecap .firstrecap-body::before{
   border: 2px solid rgba(15,23,42,.82);
 }
 .mem-card{
-  --mem-bg: #F7E3C5;
-  --mem-panel: #FFF7EB;
-  --mem-accent: #F2B46B;
   margin-top: 10px;
   border-radius: 18px;
   border: 1px solid rgba(15,23,42,.10);
@@ -861,6 +861,8 @@ html.is-firstrecap .firstrecap-body::before{
     var(--mem-bg);
   padding: 12px;
   position: relative;
+  /* Create a local stacking context so stickers never cover global banner/topbar */
+  z-index: 0;
 }
 .mem-sticker{
   position:absolute;
@@ -879,7 +881,12 @@ html.is-firstrecap .firstrecap-body::before{
 .mem-stickers{
   position:absolute;
   inset: 0;
-  pointer-events: none;
+  /* Must be hit-testable so placed stickers can receive pointer events across browsers */
+  pointer-events: auto;
+  /* Above card content, but still under global banner/topbar */
+  z-index: 2;
+  /* Allow vertical page scroll when touching empty area */
+  touch-action: pan-y;
 }
 .mem-sticker.mem-sticker--placed{
   right: auto;
@@ -980,6 +987,9 @@ html.is-firstrecap .firstrecap-body::before{
   border-radius: 999px;
   padding: 4px 10px;
 }
+.mem-k.mem-k--inline{
+  padding: 4px 8px;
+}
 .mem-v{
   font-size: 13px;
   font-weight: 900;
@@ -1040,15 +1050,16 @@ html.is-firstrecap .firstrecap-body::before{
 }
 .mem-panel{margin-top: 10px;}
 .mem-swatches{
-  display:flex;
-  gap:10px;
-  overflow:auto;
-  padding-bottom: 4px;
+  display:grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap:8px;
+  overflow: visible;
+  padding-bottom: 0;
 }
 .mem-grid{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
+  display:grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap:8px;
 }
 .mem-opt{
   border: 1px solid var(--border);
@@ -1061,15 +1072,24 @@ html.is-firstrecap .firstrecap-body::before{
   gap:8px;
   min-height: 40px;
   position: relative;
+  width: 100%;
 }
 .mem-opt--active{
   border-color: rgba(0,184,148,.35);
   box-shadow: 0 10px 20px rgba(0,184,148,.10);
 }
 .mem-opt--locked{
-  opacity: .45;
+  opacity: .65;
 }
-.mem-opt__ico{font-size: 18px; line-height: 1}
+.mem-opt__ico{font-size: 20px; line-height: 1}
+.mem-opt__swatch{
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--sw);
+  border: 1px solid rgba(15,23,42,.10);
+  box-shadow: 0 10px 18px rgba(15,23,42,.08);
+}
 .mem-opt__t{font-size: 12px; font-weight: 900; color: rgba(15,23,42,.86)}
 .mem-opt__lock{
   position:absolute;
@@ -1089,18 +1109,70 @@ html.is-firstrecap .firstrecap-body::before{
   border-radius: 999px;
   padding: 2px 6px;
   line-height: 1;
+  white-space: nowrap;
 }
-.mem-opt[data-mem-color]{
-  width: 38px;
-  height: 38px;
-  border-radius: 999px;
-  padding: 0;
+.mem-opt__price--ghost{
+  visibility: hidden;
+}
+.mem-opt--compact{
+  height: auto;
+  aspect-ratio: 1 / 1;
+  padding: 10px 6px 26px;
   justify-content:center;
+  flex-direction: column;
+  gap: 6px;
+}
+.mem-opt--compact .mem-opt__ico{
+  font-size: 34px;
+}
+.mem-opt--compact .mem-opt__swatch{
+  width: 44px;
+  height: 44px;
+}
+.mem-opt--compact .mem-opt__price{
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  transform: translateX(-50%);
+  font-size: 11px;
+  padding: 2px 6px;
+  /* Keep full text visible (e.g. "80积分") */
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+}
+.mem-opt__used{
+  position:absolute;
+  left: 8px;
+  top: 6px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(0,184,148,.16);
+  border: 1px solid rgba(0,184,148,.30);
+  color: rgba(0,184,148,.95);
+  font-size: 12px;
+  font-weight: 950;
+  line-height: 1;
+}
+.mem-opt--fullswatch{
   background: var(--sw);
   border-color: rgba(15,23,42,.10);
 }
-.mem-opt[data-mem-color] .mem-opt__lock{right: 12px; top: 10px;}
-.mem-opt[data-mem-color] .mem-opt__price{right: -2px; bottom: -2px;}
+.mem-opt[data-mem-color]{
+  /* Color tiles use full-swatch background */
+  background: var(--sw);
+}
+.mem-opt[data-mem-color] .mem-opt__lock{right: 8px; top: 6px;}
+.mem-opt[data-mem-color] .mem-opt__price{
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  transform: translateX(-50%);
+}
 .mini-card__k{font-size:13px; font-weight:950; color: var(--text); letter-spacing:.2px}
 .mini-card__v{font-size:18px; font-weight:950; margin-top:8px; line-height:1.25}
 .mini-card__d{font-size:12px; color: var(--muted); margin-top:8px; line-height:1.45}
