@@ -22,6 +22,10 @@ const STORAGE_KEY = "taptap10y_state_v1";
  *   memorialUnlocks?: { colors: string[]; stickers: string[]; avatars: string[] };
  *   daily?: { lotteryDayKey?: string };
  *   mutualMessages?: Record<string, { text: string; ts: number; likes?: number }[]>;
+ *   entryGateDone?: boolean;
+ *   firstRecapDone?: boolean;
+ *   firstRecapFlow?: { phase: "snap" | "bind" | "done"; idx: number };
+ *   firstRecapRun?: { startPoints: number; startCoupons: number; doneModalShown: boolean };
  * }} PhaseState */
 
 const DEFAULT_PRESET_KEY = "test";
@@ -314,15 +318,15 @@ const GROWTH_GAMES = [
 ];
 
 const PLAYTEST_GAMES = [
-  { id: "p1", title: "《雾灯之下》", desc: "10 分钟试玩 · 轻解谜 · 叙事氛围", tags: ["轻解谜", "叙事", "氛围感", "10分钟"], heat: 128600, points: 25 },
-  { id: "p2", title: "《纸片机甲工坊》", desc: "10 分钟试玩 · 组装 · 轻战斗", tags: ["组装", "轻战斗", "机甲", "10分钟"], heat: 96400, points: 25 },
-  { id: "p3", title: "《夜行列车·7号车厢》", desc: "10 分钟试玩 · 推理 · 多结局", tags: ["推理", "多结局", "悬疑", "10分钟"], heat: 183200, points: 30 },
-  { id: "p4", title: "《像素海盗电台》", desc: "10 分钟试玩 · 节奏 · 轻 Roguelike", tags: ["节奏", "Roguelike", "像素", "10分钟"], heat: 152300, points: 25 },
-  { id: "p5", title: "《月面快递》", desc: "10 分钟试玩 · 经营 · 轻策略", tags: ["经营", "轻策略", "治愈", "10分钟"], heat: 110800, points: 20 },
-  { id: "p6", title: "《玻璃花园》", desc: "10 分钟试玩 · 叙事 · 互动选择", tags: ["叙事", "互动选择", "情感", "10分钟"], heat: 97200, points: 20 },
-  { id: "p7", title: "《重力回廊》", desc: "10 分钟试玩 · 动作 · 平台跳跃", tags: ["动作", "平台跳跃", "挑战", "10分钟"], heat: 206500, points: 30 },
-  { id: "p8", title: "《纸上迷宫》", desc: "10 分钟试玩 · 解谜 · 手绘风", tags: ["解谜", "手绘", "烧脑", "10分钟"], heat: 87500, points: 25 },
-  { id: "p9", title: "《喵喵合唱团》", desc: "10 分钟试玩 · 音游 · 合作", tags: ["音游", "合作", "可爱", "10分钟"], heat: 169900, points: 30 },
+  { id: "p1", title: "《雾灯之下》", desc: "10 分钟试玩 · 轻解谜 · 叙事氛围", tags: ["轻解谜", "叙事", "氛围感", "10分钟"], heat: 300, points: 25 },
+  { id: "p2", title: "《纸片机甲工坊》", desc: "10 分钟试玩 · 组装 · 轻战斗", tags: ["组装", "轻战斗", "机甲", "10分钟"], heat: 275, points: 25 },
+  { id: "p3", title: "《夜行列车·7号车厢》", desc: "10 分钟试玩 · 推理 · 多结局", tags: ["推理", "多结局", "悬疑", "10分钟"], heat: 250, points: 30 },
+  { id: "p4", title: "《像素海盗电台》", desc: "10 分钟试玩 · 节奏 · 轻 Roguelike", tags: ["节奏", "Roguelike", "像素", "10分钟"], heat: 225, points: 25 },
+  { id: "p5", title: "《月面快递》", desc: "10 分钟试玩 · 经营 · 轻策略", tags: ["经营", "轻策略", "治愈", "10分钟"], heat: 200, points: 20 },
+  { id: "p6", title: "《玻璃花园》", desc: "10 分钟试玩 · 叙事 · 互动选择", tags: ["叙事", "互动选择", "情感", "10分钟"], heat: 175, points: 20 },
+  { id: "p7", title: "《重力回廊》", desc: "10 分钟试玩 · 动作 · 平台跳跃", tags: ["动作", "平台跳跃", "挑战", "10分钟"], heat: 150, points: 30 },
+  { id: "p8", title: "《纸上迷宫》", desc: "10 分钟试玩 · 解谜 · 手绘风", tags: ["解谜", "手绘", "烧脑", "10分钟"], heat: 125, points: 25 },
+  { id: "p9", title: "《喵喵合唱团》", desc: "10 分钟试玩 · 音游 · 合作", tags: ["音游", "合作", "可爱", "10分钟"], heat: 100, points: 30 },
 ];
 
 const MUTUAL_GAMES = [
@@ -339,7 +343,7 @@ const MUTUAL_GAMES = [
     id: "m2",
     title: "香肠派对",
     url: "https://www.taptap.cn/app/58881?os=pc",
-    tags: ["射击", "吃鸡", "多人联机"],
+    tags: ["射击", "吃鸡", "多人"],
     score: 8.8,
     tapExclusive: false,
     postUrl: "https://www.taptap.cn/moment/756862887149965161",
@@ -348,7 +352,7 @@ const MUTUAL_GAMES = [
     id: "m3",
     title: "心动小镇",
     url: "https://www.taptap.cn/app/45213?os=pc",
-    tags: ["治愈", "模拟经营", "多人联机"],
+    tags: ["治愈", "模拟经营", "多人"],
     score: 8.6,
     tapExclusive: true,
     postUrl: "https://www.taptap.cn/moment/755000000000000000",
@@ -380,12 +384,13 @@ const SHOP_ITEMS = {
 };
 
 const MEM_CARD_COLORS = [
-  { id: "mc_cream", label: "奶油", bg: "#F7E3C5", panel: "#FFF7EB", accent: "#F2B46B" },
-  { id: "mc_pink", label: "樱桃", bg: "#F6C4C8", panel: "#FFECEF", accent: "#E97D87" },
-  { id: "mc_mint", label: "薄荷", bg: "#C7F0E4", panel: "#EFFFFA", accent: "#42C6A6" },
-  { id: "mc_sky", label: "晴空", bg: "#CFE5FF", panel: "#EDF5FF", accent: "#5A94FF" },
-  { id: "mc_lav", label: "薰衣草", bg: "#E3D7FF", panel: "#F4F0FF", accent: "#8B6BFF" },
-  { id: "mc_sand", label: "沙丘", bg: "#F2D9B8", panel: "#FFF2E1", accent: "#C98F4C" },
+  // Background themes (kept name `MEM_CARD_COLORS` for storage compatibility)
+  { id: "mc_cream", label: "奶油", bg: "radial-gradient(520px 260px at 20% 10%, rgba(255,255,255,.32), transparent 60%), repeating-linear-gradient(135deg, rgba(15,23,42,.04) 0 10px, rgba(15,23,42,0) 10px 20px), #F7E3C5", panel: "#FFF7EB", accent: "#F2B46B" },
+  { id: "mc_pink", label: "樱桃", bg: "radial-gradient(520px 260px at 70% 0%, rgba(255,255,255,.30), transparent 62%), repeating-linear-gradient(45deg, rgba(15,23,42,.04) 0 8px, rgba(15,23,42,0) 8px 16px), #F6C4C8", panel: "#FFECEF", accent: "#E97D87" },
+  { id: "mc_mint", label: "薄荷", bg: "radial-gradient(520px 260px at 30% 0%, rgba(255,255,255,.34), transparent 62%), radial-gradient(circle at 30% 25%, rgba(0,184,148,.10) 0 2px, transparent 3px) 0 0/18px 18px, #C7F0E4", panel: "#EFFFFA", accent: "#42C6A6" },
+  { id: "mc_sky", label: "晴空", bg: "radial-gradient(520px 260px at 80% 10%, rgba(255,255,255,.34), transparent 60%), repeating-linear-gradient(0deg, rgba(15,23,42,.035) 0 1px, rgba(15,23,42,0) 1px 14px), #CFE5FF", panel: "#EDF5FF", accent: "#5A94FF" },
+  { id: "mc_lav", label: "薰衣草", bg: "radial-gradient(520px 260px at 60% 0%, rgba(255,255,255,.34), transparent 62%), repeating-linear-gradient(90deg, rgba(15,23,42,.03) 0 1px, rgba(15,23,42,0) 1px 14px), #E3D7FF", panel: "#F4F0FF", accent: "#8B6BFF" },
+  { id: "mc_sand", label: "沙丘", bg: "radial-gradient(520px 260px at 20% 0%, rgba(255,255,255,.32), transparent 62%), radial-gradient(circle at 20% 30%, rgba(15,23,42,.035) 0 2px, transparent 3px) 0 0/16px 16px, #F2D9B8", panel: "#FFF2E1", accent: "#C98F4C" },
 ];
 
 const MEM_STICKERS = [
@@ -445,7 +450,17 @@ function loadState() {
     inventory: { frames: [], badges: [] },
     equipped: {},
     playtest: { completed: [], feedback: {}, claimed: [] },
-    memorial: { tab: "color", colorId: "mc_cream", stickerId: "ms_star", avatarId: "ma_bunny" },
+    memorial: {
+      tab: "color",
+      // `colorId` now represents background theme (with patterns)
+      colorId: "mc_cream",
+      // Multi-sticker placement
+      stickers: [{ id: "ms_star", x: 82, y: 18, s: 1, r: 0 }],
+      activeStickerIdx: 0,
+      // Legacy field (kept for migration)
+      stickerId: "ms_star",
+      avatarId: "ma_bunny",
+    },
     memorialUnlocks: { colors: ["mc_cream"], stickers: ["ms_star"], avatars: ["ma_bunny"] },
     daily: { lotteryDayKey: "" },
     mutualMessages: {
@@ -464,6 +479,12 @@ function loadState() {
       // Simulate "no hot comments yet" for one game
       m4: [],
     },
+    // Has the opening gate been passed at least once?
+    // Used to ensure "re-open after refresh" goes straight to the hall unless explicitly reset.
+    entryGateDone: false,
+    firstRecapDone: false,
+    firstRecapFlow: { phase: "snap", idx: 0 },
+    firstRecapRun: { startPoints: 0, startCoupons: 0, doneModalShown: false },
   };
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -488,8 +509,28 @@ function loadState() {
     if (!merged.memorial || typeof merged.memorial !== "object") merged.memorial = { ...fallback.memorial };
     if (!["color", "sticker", "avatar"].includes(String(merged.memorial.tab || ""))) merged.memorial.tab = fallback.memorial.tab;
     if (!String(merged.memorial.colorId || "").trim()) merged.memorial.colorId = fallback.memorial.colorId;
-    if (!String(merged.memorial.stickerId || "").trim()) merged.memorial.stickerId = fallback.memorial.stickerId;
     if (!String(merged.memorial.avatarId || "").trim()) merged.memorial.avatarId = fallback.memorial.avatarId;
+
+    // Stickers: migrate legacy single `stickerId` into `stickers[]`
+    const legacyStickerId = String((parsed?.memorial || {})?.stickerId || merged.memorial.stickerId || "").trim();
+    if (!Array.isArray(merged.memorial.stickers)) merged.memorial.stickers = [];
+    merged.memorial.stickers = merged.memorial.stickers
+      .filter((x) => x && typeof x === "object")
+      .map((x) => ({
+        id: String(x.id || "").trim(),
+        x: Math.max(0, Math.min(100, Number(x.x ?? 50))),
+        y: Math.max(0, Math.min(100, Number(x.y ?? 22))),
+        s: Math.max(0.6, Math.min(1.8, Number(x.s ?? 1))),
+        r: Math.max(-45, Math.min(45, Number(x.r ?? 0))),
+      }))
+      .filter((x) => x.id);
+    if (!merged.memorial.stickers.length && legacyStickerId) {
+      merged.memorial.stickers = [{ id: legacyStickerId, x: 82, y: 18, s: 1, r: 0 }];
+    }
+    merged.memorial.activeStickerIdx = Math.max(0, Number(merged.memorial.activeStickerIdx ?? 0));
+    if (merged.memorial.activeStickerIdx >= merged.memorial.stickers.length) merged.memorial.activeStickerIdx = Math.max(0, merged.memorial.stickers.length - 1);
+    // Keep legacy for older code paths/debug UI
+    if (!String(merged.memorial.stickerId || "").trim()) merged.memorial.stickerId = legacyStickerId || fallback.memorial.stickerId;
 
     merged.memorialUnlocks = { ...fallback.memorialUnlocks, ...(parsed?.memorialUnlocks || {}) };
     if (!merged.memorialUnlocks || typeof merged.memorialUnlocks !== "object") merged.memorialUnlocks = { ...fallback.memorialUnlocks };
@@ -500,6 +541,20 @@ function loadState() {
     merged.daily = { ...fallback.daily, ...(parsed?.daily || {}) };
     if (!merged.daily || typeof merged.daily !== "object") merged.daily = { ...fallback.daily };
     if (!String(merged.daily.lotteryDayKey || "").trim()) merged.daily.lotteryDayKey = "";
+
+    merged.entryGateDone = !!merged.entryGateDone;
+    merged.firstRecapDone = !!merged.firstRecapDone;
+    // Keep a small cursor so the ritual page can continue after reload.
+    if (!merged.firstRecapFlow || typeof merged.firstRecapFlow !== "object") merged.firstRecapFlow = { ...fallback.firstRecapFlow };
+    const ph = String(merged.firstRecapFlow.phase || "");
+    merged.firstRecapFlow.phase = ph === "bind" || ph === "done" ? ph : "snap";
+    merged.firstRecapFlow.idx = Math.max(0, Number(merged.firstRecapFlow.idx || 0));
+
+    merged.firstRecapRun = { ...fallback.firstRecapRun, ...(parsed?.firstRecapRun || {}) };
+    if (!merged.firstRecapRun || typeof merged.firstRecapRun !== "object") merged.firstRecapRun = { ...fallback.firstRecapRun };
+    merged.firstRecapRun.startPoints = Math.max(0, Number(merged.firstRecapRun.startPoints || 0));
+    merged.firstRecapRun.startCoupons = Math.max(0, Number(merged.firstRecapRun.startCoupons || 0));
+    merged.firstRecapRun.doneModalShown = !!merged.firstRecapRun.doneModalShown;
     return merged;
   } catch {
     return fallback;
@@ -560,7 +615,8 @@ function calcSnapshotGrants(recap) {
     // 基础
     snap_reg_active: fixed(10),
     snap_streak: fixed(10),
-    snap_spend: fixed(clamp(Math.floor(spendTotal / 100) * 10, 10, 300)),
+    // TapTap 消费：积分按原规则，点券=消费金额的10%（向下取整）
+    snap_spend: fixed(clamp(Math.floor(spendTotal / 100) * 10, 10, 300), Math.max(0, Math.floor(spendTotal * 0.1))),
 
     // 玩游戏
     snap_playtime: fixed(20),
@@ -673,27 +729,67 @@ function toast(msg) {
   toast._t = setTimeout(() => el.classList.add("hidden"), 2200);
 }
 
-function openModal({ title, bodyHtml, footerHtml, hideClose = false, lockClose = false }) {
+// When opening a modal from within another modal (single modal container),
+// we can register an "after close" callback to restore the previous view.
+const _modalAfterClose = [];
+
+function openModal({ title, bodyHtml, footerHtml, hideClose = false, lockClose = false, variant = "" }) {
   $("#modalTitle").textContent = title;
   $("#modalBody").innerHTML = bodyHtml || "";
   $("#modalFooter").innerHTML = footerHtml || "";
   const closeBtn = $("#modalClose");
   closeBtn?.classList.toggle("hidden", !!hideClose);
   closeBtn?.setAttribute("aria-hidden", hideClose ? "true" : "false");
-  $("#modal")?.setAttribute("data-lock-close", lockClose ? "1" : "0");
+  const modal = $("#modal");
+  modal?.setAttribute("data-lock-close", lockClose ? "1" : "0");
+  modal?.setAttribute("data-variant", String(variant || ""));
   $("#modalBackdrop").classList.remove("hidden");
-  $("#modal").classList.remove("hidden");
+  modal?.classList.remove("hidden");
   $("#modalBackdrop").setAttribute("aria-hidden", "false");
 }
 
 function closeModal() {
   $("#modalBackdrop").classList.add("hidden");
-  $("#modal").classList.add("hidden");
+  const modal = $("#modal");
+  modal?.classList.add("hidden");
   $("#modalBackdrop").setAttribute("aria-hidden", "true");
   const closeBtn = $("#modalClose");
   closeBtn?.classList.remove("hidden");
   closeBtn?.setAttribute("aria-hidden", "false");
-  $("#modal")?.setAttribute("data-lock-close", "0");
+  modal?.setAttribute("data-lock-close", "0");
+  modal?.setAttribute("data-variant", "");
+
+  // Restore previous modal view if needed.
+  const cb = _modalAfterClose.pop();
+  if (typeof cb === "function") {
+    try {
+      cb();
+    } catch {
+      // ignore
+    }
+  }
+}
+
+let _modalDismissWired = false;
+function wireModalDismiss() {
+  if (_modalDismissWired) return;
+  _modalDismissWired = true;
+
+  const canCloseModal = () => $("#modal")?.getAttribute("data-lock-close") !== "1";
+  $("#modalClose")?.addEventListener("click", () => {
+    if (!canCloseModal()) return;
+    closeModal();
+  });
+  $("#modalBackdrop")?.addEventListener("click", () => {
+    if (!canCloseModal()) return;
+    closeModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      if (!canCloseModal()) return;
+      closeModal();
+    }
+  });
 }
 
 function openRewardModal({ title = "领取成功", grant, subtitle = "", onConfirm }) {
@@ -712,6 +808,130 @@ function openRewardModal({ title = "领取成功", grant, subtitle = "", onConfi
   });
 }
 
+function rectCenter(r) {
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+}
+
+function pulsePill(el) {
+  if (!el) return;
+  el.classList.remove("pill--pulse");
+  // Force reflow so repeated pulses work
+  void el.offsetHeight;
+  el.classList.add("pill--pulse");
+  setTimeout(() => el.classList.remove("pill--pulse"), 560);
+}
+
+function flyChip({ label, start, end, kind }) {
+  const prefersReduce = !!window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  const el = document.createElement("div");
+  el.className = `fly-reward ${kind === "coupon" ? "fly-reward--coupon" : ""}`;
+  el.textContent = label;
+  el.style.transform = `translate(${start.x}px, ${start.y}px) translate(-50%, -50%) scale(1)`;
+  document.body.appendChild(el);
+
+  if (prefersReduce) {
+    // Minimal: no animation, short delay then remove.
+    setTimeout(() => el.remove(), 180);
+    return Promise.resolve();
+  }
+
+  // Stronger, slower arc flight (Web Animations if available)
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const lift = Math.max(70, Math.min(130, Math.round(Math.hypot(dx, dy) * 0.22)));
+  const mid = { x: start.x + dx * 0.55, y: start.y + dy * 0.55 - lift };
+  const dur = 1050;
+  // Resolve earlier than full fade-out so card switching can start sooner.
+  // The chip will still continue fading out after "arrival".
+  const arriveOffset = 0.86;
+  const arriveMs = Math.max(0, Math.min(dur, Math.round(dur * arriveOffset)));
+
+  if (el.animate) {
+    const anim = el.animate(
+      [
+        { transform: `translate(${start.x}px, ${start.y}px) translate(-50%, -50%) scale(1)`, opacity: 1, offset: 0 },
+        { transform: `translate(${start.x}px, ${start.y}px) translate(-50%, -50%) scale(1.18)`, opacity: 1, offset: 0.16 },
+        { transform: `translate(${mid.x}px, ${mid.y}px) translate(-50%, -50%) scale(1.08)`, opacity: 0.96, offset: 0.62 },
+        // Arrive at target earlier, then keep fading out.
+        { transform: `translate(${end.x}px, ${end.y}px) translate(-50%, -50%) scale(.96)`, opacity: 0.90, offset: arriveOffset },
+        { transform: `translate(${end.x}px, ${end.y}px) translate(-50%, -50%) scale(.88)`, opacity: 0.06, offset: 1 },
+      ],
+      { duration: dur, easing: "cubic-bezier(.16,.92,.16,1)", fill: "forwards" },
+    );
+
+    return new Promise((resolve) => {
+      let done = false;
+      const resolveOnce = () => {
+        if (done) return;
+        done = true;
+        resolve();
+      };
+
+      setTimeout(resolveOnce, arriveMs);
+      anim.finished
+        .catch(() => {})
+        .then(() => {
+          el.remove();
+          // If animation ended early, still resolve.
+          resolveOnce();
+        });
+    });
+  }
+
+  // Fallback: CSS transition (still slower than before)
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      el.classList.add("fly-reward--anim");
+      el.style.transform = `translate(${mid.x}px, ${mid.y}px) translate(-50%, -50%) scale(1.08)`;
+      el.style.opacity = "0.96";
+      setTimeout(() => {
+        el.style.transform = `translate(${end.x}px, ${end.y}px) translate(-50%, -50%) scale(.88)`;
+        el.style.opacity = "0.06";
+      }, 240);
+      let done = false;
+      const resolveOnce = () => {
+        if (done) return;
+        done = true;
+        resolve();
+      };
+      // Resolve at "arrival" instead of waiting for full fade-out.
+      setTimeout(resolveOnce, arriveMs);
+      setTimeout(() => {
+        el.remove();
+        resolveOnce();
+      }, dur + 80);
+    });
+  });
+}
+
+async function flyGrantToSticky({ fromRect, grant }) {
+  try {
+    const start = rectCenter(fromRect);
+    const tasks = [];
+    if (Number(grant?.points || 0) > 0) {
+      const target = document.getElementById("pillPoints");
+      if (target) {
+        const end = rectCenter(target.getBoundingClientRect());
+        tasks.push(
+          flyChip({ label: `+${fmt(Number(grant.points || 0))} 积分`, start, end, kind: "points" }).then(() => pulsePill(target)),
+        );
+      }
+    }
+    if (Number(grant?.coupons || grant?.walletCoupons || grant?.coupon || 0) > 0) {
+      const c = Number(grant?.coupons || 0);
+      const target = document.getElementById("pillCoupons");
+      if (target) {
+        const end = rectCenter(target.getBoundingClientRect());
+        tasks.push(flyChip({ label: `+${fmt(c)} 点券`, start, end, kind: "coupon" }).then(() => pulsePill(target)));
+      }
+    }
+    if (!tasks.length) return;
+    await Promise.all(tasks);
+  } catch {
+    // ignore
+  }
+}
+
 function scrollTrackToCard(track, card, behavior = "auto") {
   if (!track || !card) return;
   if (behavior === "smooth") {
@@ -724,11 +944,10 @@ function scrollTrackToCard(track, card, behavior = "auto") {
   track.style.scrollBehavior = "auto";
   track.style.scrollSnapType = "none";
 
-  const trackRect = track.getBoundingClientRect();
-  const cardRect = card.getBoundingClientRect();
   const current = track.scrollLeft;
-  const cardCenter = (cardRect.left - trackRect.left) + current + cardRect.width / 2;
-  const targetLeft = Math.max(0, Math.round(cardCenter - trackRect.width / 2));
+  // Use layout metrics (offsetLeft/offsetWidth) so transforms/animations don't affect the target.
+  const cardCenter = (card.offsetLeft || 0) + (card.offsetWidth || 0) / 2;
+  const targetLeft = Math.max(0, Math.round(cardCenter - track.clientWidth / 2));
   track.scrollLeft = targetLeft;
 
   requestAnimationFrame(() => {
@@ -744,11 +963,10 @@ function animateTrackToCard(track, card, { durationMs = 520 } = {}) {
   track.style.scrollBehavior = "auto";
   track.style.scrollSnapType = "none";
 
-  const trackRect = track.getBoundingClientRect();
-  const cardRect = card.getBoundingClientRect();
   const startLeft = track.scrollLeft;
-  const cardCenter = (cardRect.left - trackRect.left) + startLeft + cardRect.width / 2;
-  const endLeft = Math.max(0, Math.round(cardCenter - trackRect.width / 2));
+  // Use layout metrics (offsetLeft/offsetWidth) so transforms/animations don't affect the target.
+  const cardCenter = (card.offsetLeft || 0) + (card.offsetWidth || 0) / 2;
+  const endLeft = Math.max(0, Math.round(cardCenter - track.clientWidth / 2));
 
   // no-op
   if (Math.abs(endLeft - startLeft) < 2) {
@@ -786,8 +1004,9 @@ function requestCarouselInit(trackId, idx) {
 function scheduleScrollToNextCard(trackId, currentIdx) {
   if (!trackId && trackId !== "") return;
   const curIdx = Number(currentIdx) || 0;
-  // Scroll after user confirms (may be after render)
-  setTimeout(() => {
+  // Scroll immediately after reward flight completes (avoid any extra idle gap)
+  // Note: this is called after `render()`, so DOM is already updated.
+  {
     const track = document.getElementById(trackId);
     if (!track) return;
     const cards = Array.from(track.querySelectorAll(".mini-card"));
@@ -797,9 +1016,21 @@ function scheduleScrollToNextCard(trackId, currentIdx) {
     const target = cards[idx];
     if (!target) return;
     if (idx === cur) return; // already last: do nothing (avoid any snap animation)
+
+    // Add a "slide-in from right" enter animation (same rhythm as firstrecap).
+    try {
+      target.classList.remove("mini-card--enter");
+      // Force reflow so repeated enters work.
+      void target.offsetHeight;
+      target.classList.add("mini-card--enter");
+      target.addEventListener("animationend", () => target.classList.remove("mini-card--enter"), { once: true });
+      // Fallback cleanup
+      setTimeout(() => target.classList.remove("mini-card--enter"), 900);
+    } catch {}
+
     // Slightly slower animation to avoid "flash"
     animateTrackToCard(track, target, { durationMs: 560 });
-  }, 80);
+  }
 }
 
 function scheduleScrollToCard(trackId, idx, behavior = "auto") {
@@ -1395,6 +1626,7 @@ function calcDaysSince(ts) {
 function routeTitle(route) {
   const map = {
     home: "首页",
+    firstrecap: "TapTap 生涯回顾",
     sharememorial: "分享纪念卡",
     sharerecap: "分享回顾",
   };
@@ -1426,29 +1658,63 @@ function render() {
     return;
   }
 
+  // Home recap auto-focus should only run once per entry.
+  // Reset the flag when leaving home so re-entering can focus earliest claimable again.
+  try {
+    if (route !== "home") wireRecapInline._didAutoFocus = false;
+  } catch {}
+
   ensureCareerSnapshot(state);
   document.title = `TapTap 十周年 · ${routeTitle(route)}`;
   const main = $("#main");
   const recap = state.careerSnapshot?.recap || recapDataForState(state);
 
+  // Route-scoped styling hooks
+  document.documentElement.classList.toggle("is-firstrecap", route === "firstrecap");
+
+  // First recap ritual page: hide the topbar completely.
+  document.querySelector(".topbar")?.classList.toggle("hidden", route === "firstrecap");
+
   // Sticky stats (points & coupons) for the whole app
   setTopbarHeightVar();
   const sticky = document.getElementById("stickyStats");
   if (sticky) {
-    sticky.innerHTML = stickyStatsView(state);
-    sticky.classList.remove("hidden");
-    wireStickyStats();
+    // First recap ritual page: only show numbers (no shop/wallet CTA)
+    if (route === "firstrecap") {
+      // In firstrecap we render stats near the recap stage (not as global sticky bar).
+      sticky.innerHTML = "";
+      sticky.classList.add("hidden");
+    } else {
+      sticky.innerHTML = stickyStatsView(state);
+      sticky.classList.remove("hidden");
+      wireStickyStats();
+    }
   }
 
   // Header UI
   const backBtn = $("#btnBack");
-  if (backBtn) backBtn.classList.toggle("hidden", route === "home");
+  if (backBtn) backBtn.classList.toggle("hidden", route === "home" || route === "firstrecap");
   const subtitle = $("#headerSubtitle");
   if (subtitle) subtitle.textContent = route === "home" ? "" : routeTitle(route);
 
   if (route === "home") {
     main.innerHTML = homeView(state, recap);
     wireHome();
+    return;
+  }
+  if (route === "firstrecap") {
+    // Record starting balances for the "completion rewards" modal (once per first-recap run).
+    if (!state.firstRecapRun || typeof state.firstRecapRun !== "object") {
+      state.firstRecapRun = { startPoints: 0, startCoupons: 0, doneModalShown: false };
+    }
+    if (!state.firstRecapRun.doneModalShown && state.firstRecapFlow?.phase !== "done") {
+      // Only set once (avoid overwriting during the run / after user adjusts via debug).
+      if (!Number.isFinite(state.firstRecapRun.startPoints) || state.firstRecapRun.startPoints <= 0) state.firstRecapRun.startPoints = Math.max(0, Number(state.points || 0));
+      if (!Number.isFinite(state.firstRecapRun.startCoupons) || state.firstRecapRun.startCoupons <= 0) state.firstRecapRun.startCoupons = Math.max(0, Number(state.walletCoupons || 0));
+      saveState();
+    }
+    main.innerHTML = firstRecapView(state, recap);
+    wireFirstRecap();
     return;
   }
   if (route === "sharememorial") {
@@ -1488,22 +1754,33 @@ function stickyStatsView(s) {
       <div class="row" style="gap:12px">
         <div style="flex:1">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px">
-            <div class="pill pill--brand">
+            <div class="pill pill--brand" id="pillPoints">
               积分 <b>${fmt(s.points)}</b>
             </div>
-            <button class="link-btn" id="btnGoShop" type="button">装饰我的十周年卡片</button>
+            <button class="link-btn" id="btnGoShop" type="button">我的十周年名片</button>
           </div>
           <div class="muted small">积分兑换装饰和参与点券抽奖</div>
         </div>
         <div style="flex:1">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px">
-            <div class="pill">
+            <div class="pill" id="pillCoupons">
               已得点券 <b>${fmt(s.walletCoupons || 0)}</b>
             </div>
             <button class="link-btn" id="btnWallet" type="button">我的钱包</button>
           </div>
-          <div class="muted small">可购买站内游戏、PC CDKey、云玩服务等</div>
+          <div class="muted small">购买游戏、PC CDKey、云玩服务等</div>
         </div>
+      </div>
+    </section>
+  `;
+}
+
+function stickyStatsLiteView(s) {
+  return `
+    <section class="card sticky-stats__card" style="border-radius:0; box-shadow:none;">
+      <div class="row" style="gap:10px; justify-content:flex-start;">
+        <div class="pill pill--brand" id="pillPoints">积分 <b>${fmt(s.points)}</b></div>
+        <div class="pill" id="pillCoupons">点券 <b>${fmt(s.walletCoupons || 0)}</b></div>
       </div>
     </section>
   `;
@@ -1517,16 +1794,54 @@ function wireStickyStats() {
   $("#btnWallet")?.addEventListener("click", openWalletModal);
 }
 
+function firstRecapView(s, recap) {
+  return `
+    <div class="firstrecap-shell">
+      <div class="firstrecap-topbar" role="banner" aria-label="活动导航栏">
+        <div class="firstrecap-topbar__title">TapTap 十周年</div>
+      </div>
+
+      <div class="firstrecap-stage" aria-label="十年回顾舞台">
+        <div class="firstrecap-currency" aria-label="积分与点券">
+          <div class="pill pill--brand firstrecap-money firstrecap-money--points" id="pillPoints">
+            <div class="firstrecap-money__top">
+              <div class="firstrecap-money__k">积分</div>
+              <div class="firstrecap-money__v">${fmt(s.points)}</div>
+            </div>
+            <div class="firstrecap-money__d">活动内装扮十周年名片，抽奖点券</div>
+          </div>
+          <div class="pill firstrecap-money firstrecap-money--coupons" id="pillCoupons">
+            <div class="firstrecap-money__top">
+              <div class="firstrecap-money__k">点券</div>
+              <div class="firstrecap-money__v">${fmt(s.walletCoupons || 0)}</div>
+            </div>
+            <div class="firstrecap-money__d">购买游戏/PC CDKey/云玩服务等</div>
+          </div>
+        </div>
+
+        <div class="firstrecap-body">
+          ${recapInlineView(s, recap, { sortUnclaimedFirst: false })}
+        </div>
+      </div>
+
+      <div class="firstrecap-skip">
+        <button class="link-inline" id="btnFirstRecapSkip" type="button">先进入活动会场，稍微再进行回顾</button>
+      </div>
+    </div>
+  `;
+}
+
 function homeView(s, recap) {
   return `
-    <div id="section-recap"></div>
-    ${recapInlineView(s, recap)}
+    <div class="home-module" id="section-recap">
+      ${recapInlineView(s, recap, { sortUnclaimedFirst: false })}
+    </div>
 
-    <div id="section-discover"></div>
     ${discoverInlineView(s)}
 
-    <div id="section-memorial"></div>
-    ${memorialInlineView(s, recap)}
+    <div class="home-module" id="section-memorial">
+      ${memorialInlineView(s, recap)}
+    </div>
   `;
 }
 
@@ -1558,7 +1873,6 @@ function memorialInlineView(s, recap) {
   const bio = String(prof.bio || "").trim();
 
   const color = MEM_CARD_COLORS.find((c) => c.id === s.memorial?.colorId) || MEM_CARD_COLORS[0];
-  const sticker = MEM_STICKERS.find((x) => x.id === s.memorial?.stickerId) || MEM_STICKERS[0];
   const avatar = MEM_AVATARS.find((x) => x.id === s.memorial?.avatarId) || MEM_AVATARS[0];
 
   const frameOwned = s.inventory.frames.includes(MEM_SHOP.frame.id);
@@ -1601,7 +1915,8 @@ function memorialInlineView(s, recap) {
       kind: "sticker",
       icon: st.icon,
       label: st.label,
-      active: (s.memorial?.stickerId || "") === st.id,
+      // For multi-stickers, selecting means "add one" rather than "set".
+      active: false,
       locked: !isUnlocked("stickers", st.id),
       cost: costFor("sticker", st.id),
     }),
@@ -1636,7 +1951,7 @@ function memorialInlineView(s, recap) {
   return `
     <section class="card">
       <div class="row">
-        <p class="h1 grow">十周年纪念卡</p>
+        <p class="h1 grow">十周年名片</p>
         <button class="btn btn--brand" id="btnShareMemorial" type="button" style="min-height:36px; padding:8px 10px">分享</button>
       </div>
       <p class="muted small" style="margin:6px 0 0">用积分兑换装饰，DIY 一张属于你的纪念卡。</p>
@@ -1644,16 +1959,33 @@ function memorialInlineView(s, recap) {
       <div class="divider"></div>
 
       <div class="mem-card-shell" style="--mem-bg:${color.bg}; --mem-panel:${color.panel}; --mem-accent:${color.accent};">
-        <div class="mem-cat" aria-hidden="true">
-          <div class="mem-ear mem-ear--l"></div>
-          <div class="mem-ear mem-ear--r"></div>
-          <div class="mem-eyes"><span></span><span></span></div>
-        </div>
-
         <div class="mem-card">
-          <div class="mem-sticker" aria-hidden="true">${escapeHtml(sticker.icon)}</div>
+          <div class="mem-stickers" aria-label="贴纸">
+            ${(Array.isArray(s.memorial?.stickers) ? s.memorial.stickers : [])
+              .slice(0, 10)
+              .map((st, idx) => {
+                const id = String(st?.id || "").trim();
+                const def = MEM_STICKERS.find((x) => x.id === id) || MEM_STICKERS[0];
+                const x = Math.max(0, Math.min(100, Number(st?.x ?? 50)));
+                const y = Math.max(0, Math.min(100, Number(st?.y ?? 22)));
+                const sc = Math.max(0.6, Math.min(1.8, Number(st?.s ?? 1)));
+                const r = Math.max(-45, Math.min(45, Number(st?.r ?? 0)));
+                const activeIdx = Math.max(0, Number(s.memorial?.activeStickerIdx ?? 0));
+                const active = idx === activeIdx;
+                return `
+                  <button
+                    type="button"
+                    class="mem-sticker mem-sticker--placed ${active ? "is-active" : ""}"
+                    data-mem-sticker-idx="${idx}"
+                    aria-label="贴纸：${escapeHtml(def.label)}"
+                    style="left:${x}%; top:${y}%; transform: translate(-50%,-50%) rotate(${r}deg) scale(${sc});"
+                  >${escapeHtml(def.icon)}</button>
+                `;
+              })
+              .join("")}
+          </div>
           <div class="mem-top">
-            <div class="mem-brand">TAPTAP · 10Y</div>
+            <div class="mem-brand"></div>
             <div class="mem-mini">
               ${frameEquipped ? `<span class="tag">🟩 头像框</span>` : ""}
               ${badgeEquipped ? `<span class="tag">🛠️ 徽章</span>` : ""}
@@ -1667,8 +1999,10 @@ function memorialInlineView(s, recap) {
           <div class="mem-fields">
             <div class="mem-field">
               <span class="mem-k">昵称</span>
-              <span class="mem-v mem-v--grow">${escapeHtml(nickname)}</span>
-              <span class="mem-idpill">ID:${escapeHtml(pid)}</span>
+              <span class="mem-name">
+                <span class="mem-idpill">ID:${escapeHtml(pid)}</span>
+                <span class="mem-v mem-v--grow">${escapeHtml(nickname)}</span>
+              </span>
             </div>
             ${title ? `
               <div class="mem-field">
@@ -1683,17 +2017,19 @@ function memorialInlineView(s, recap) {
       </div>
 
       <div class="mem-diy">
-        <div class="mem-tabs" role="tablist" aria-label="DIY 选项">
-          ${tabBtn("color", "颜色")}
-          ${tabBtn("sticker", "贴纸")}
-          ${tabBtn("avatar", "角色")}
-        </div>
+      <div class="mem-tabs" role="tablist" aria-label="DIY 选项">
+        ${tabBtn("color", "背景")}
+        ${tabBtn("sticker", "贴纸")}
+        ${tabBtn("avatar", "角色")}
+      </div>
 
         <div class="mem-panel ${tab === "color" ? "" : "hidden"}" data-mem-panel="color">
-          <div class="mem-swatches">${colorOpts}</div>
+          <div class="muted small" style="margin-top:2px">选择一款背景主题（支持不同图案）。</div>
+          <div class="mem-swatches" style="margin-top:10px">${colorOpts}</div>
         </div>
         <div class="mem-panel ${tab === "sticker" ? "" : "hidden"}" data-mem-panel="sticker">
-          <div class="mem-grid">${stickerOpts}</div>
+          <div class="muted small" style="margin-top:2px">点选添加贴纸；拖动贴纸可调整位置。</div>
+          <div class="mem-grid" style="margin-top:10px">${stickerOpts}</div>
         </div>
         <div class="mem-panel ${tab === "avatar" ? "" : "hidden"}" data-mem-panel="avatar">
           <div class="mem-grid">${avatarOpts}</div>
@@ -1701,17 +2037,28 @@ function memorialInlineView(s, recap) {
       </div>
 
       <div class="divider"></div>
-      <div class="h2" style="margin:0 0 8px">兑换装饰</div>
       <div class="list">
+        <div class="item">
+          <div class="row">
+            <div class="grow">
+              <div class="item__title">每日抽点券</div>
+              <div class="item__desc">每日限 1 次，抽到的点券可在我的钱包查看。</div>
+            </div>
+            <div class="mem-shop__right">
+              ${lotBtn}
+            </div>
+          </div>
+        </div>
+
         <div class="item">
           <div class="row">
             <div class="equip equip--frame">${escapeHtml(MEM_SHOP.frame.icon)}</div>
             <div class="grow">
               <div class="item__title">${escapeHtml(MEM_SHOP.frame.title)}</div>
             </div>
-          </div>
-          <div class="item__meta">
-            ${frameBtn}
+            <div class="mem-shop__right">
+              ${frameBtn}
+            </div>
           </div>
         </div>
 
@@ -1721,21 +2068,9 @@ function memorialInlineView(s, recap) {
             <div class="grow">
               <div class="item__title">${escapeHtml(MEM_SHOP.badge.title)}</div>
             </div>
-          </div>
-          <div class="item__meta">
-            ${badgeBtn}
-          </div>
-        </div>
-
-        <div class="item">
-          <div class="row">
-            <div class="grow">
-              <div class="item__title">每日抽点券</div>
-              <div class="item__desc">每日限 1 次，抽取后点券自动入账。</div>
+            <div class="mem-shop__right">
+              ${badgeBtn}
             </div>
-          </div>
-          <div class="item__meta">
-            ${lotBtn}
           </div>
         </div>
       </div>
@@ -1787,6 +2122,184 @@ function shareRecapView(s, recap) {
       </div>
     </section>
   `;
+}
+
+function escapeXml(str) {
+  return String(str || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
+}
+
+function downloadSvgAsPng(svgString, filename = "taptap-10y-share.png", { scale = 2 } = {}) {
+  try {
+    const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.decoding = "async";
+    img.onload = () => {
+      try {
+        const wMatch = svgString.match(/\bwidth="(\d+)"/);
+        const hMatch = svgString.match(/\bheight="(\d+)"/);
+        const w = Math.max(1, Number(wMatch?.[1] || 1080));
+        const h = Math.max(1, Number(hMatch?.[1] || 1920));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(w * scale);
+        canvas.height = Math.round(h * scale);
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("no ctx");
+        ctx.setTransform(scale, 0, 0, scale, 0, 0);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        canvas.toBlob(
+          (png) => {
+            try {
+              if (!png) return toast("下载失败（图片生成失败）");
+              const a = document.createElement("a");
+              a.href = URL.createObjectURL(png);
+              a.download = filename;
+              a.click();
+              setTimeout(() => URL.revokeObjectURL(a.href), 800);
+              toast("已下载图片");
+            } catch {
+              toast("下载失败（浏览器限制）");
+            }
+          },
+          "image/png",
+          0.92,
+        );
+      } catch {
+        toast("下载失败（图片生成失败）");
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      toast("下载失败（图片生成失败）");
+    };
+    img.src = url;
+  } catch {
+    toast("下载失败（浏览器限制）");
+  }
+}
+
+function shareRecapTextForShare(recap) {
+  const reg = String(recap.regDate || "").trim();
+  const downloads = Number(recap.downloadsCount || 0);
+  const play = String(recap.playTimeTotal || "").trim();
+  const parts = [];
+  if (reg) parts.push(`${reg} 加入`);
+  if (downloads > 0) parts.push(`下载 ${fmt(downloads)} 个游戏`);
+  if (play) parts.push(`总时长 ${play}`);
+  return `我的 TapTap 十年回顾：${parts.join("，") || "一些很酷的数据"}。#十年同行`;
+}
+
+function openShareRecapModal({ onClose } = {}) {
+  const recap = state.careerSnapshot?.recap || recapDataForState(state);
+  const url = shareUrlForRoute("sharerecap");
+  const qr = qrSvgHtml(url);
+
+  if (typeof onClose === "function") _modalAfterClose.push(onClose);
+
+  const nick = String(state.profile?.nickname || "").trim() || "TapTap 用户";
+  const pid = String(state.profile?.id || "").trim() || "—";
+
+  const body = `
+    <div class="small" style="line-height:1.55">
+      <div class="row" style="align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px">
+        <div class="grow" style="min-width:0">
+          <div style="font-weight:950; font-size:13px; letter-spacing:.2px">${escapeHtml(nick)}</div>
+          <div class="muted small" style="margin-top:2px">ID ${escapeHtml(pid)}</div>
+        </div>
+      </div>
+      ${shareCardHtml(state, recap, { variant: "recap" })}
+      <div class="divider"></div>
+      <div class="share-qr">
+        <div class="share-qr__box" aria-label="二维码">${qr}</div>
+        <div class="muted small share-qr__txt"><span class="mono">${escapeHtml(url)}</span></div>
+      </div>
+    </div>
+  `;
+
+  const footer = `
+    <button class="btn" id="btnShareTo" type="button">分享至</button>
+    <button class="btn btn--brand" id="btnDownloadShareImg" type="button">下载图片</button>
+  `;
+
+  openModal({ title: "我的TapTap十年回顾", bodyHtml: body, footerHtml: footer });
+
+  $("#btnShareTo")?.addEventListener("click", async () => {
+    const text = shareRecapTextForShare(recap);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "我的TapTap十年回顾", text, url });
+        return;
+      }
+    } catch {
+      // ignore; fallback to copy
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast("已复制链接，可粘贴分享");
+    } catch {
+      toast("分享失败（浏览器权限限制）");
+    }
+  });
+
+  $("#btnDownloadShareImg")?.addEventListener("click", () => {
+    const W = 1080;
+    const H = 1920;
+    const qrSized = String(qr).replace("<svg ", `<svg x="390" y="1320" width="300" height="300" `);
+    const title = "我的TapTap十年回顾";
+    const subtitle = `${nick} · ID ${pid}`;
+    const regDate = String(recap.regDate || "").trim() || "—";
+    const downloads = fmt(Number(recap.downloadsCount || 0));
+    const play = String(recap.playTimeTotal || "").trim() || "—";
+    const topGame = String(recap.topGame1 || "").trim() || "—";
+    const posterSvg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+        <defs>
+          <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#F7F9FC"/>
+            <stop offset="1" stop-color="#FFFFFF"/>
+          </linearGradient>
+        </defs>
+        <rect width="${W}" height="${H}" fill="url(#bg)"/>
+        <circle cx="140" cy="160" r="260" fill="#E7FBF5" opacity="0.9"/>
+        <circle cx="920" cy="220" r="300" fill="#EEF5FF" opacity="0.9"/>
+
+        <text x="90" y="170" font-size="54" font-weight="800" fill="#0F172A">${escapeXml(title)}</text>
+        <text x="90" y="230" font-size="28" font-weight="700" fill="#334155">${escapeXml(subtitle)}</text>
+
+        <rect x="90" y="290" width="900" height="820" rx="36" fill="#FFFFFF" stroke="rgba(15,23,42,0.10)" stroke-width="2"/>
+        <text x="130" y="380" font-size="28" font-weight="800" fill="#0F172A">加入时间</text>
+        <text x="130" y="440" font-size="44" font-weight="900" fill="#0F172A">${escapeXml(regDate)}</text>
+
+        <text x="130" y="540" font-size="28" font-weight="800" fill="#0F172A">下载游戏</text>
+        <text x="130" y="600" font-size="44" font-weight="900" fill="#0F172A">${escapeXml(downloads)} 个</text>
+
+        <text x="130" y="700" font-size="28" font-weight="800" fill="#0F172A">总游戏时长</text>
+        <text x="130" y="760" font-size="44" font-weight="900" fill="#0F172A">${escapeXml(play)}</text>
+
+        <text x="130" y="860" font-size="28" font-weight="800" fill="#0F172A">最喜欢的游戏</text>
+        <text x="130" y="920" font-size="40" font-weight="900" fill="#0F172A">${escapeXml(topGame)}</text>
+
+        <rect x="90" y="1240" width="900" height="600" rx="36" fill="#FFFFFF" stroke="rgba(15,23,42,0.10)" stroke-width="2"/>
+        ${qrSized}
+        <text x="540" y="1670" text-anchor="middle" font-size="26" font-weight="800" fill="#0F172A">扫码打开分享页</text>
+        <text x="540" y="1720" text-anchor="middle" font-size="22" font-weight="700" fill="#64748B">${escapeXml(url)}</text>
+
+        <text x="540" y="1860" text-anchor="middle" font-size="22" font-weight="800" fill="#00B894">TapTap 十周年 · 十年同行</text>
+      </svg>
+    `.trim();
+    downloadSvgAsPng(posterSvg, "taptap-10y-share.png", { scale: 2 });
+  });
 }
 
 function wireSharePage() {
@@ -1857,7 +2370,14 @@ function wireMemorialInline() {
     const unlocked = list.includes(id);
     if (unlocked) {
       if (kind === "color") state.memorial.colorId = id;
-      if (kind === "sticker") state.memorial.stickerId = id;
+      if (kind === "sticker") {
+        if (!Array.isArray(state.memorial.stickers)) state.memorial.stickers = [];
+        if (state.memorial.stickers.length >= 10) return toast("贴纸太多啦，先调整一下再添加");
+        state.memorial.stickers.push({ id, x: 76, y: 26, s: 1, r: 0 });
+        state.memorial.activeStickerIdx = Math.max(0, state.memorial.stickers.length - 1);
+        // Keep legacy field updated for debug compatibility
+        state.memorial.stickerId = id;
+      }
       if (kind === "avatar") state.memorial.avatarId = id;
       saveState();
       render();
@@ -1872,7 +2392,14 @@ function wireMemorialInline() {
         state.points -= cost;
         list.push(id);
         if (kind === "color") state.memorial.colorId = id;
-        if (kind === "sticker") state.memorial.stickerId = id;
+        if (kind === "sticker") {
+          if (!Array.isArray(state.memorial.stickers)) state.memorial.stickers = [];
+          if (state.memorial.stickers.length < 10) {
+            state.memorial.stickers.push({ id, x: 76, y: 26, s: 1, r: 0 });
+            state.memorial.activeStickerIdx = Math.max(0, state.memorial.stickers.length - 1);
+          }
+          state.memorial.stickerId = id;
+        }
         if (kind === "avatar") state.memorial.avatarId = id;
         saveState();
         closeModal();
@@ -1885,6 +2412,82 @@ function wireMemorialInline() {
   $$("[data-mem-color]").forEach((b) => b.addEventListener("click", () => setOrBuy("color", String(b.dataset.memColor || ""))));
   $$("[data-mem-sticker]").forEach((b) => b.addEventListener("click", () => setOrBuy("sticker", String(b.dataset.memSticker || ""))));
   $$("[data-mem-avatar]").forEach((b) => b.addEventListener("click", () => setOrBuy("avatar", String(b.dataset.memAvatar || ""))));
+
+  // Multi-sticker interactions: select & drag
+  try {
+    const card = document.querySelector(".mem-card");
+    const stickersWrap = document.querySelector(".mem-stickers");
+    if (card && stickersWrap) {
+      let draggingIdx = null;
+      let pointerId = null;
+
+      const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+      const posToPct = (clientX, clientY) => {
+        const r = card.getBoundingClientRect();
+        const x = ((clientX - r.left) / Math.max(1, r.width)) * 100;
+        const y = ((clientY - r.top) / Math.max(1, r.height)) * 100;
+        return { x: clamp(x, 4, 96), y: clamp(y, 6, 92) };
+      };
+
+      const setActive = (idx) => {
+        if (!Array.isArray(state.memorial.stickers)) state.memorial.stickers = [];
+        const i = clamp(Number(idx) || 0, 0, Math.max(0, state.memorial.stickers.length - 1));
+        state.memorial.activeStickerIdx = i;
+        saveState();
+        render();
+      };
+
+      stickersWrap.addEventListener("click", (e) => {
+        const btn = e.target?.closest?.("[data-mem-sticker-idx]");
+        if (!btn) return;
+        const idx = Number(btn.getAttribute("data-mem-sticker-idx") || 0);
+        setActive(idx);
+      });
+
+      stickersWrap.addEventListener("pointerdown", (e) => {
+        const btn = e.target?.closest?.("[data-mem-sticker-idx]");
+        if (!btn) return;
+        const idx = Number(btn.getAttribute("data-mem-sticker-idx") || 0);
+        if (!Number.isFinite(idx)) return;
+        draggingIdx = idx;
+        pointerId = e.pointerId;
+        try { btn.setPointerCapture(pointerId); } catch {}
+        // Also select on drag start
+        if (state.memorial.activeStickerIdx !== idx) {
+          state.memorial.activeStickerIdx = idx;
+          saveState();
+        }
+        e.preventDefault();
+      });
+
+      stickersWrap.addEventListener("pointermove", (e) => {
+        if (draggingIdx == null) return;
+        const idx = Number(draggingIdx);
+        if (!Array.isArray(state.memorial.stickers) || !state.memorial.stickers[idx]) return;
+        const p = posToPct(e.clientX, e.clientY);
+        state.memorial.stickers[idx].x = p.x;
+        state.memorial.stickers[idx].y = p.y;
+        // Update element position without full render for smoothness
+        const el = stickersWrap.querySelector(`[data-mem-sticker-idx="${idx}"]`);
+        if (el) {
+          el.style.left = `${p.x}%`;
+          el.style.top = `${p.y}%`;
+        }
+      });
+
+      const endDrag = () => {
+        if (draggingIdx == null) return;
+        draggingIdx = null;
+        pointerId = null;
+        saveState();
+      };
+
+      stickersWrap.addEventListener("pointerup", endDrag);
+      stickersWrap.addEventListener("pointercancel", endDrag);
+    }
+  } catch {
+    // ignore
+  }
 
   $$("[data-mem-buy]").forEach((b) =>
     b.addEventListener("click", () => {
@@ -1947,20 +2550,20 @@ function wireMemorialInline() {
       onConfirm: () => {
         state.points -= MEM_SHOP.lottery.cost;
         state.daily.lotteryDayKey = today;
-        // Safe demo: always give 1 coupon, small chance to get full prize
-        const big = Math.random() < 0.18;
-        const add = big ? MEM_SHOP.lottery.prize : 1;
-        addCoupons(state, add);
+        // No pity: random 1 coupon or none.
+        const hit = Math.random() < 0.5;
+        const add = hit ? 1 : 0;
+        if (add > 0) addCoupons(state, add);
         saveState();
         closeModal();
         render();
-        toast(big ? `恭喜你：点券 +${MEM_SHOP.lottery.prize}` : "点券 +1（保底）");
+        toast(hit ? "恭喜你：点券 +1" : "很遗憾：没抽到点券");
       },
     });
   });
 }
 
-function recapInlineView(s, recap) {
+function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
   const snapshot = s.careerSnapshot || { recap, grants: calcSnapshotGrants(recap) };
   const snap = snapshot.recap || recap;
   const togetherDays = calcDaysSince(parseCnDateToTs(snap.regDate));
@@ -2856,17 +3459,19 @@ function recapInlineView(s, recap) {
         Number(snap.creatorWorks || 0) > 0,
     },
   ];
-  const snapshotCards = snapshotCardsAll
-    .filter((c) => c.visible)
-    .map((c, i) => ({ c, i }))
-    // Sort: unclaimed first, claimed last; keep original order within group.
-    .sort((a, b) => {
-      const ac = !!hasClaimed(s, a.c.rewardId);
-      const bc = !!hasClaimed(s, b.c.rewardId);
-      if (ac !== bc) return Number(ac) - Number(bc);
-      return a.i - b.i;
-    })
-    .map((x) => x.c);
+  let snapshotCards = snapshotCardsAll.filter((c) => c.visible);
+  if (sortUnclaimedFirst) {
+    snapshotCards = snapshotCards
+      .map((c, i) => ({ c, i }))
+      // Sort: unclaimed first, claimed last; keep original order within group.
+      .sort((a, b) => {
+        const ac = !!hasClaimed(s, a.c.rewardId);
+        const bc = !!hasClaimed(s, b.c.rewardId);
+        if (ac !== bc) return Number(ac) - Number(bc);
+        return a.i - b.i;
+      })
+      .map((x) => x.c);
+  }
 
   const bindCards = [
     {
@@ -2887,41 +3492,55 @@ function recapInlineView(s, recap) {
 
   const snapshotSection = snapshotCards.length
     ? `
-      <div class="h2" style="margin:0 0 8px">TapTap 生涯</div>
-      <div style="margin-top:10px" class="carousel" aria-label="生涯数据卡片">
-        <div class="hscroll carousel__track" id="recapCarouselSnap" role="list">
-          ${snapshotCards.map((c, i) => miniCardHtml(c, i, s, snap)).join("")}
+      <div class="recap-section" data-recap-section="snap">
+        <div class="recap-section__head">
+          <div class="h2" style="margin:0 0 8px">TapTap 生涯</div>
         </div>
-        <div class="carousel__dots" id="recapDotsSnap" aria-label="生涯数据分页">
-          ${snapshotCards
+        <div style="margin-top:10px" class="carousel" aria-label="生涯数据卡片">
+          <div class="hscroll carousel__track" id="recapCarouselSnap" role="list">
+            ${snapshotCards.map((c, i) => miniCardHtml(c, i, s, snap)).join("")}
+          </div>
+          <div class="carousel__meta hidden" id="recapMetaSnap"></div>
+          <div class="carousel__dots" id="recapDotsSnap" aria-label="生涯数据分页">
+            ${snapshotCards
+              .map(
+                (_, i) =>
+                  `<button class="dot ${i === 0 ? "dot--active" : ""}" type="button" data-dot="${i}" aria-label="第 ${i + 1} 张"></button>`,
+              )
+              .join("")}
+          </div>
+        </div>
+      </div>
+    `
+    : `
+      <div class="recap-section" data-recap-section="snap">
+        <div class="recap-section__head">
+          <div class="h2" style="margin:0 0 8px">TapTap 生涯</div>
+        </div>
+        <div class="muted small">当前没有可展示的数据卡片。</div>
+      </div>
+    `;
+
+  const bindSection = `
+    <div class="recap-section" data-recap-section="bind">
+      <div class="divider"></div>
+      <div class="recap-section__head">
+        <div class="h2" style="margin:0 0 8px">将我的游戏世界融入TapTap</div>
+        <div class="muted small">现在绑定数据也可领取奖励哦</div>
+      </div>
+      <div style="margin-top:10px" class="carousel" aria-label="可补齐数据卡片">
+        <div class="hscroll carousel__track" id="recapCarouselBind" role="list">
+          ${bindCards.filter((c) => c.visible).map((c, i) => miniCardHtml(c, i, s, snap)).join("")}
+        </div>
+        <div class="carousel__meta hidden" id="recapMetaBind"></div>
+        <div class="carousel__dots" id="recapDotsBind" aria-label="可补齐数据分页">
+          ${bindCards
             .map(
               (_, i) =>
                 `<button class="dot ${i === 0 ? "dot--active" : ""}" type="button" data-dot="${i}" aria-label="第 ${i + 1} 张"></button>`,
             )
             .join("")}
         </div>
-      </div>
-    `
-    : `
-      <div class="h2" style="margin:0 0 8px">TapTap 生涯</div>
-      <div class="muted small">当前没有可展示的数据卡片。</div>
-    `;
-
-  const bindSection = `
-    <div class="divider"></div>
-    <div class="h2" style="margin:0 0 8px">将我的游戏世界融入TapTap</div>
-    <div class="muted small">现在绑定数据也可领取奖励哦</div>
-    <div style="margin-top:10px" class="carousel" aria-label="可补齐数据卡片">
-      <div class="hscroll carousel__track" id="recapCarouselBind" role="list">
-        ${bindCards.filter((c) => c.visible).map((c, i) => miniCardHtml(c, i, s, snap)).join("")}
-      </div>
-      <div class="carousel__dots" id="recapDotsBind" aria-label="可补齐数据分页">
-        ${bindCards
-          .map(
-            (_, i) =>
-              `<button class="dot ${i === 0 ? "dot--active" : ""}" type="button" data-dot="${i}" aria-label="第 ${i + 1} 张"></button>`,
-          )
-          .join("")}
       </div>
     </div>
   `;
@@ -3066,7 +3685,7 @@ function rewardBlockHtml(rewardId, s, recap) {
 function miniCardHtml(card, idx, s, recap) {
   const kindClass = String(card.rewardId || "").startsWith("bind_") ? "mini-card--bind" : "mini-card--snap";
   return `
-    <div class="mini-card ${kindClass}" role="listitem" data-card-idx="${idx}">
+    <div class="mini-card ${kindClass}" role="listitem" data-card-idx="${idx}" data-reward-id="${escapeHtml(card.rewardId || "")}">
       <div class="mini-card__k">${card.label}</div>
       ${card.value ? `<div class="mini-card__v">${card.value}</div>` : ""}
       ${kindClass === "mini-card--bind" && card.desc ? `<div class="mini-card__d">${card.desc}</div>` : ""}
@@ -3237,120 +3856,30 @@ function shareCardHtml(s, recap, { variant }) {
 }
 
 function wireRecapInline() {
-  $("#btnToggleShare")?.addEventListener("click", () => {
-    navigate("sharerecap");
-  });
+  // Share recap: modal only (do not navigate away from the activity page)
+  $("#btnToggleShare")?.addEventListener("click", openShareRecapModal);
 
-  // (旧逻辑保留在代码中以便需要时回滚/参考)
-  return;
-
-  $("#btnToggleShare")?.addEventListener("click", () => {
-    const recap = state.careerSnapshot?.recap || recapDataForState(state);
-    const body = `
-      <div class="small" style="line-height:1.55">
-        ${shareCardHtml(state, recap, { variant: "recap" })}
-      </div>
-    `;
-    const footer = `
-      <button class="btn" id="btnShareRecap">复制分享文案</button>
-      <button class="btn btn--brand" id="btnDownloadCard">下载分享卡</button>
-    `;
-    openModal({ title: "分享回顾", bodyHtml: body, footerHtml: footer });
-
-    $("#btnShareRecap")?.addEventListener("click", async () => {
-      const recap = state.careerSnapshot?.recap || recapDataForState(state);
-      const oneTag = (str) => {
-        const raw = String(str || "").trim();
-        if (!raw) return "";
-        return raw.split("／")[0].split("/")[0].split("·")[0].split("|")[0].trim();
-      };
-      const maxYear = (v) => {
-        const ys = Array.isArray(v)
-          ? v
-          : String(v || "")
-            .split(/[、,，/\s]+/g)
-            .map((x) => String(x || "").trim())
-            .map((x) => x.replace(/[^\d]/g, ""))
-            .filter(Boolean)
-            .map((x) => Number(x))
-            .filter((n) => Number.isFinite(n));
-        if (!ys.length) return null;
-        return Math.max(...ys);
-      };
-      const reg = String(recap.regDate || "").trim();
-      const downloads = Number(recap.downloadsCount || 0);
-      const play = String(recap.playTimeTotal || "").trim();
-      const favGame = String(recap.topGame1 || "").trim();
-      const favGenre = oneTag(recap.topGenre1 || recap.favoriteGenre);
-      const black = Number(recap.badgesBlackGoldTotal || 0);
-      const plat = Number(recap.platinumAchievementsTotal || 0);
-      const reviews = Number(recap.reviewsCount || 0);
-      const zuiti = Number(recap.zuitiReviewsCount || recap.zuitiCount || 0);
-      const criticYear = maxYear(recap.taptapCriticYears);
-
-      const parts = [];
-      if (reg) parts.push(`${reg} 加入`);
-      if (downloads > 0) parts.push(`下载 ${fmt(downloads)} 个游戏`);
-      if (play) parts.push(`总时长 ${play}`);
-      if (favGame) parts.push(`最爱 ${favGame}`);
-      if (favGenre) parts.push(`最爱类型 ${favGenre}`);
-      if (black > 0) parts.push(`黑金徽章 ${fmt(black)} 个`);
-      if (plat > 0) parts.push(`白金成就 ${fmt(plat)} 个`);
-      if (reviews > 0) parts.push(`评价 ${fmt(reviews)} 条`);
-      if (zuiti > 0) parts.push(`嘴替 ${fmt(zuiti)} 条`);
-      if (criticYear) parts.push(`${criticYear} 玩赏家`);
-      const text = `我的 TapTap 生涯回顾：${parts.join("，") || "一些很酷的数据"}。#十年同行`;
-      try {
-        await navigator.clipboard.writeText(text);
-        toast("已复制分享文案");
-      } catch {
-        toast("复制失败（浏览器权限限制）");
+  // On entry to the hall, focus the earliest claimable snapshot card (but keep original order).
+  // IMPORTANT: do NOT re-auto-focus on every render, otherwise claiming will "jump" before fly animation finishes.
+  if (!wireRecapInline._didAutoFocus) {
+    wireRecapInline._didAutoFocus = true;
+    try {
+      const track = document.getElementById("recapCarouselSnap");
+      if (track) {
+        const cards = Array.from(track.querySelectorAll(".mini-card"));
+        const idx = cards.findIndex((el) => {
+          const id = String(el.getAttribute("data-reward-id") || "");
+          if (!id || !id.startsWith("snap_")) return false;
+          if (hasClaimed(state, id)) return false;
+          const g = snapshotClaimGrant(state, id);
+          return !!g && (Number(g.points || 0) > 0 || Number(g.coupons || 0) > 0);
+        });
+        if (idx >= 0) requestCarouselInit("recapCarouselSnap", idx);
       }
-    });
-
-    $("#btnDownloadCard")?.addEventListener("click", () => {
-      // Preview-only: create a simple downloadable text file as placeholder
-      const recap = state.careerSnapshot?.recap || recapDataForState(state);
-      const maxYear = (v) => {
-        const ys = Array.isArray(v)
-          ? v
-          : String(v || "")
-            .split(/[、,，/\s]+/g)
-            .map((x) => String(x || "").trim())
-            .map((x) => x.replace(/[^\d]/g, ""))
-            .filter(Boolean)
-            .map((x) => Number(x))
-            .filter((n) => Number.isFinite(n));
-        if (!ys.length) return null;
-        return Math.max(...ys);
-      };
-      const criticYear = maxYear(recap.taptapCriticYears);
-      const content = [
-        "TapTap 十周年 · 生涯回顾分享卡",
-        `加入：${String(recap.regDate || "").trim() || "—"}`,
-        `下载：${fmt(Number(recap.downloadsCount || 0))} 个游戏`,
-        `总时长：${String(recap.playTimeTotal || "").trim() || "—"}`,
-        `最爱游戏：${String(recap.topGame1 || "").trim() || "—"}`,
-        `最爱类型：${String(recap.topGenre1 || recap.favoriteGenre || "").trim() || "—"}`,
-        `黑金徽章：${fmt(Number(recap.badgesBlackGoldTotal || 0))} 个`,
-        `白金成就：${fmt(Number(recap.platinumAchievementsTotal || 0))} 个`,
-        `评价：${fmt(Number(recap.reviewsCount || 0))} 条`,
-        `嘴替：${fmt(Number(recap.zuitiReviewsCount || recap.zuitiCount || 0))} 条`,
-        `最近一年玩赏家：${criticYear ? `${criticYear}` : "—"}`,
-        `创作游戏：${fmt(Number(recap.devGamesCount || 0))} 款`,
-        `聚光灯 GameJam：${String(recap.spotlightGamejam1Name || "").trim() || "—"}`,
-        `TapMaker：${String(recap.tapmaker1Name || "").trim() || "—"}`,
-        `积分：${state.points}`,
-      ].join("\\n");
-      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "taptap-10y-share-card.txt";
-      a.click();
-      URL.revokeObjectURL(a.href);
-      toast("已下载分享卡");
-    });
-  });
+    } catch {
+      // ignore
+    }
+  }
 
   wireCarousel("recapCarouselSnap", "recapDotsSnap");
   wireCarousel("recapCarouselBind", "recapDotsBind");
@@ -3367,6 +3896,7 @@ function wireRecapInline() {
 
       // Snapshot reward
       if (id.startsWith("snap_")) {
+        const fromRect = b.getBoundingClientRect();
         const grant = snapshotClaimGrant(state, id);
         if (!grant) return;
         if (!grant.points && !grant.coupons) return;
@@ -3377,11 +3907,7 @@ function wireRecapInline() {
         addCoupons(state, grant.coupons || 0);
         saveState();
         render();
-        openRewardModal({
-          title: "领取成功",
-          grant,
-          onConfirm: () => scheduleScrollToNextCard(trackId, currentIdx),
-        });
+        flyGrantToSticky({ fromRect, grant }).then(() => scheduleScrollToNextCard(trackId, currentIdx));
         return;
       }
 
@@ -3389,6 +3915,7 @@ function wireRecapInline() {
       const r = BIND_REWARDS.find((x) => x.id === id);
       if (!r) return;
       if (id === "bind_roles") {
+        const fromRect = b.getBoundingClientRect();
         const bound = Math.max(0, Number(state.boundRolesCount || 0));
         const claimedCount = Math.max(0, Number(state.claimedRoleRewardsCount || 0));
         const pending = Math.max(0, bound - claimedCount);
@@ -3400,28 +3927,19 @@ function wireRecapInline() {
         addCoupons(state, grant.coupons || 0);
         saveState();
         render();
-        openRewardModal({
-          title: "领取成功",
-          grant,
-          subtitle: `新绑定 ${fmt(pending)} 个角色`,
-          onConfirm: () => scheduleScrollToNextCard(trackId, currentIdx),
-        });
+        flyGrantToSticky({ fromRect, grant }).then(() => scheduleScrollToNextCard(trackId, currentIdx));
         return;
       }
 
       if (!r.isReady?.(state)) return;
       markClaimed(state, id);
       const grant = { points: r.grant?.points || 0, coupons: r.grant?.coupons || 0 };
+      const fromRect = b.getBoundingClientRect();
       addPoints(state, grant.points || 0);
       addCoupons(state, grant.coupons || 0);
       saveState();
       render();
-      openRewardModal({
-        title: "领取成功",
-        grant,
-        subtitle: r.title,
-        onConfirm: () => scheduleScrollToNextCard(trackId, currentIdx),
-      });
+      flyGrantToSticky({ fromRect, grant }).then(() => scheduleScrollToNextCard(trackId, currentIdx));
     }),
   );
 
@@ -3454,6 +3972,424 @@ function wireRecapInline() {
       $("#btnDeeplinkOk")?.addEventListener("click", closeModal);
     }),
   );
+
+  // NOTE: old share modal logic removed (handled by `openShareRecapModal()`).
+}
+
+function wireFirstRecap() {
+  if (wireFirstRecap._claiming == null) wireFirstRecap._claiming = false;
+  if (wireFirstRecap._enter == null) wireFirstRecap._enter = null;
+
+  const updateFirstRecapCurrencyDom = () => {
+    try {
+      const pv = document.querySelector("#pillPoints .firstrecap-money__v") || document.querySelector("#pillPoints b");
+      const cv = document.querySelector("#pillCoupons .firstrecap-money__v") || document.querySelector("#pillCoupons b");
+      if (pv) pv.textContent = fmt(Number(state.points || 0));
+      if (cv) cv.textContent = fmt(Number(state.walletCoupons || 0));
+    } catch {
+      // ignore
+    }
+  };
+
+  // Share (only show after all cards are done)
+  const shareBtn = $("#btnToggleShare");
+  if (shareBtn) shareBtn.classList.add("hidden");
+  shareBtn?.addEventListener("click", openShareRecapModal);
+
+  const snapSection = document.querySelector("[data-recap-section='snap']");
+  const bindSection = document.querySelector("[data-recap-section='bind']");
+  const snapTrack = document.getElementById("recapCarouselSnap");
+  const bindTrack = document.getElementById("recapCarouselBind");
+  const snapCards = snapTrack ? Array.from(snapTrack.querySelectorAll(".mini-card")) : [];
+  const bindCards = bindTrack ? Array.from(bindTrack.querySelectorAll(".mini-card")) : [];
+
+  // Only show bind cards that are ALREADY claimable on this ritual page.
+  const pendingRoles = Math.max(0, Number(state.boundRolesCount || 0) - Number(state.claimedRoleRewardsCount || 0));
+  const claimableBindIds = [];
+  if (!!state.boundSteam && !hasClaimed(state, "bind_steam")) claimableBindIds.push("bind_steam");
+  if (pendingRoles > 0) claimableBindIds.push("bind_roles");
+  const bindCardsClaimable = bindCards.filter((el) => claimableBindIds.includes(String(el.getAttribute("data-reward-id") || "")));
+
+  const flow = (() => {
+    const f = state.firstRecapFlow;
+    if (!f || typeof f !== "object") return { phase: "snap", idx: 0 };
+    const ph = String(f.phase || "");
+    return {
+      phase: ph === "bind" || ph === "done" ? ph : "snap",
+      idx: Math.max(0, Number(f.idx || 0)),
+    };
+  })();
+
+  const setFlow = (next) => {
+    state.firstRecapFlow = { phase: next.phase, idx: Math.max(0, Number(next.idx || 0)) };
+    // Mark the first-time ritual as completed once all cards are done.
+    if (next.phase === "done") state.firstRecapDone = true;
+    saveState();
+  };
+
+  const markEnterAnim = (phase, idx) => {
+    wireFirstRecap._enter = { phase: String(phase || ""), idx: Math.max(0, Number(idx || 0)) };
+  };
+
+  const showQueue = (cards, unlockedIdx) => {
+    const u = Math.max(0, Number(unlockedIdx || 0));
+    cards.forEach((el, i) => el.classList.toggle("firstrecap-card--shown", i <= u));
+  };
+
+  const applyFlow = () => {
+    const renderDots = (dotsId, count) => {
+      const wrap = document.getElementById(dotsId);
+      if (!wrap) return;
+      const n = Math.max(0, Number(count || 0));
+      wrap.innerHTML = Array.from({ length: n })
+        .map(
+          (_, i) =>
+            `<button class="dot ${i === 0 ? "dot--active" : ""}" type="button" data-dot="${i}" aria-label="第 ${i + 1} 张"></button>`,
+        )
+        .join("");
+    };
+
+    // Hide all bind cards except claimable ones.
+    bindCards.forEach((el) => {
+      const id = String(el.getAttribute("data-reward-id") || "");
+      el.classList.toggle("hidden", !claimableBindIds.includes(id));
+    });
+
+    if (flow.phase === "snap") {
+      snapSection?.classList.remove("hidden");
+      bindSection?.classList.add("hidden");
+      // No snapshot cards: jump directly
+      if (!snapCards.length) {
+        if (bindCardsClaimable.length) {
+          setFlow({ phase: "bind", idx: 0 });
+          return render();
+        }
+        setFlow({ phase: "done", idx: 0 });
+        return render();
+      }
+      const unlocked = Math.min(flow.idx, Math.max(0, snapCards.length - 1));
+      showQueue(snapCards, unlocked);
+      requestCarouselInit("recapCarouselSnap", unlocked);
+      renderDots("recapDotsSnap", unlocked + 1);
+      wireCarousel("recapCarouselSnap", "recapDotsSnap", {
+        cardSelector: ".mini-card.firstrecap-card--shown",
+        activeCardClass: "firstrecap-card--active",
+      });
+
+      // Only animate when the NEXT card is unlocked by claiming (not on manual swipe).
+      const enter = wireFirstRecap._enter;
+      if (enter && enter.phase === "snap" && enter.idx === unlocked) {
+        const el = snapCards[unlocked];
+        if (el) {
+          el.classList.remove("firstrecap-card--enter");
+          // Force reflow so repeated enters work.
+          void el.offsetHeight;
+          el.classList.add("firstrecap-card--enter");
+          el.addEventListener(
+            "animationend",
+            () => el.classList.remove("firstrecap-card--enter"),
+            { once: true },
+          );
+        }
+        wireFirstRecap._enter = null;
+      }
+      return;
+    }
+    if (flow.phase === "bind") {
+      // Only show bind section when there are claimable bind rewards.
+      if (!bindCardsClaimable.length) {
+        setFlow({ phase: "done", idx: 0 });
+        return render();
+      }
+      snapSection?.classList.add("hidden");
+      bindSection?.classList.remove("hidden");
+      const unlocked = Math.min(flow.idx, Math.max(0, bindCardsClaimable.length - 1));
+      showQueue(bindCardsClaimable, unlocked);
+      requestCarouselInit("recapCarouselBind", unlocked);
+      renderDots("recapDotsBind", unlocked + 1);
+      wireCarousel("recapCarouselBind", "recapDotsBind", {
+        cardSelector: ".mini-card.firstrecap-card--shown:not(.hidden)",
+        activeCardClass: "firstrecap-card--active",
+      });
+
+      const enter = wireFirstRecap._enter;
+      if (enter && enter.phase === "bind" && enter.idx === unlocked) {
+        const el = bindCardsClaimable[unlocked];
+        if (el) {
+          el.classList.remove("firstrecap-card--enter");
+          void el.offsetHeight;
+          el.classList.add("firstrecap-card--enter");
+          el.addEventListener(
+            "animationend",
+            () => el.classList.remove("firstrecap-card--enter"),
+            { once: true },
+          );
+        }
+        wireFirstRecap._enter = null;
+      }
+      return;
+    }
+
+    // done
+    // Keep cards visible for review; just reveal share button.
+    snapSection?.classList.remove("hidden");
+    if (bindCardsClaimable.length) bindSection?.classList.remove("hidden");
+    else bindSection?.classList.add("hidden");
+    showQueue(snapCards, Math.max(0, snapCards.length - 1));
+    renderDots("recapDotsSnap", snapCards.length);
+    if (bindCardsClaimable.length) {
+      showQueue(bindCardsClaimable, Math.max(0, bindCardsClaimable.length - 1));
+      renderDots("recapDotsBind", bindCardsClaimable.length);
+    }
+    {
+      const unlocked = Math.max(0, snapCards.length - 1);
+      requestCarouselInit("recapCarouselSnap", unlocked);
+      wireCarousel("recapCarouselSnap", "recapDotsSnap", {
+        cardSelector: ".mini-card.firstrecap-card--shown",
+        activeCardClass: "firstrecap-card--active",
+      });
+    }
+    if (bindCardsClaimable.length) {
+      const unlocked = Math.max(0, bindCardsClaimable.length - 1);
+      requestCarouselInit("recapCarouselBind", unlocked);
+      wireCarousel("recapCarouselBind", "recapDotsBind", {
+        cardSelector: ".mini-card.firstrecap-card--shown:not(.hidden)",
+        activeCardClass: "firstrecap-card--active",
+      });
+    }
+    if (shareBtn) shareBtn.classList.remove("hidden");
+
+    // Completion modal (first time only)
+    try {
+      if (state.firstRecapDone && !state.firstRecapRun?.doneModalShown) {
+        const startP = Math.max(0, Number(state.firstRecapRun?.startPoints || 0));
+        const startC = Math.max(0, Number(state.firstRecapRun?.startCoupons || 0));
+        const gained = {
+          points: Math.max(0, Math.floor(Number(state.points || 0) - startP)),
+          coupons: Math.max(0, Math.floor(Number(state.walletCoupons || 0) - startC)),
+        };
+
+        // Mark as shown before opening (avoid double-open on re-render).
+        if (!state.firstRecapRun || typeof state.firstRecapRun !== "object") state.firstRecapRun = { startPoints: startP, startCoupons: startC, doneModalShown: true };
+        state.firstRecapRun.doneModalShown = true;
+        saveState();
+
+        const bigRewards = (() => {
+          const parts = [];
+          if (gained.points > 0) {
+            parts.push(`
+              <div class="celebrate-grant celebrate-grant--points">
+                <div class="celebrate-grant__k">积分</div>
+                <div class="celebrate-grant__v">+${fmt(gained.points)}</div>
+                <div class="celebrate-grant__d">在活动会场装扮十周年名片，抽奖点券</div>
+              </div>
+            `);
+          }
+          if (gained.coupons > 0) {
+            parts.push(`
+              <div class="celebrate-grant celebrate-grant--coupons">
+                <div class="celebrate-grant__k">点券</div>
+                <div class="celebrate-grant__v">+${fmt(gained.coupons)}</div>
+                <div class="celebrate-grant__d">购买站内游戏、PC CDKey、云玩服务等</div>
+              </div>
+            `);
+          }
+          if (!parts.length) {
+            return `<div class="muted small">本次没有获得可统计的奖励</div>`;
+          }
+          return `<div class="celebrate-grants">${parts.join("")}</div>`;
+        })();
+
+        const body = `
+          <div class="celebrate">
+            <div class="celebrate-hero" aria-hidden="true"></div>
+            <div class="celebrate-top">
+              <div class="celebrate-title">十年回顾结束啦</div>
+            </div>
+            <div class="celebrate-panel">
+              ${bigRewards}
+            </div>
+          </div>
+        `;
+        const footer = `
+          <button class="btn" id="btnFirstRecapGoHall" type="button">前往活动会场</button>
+          <button class="btn btn--brand" id="btnFirstRecapShare" type="button">分享我的十年回顾</button>
+        `;
+
+        const reopenDoneModal = () => {
+          // Title is hidden for this variant; keep a short label for accessibility.
+          openModal({ title: "完成", bodyHtml: body, footerHtml: footer, hideClose: true, lockClose: true, variant: "celebrate" });
+          $("#btnFirstRecapGoHall")?.addEventListener("click", () => {
+            closeModal();
+            navigate("home");
+          });
+          $("#btnFirstRecapShare")?.addEventListener("click", () => {
+            // Swap to share modal; when it closes, restore this summary modal.
+            openShareRecapModal({ onClose: reopenDoneModal });
+          });
+        };
+
+        reopenDoneModal();
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const advanceAfterClaim = () => {
+    if (flow.phase === "snap") {
+      const nextIdx = flow.idx + 1;
+      if (nextIdx < snapCards.length) {
+        markEnterAnim("snap", nextIdx);
+        setFlow({ phase: "snap", idx: nextIdx });
+        return render();
+      }
+      // Snapshot finished: go bind phase only if there are claimable bind rewards
+      if (bindCardsClaimable.length) {
+        markEnterAnim("bind", 0);
+        setFlow({ phase: "bind", idx: 0 });
+        return render();
+      }
+      setFlow({ phase: "done", idx: 0 });
+      return render();
+    }
+    if (flow.phase === "bind") {
+      const nextIdx = flow.idx + 1;
+      if (nextIdx < bindCardsClaimable.length) {
+        markEnterAnim("bind", nextIdx);
+        setFlow({ phase: "bind", idx: nextIdx });
+        return render();
+      }
+      setFlow({ phase: "done", idx: 0 });
+      return render();
+    }
+  };
+
+  // Delegate clicks (rebind each render to avoid stale closures)
+  const root = document.getElementById("main");
+  if (wireFirstRecap._onClick && root) root.removeEventListener("click", wireFirstRecap._onClick);
+  wireFirstRecap._onClick = (e) => {
+    const t = e.target;
+
+    // Small skip link (go to hall now)
+    if (t?.closest?.("#btnFirstRecapSkip")) {
+      // Don't block the user next time; keep their progress in case they come back via hash.
+      state.firstRecapDone = true;
+      saveState();
+      navigate("home");
+      return;
+    }
+
+    const btn = t?.closest?.("[data-claim], [data-bind], [data-deeplink]");
+    if (!btn) return;
+    const card = btn.closest?.(".mini-card");
+    // Only allow interactions on the currently focused card in the ritual flow.
+    if (!card || !card.classList.contains("firstrecap-card--active")) return;
+
+    // Claim
+    if (btn.hasAttribute("data-claim")) {
+      if (wireFirstRecap._claiming) return;
+      const id = String(btn.getAttribute("data-claim") || "");
+      if (!id) return;
+      if (id !== "bind_roles" && hasClaimed(state, id)) return;
+      const fromRect = btn.getBoundingClientRect();
+
+      // Snapshot reward
+      if (id.startsWith("snap_")) {
+        const grant = snapshotClaimGrant(state, id);
+        if (!grant) return;
+        if (!grant.points && !grant.coupons) return;
+        wireFirstRecap._claiming = true;
+        markClaimed(state, id);
+        const aliases = SNAP_REWARD_ALIASES[id];
+        if (aliases?.length) aliases.forEach((a) => markClaimed(state, a));
+        addPoints(state, grant.points || 0);
+        addCoupons(state, grant.coupons || 0);
+        saveState();
+        // Match hall behavior: wait for fly animation to finish, then advance.
+        updateFirstRecapCurrencyDom();
+        const done = () => {
+          // Start advancing ASAP after fly completes (same beat as hall home)
+          wireFirstRecap._claiming = false;
+          queueMicrotask(() => advanceAfterClaim());
+        };
+        Promise.resolve(flyGrantToSticky({ fromRect, grant })).then(done).catch(done);
+        // Safety unlock (avoid stuck state if animation fails silently)
+        setTimeout(() => (wireFirstRecap._claiming = false), 2200);
+        return;
+      }
+
+      // Bind reward (only roles can be multi-claim)
+      const r = BIND_REWARDS.find((x) => x.id === id);
+      if (!r) return;
+      if (id === "bind_roles") {
+        const bound = Math.max(0, Number(state.boundRolesCount || 0));
+        const claimedCount = Math.max(0, Number(state.claimedRoleRewardsCount || 0));
+        const pending = Math.max(0, bound - claimedCount);
+        if (pending <= 0) return;
+        const per = r.perRole || { points: 0, coupons: 0 };
+        wireFirstRecap._claiming = true;
+        state.claimedRoleRewardsCount = claimedCount + pending;
+        const grant = { points: (per.points || 0) * pending, coupons: (per.coupons || 0) * pending };
+        addPoints(state, grant.points || 0);
+        addCoupons(state, grant.coupons || 0);
+        saveState();
+        updateFirstRecapCurrencyDom();
+        const done = () => {
+          wireFirstRecap._claiming = false;
+          queueMicrotask(() => advanceAfterClaim());
+        };
+        Promise.resolve(flyGrantToSticky({ fromRect, grant })).then(done).catch(done);
+        setTimeout(() => (wireFirstRecap._claiming = false), 2200);
+        return;
+      }
+      // Steam one-time
+      if (!r.isReady?.(state)) return;
+      wireFirstRecap._claiming = true;
+      markClaimed(state, id);
+      const grant = { points: r.grant?.points || 0, coupons: r.grant?.coupons || 0 };
+      addPoints(state, grant.points || 0);
+      addCoupons(state, grant.coupons || 0);
+      saveState();
+      updateFirstRecapCurrencyDom();
+      {
+        const done = () => {
+          wireFirstRecap._claiming = false;
+          queueMicrotask(() => advanceAfterClaim());
+        };
+        Promise.resolve(flyGrantToSticky({ fromRect, grant })).then(done).catch(done);
+        setTimeout(() => (wireFirstRecap._claiming = false), 2200);
+      }
+      return;
+    }
+
+    // Bind (ritual page should not encourage binding, but keep deeplink explanation if needed)
+    if (btn.hasAttribute("data-bind")) {
+      // Ignore: ritual page shows bind cards only when already claimable
+      return;
+    }
+
+    // Deeplink explanation
+    if (btn.hasAttribute("data-deeplink")) {
+      const uri = String(btn.getAttribute("data-deeplink") || "").trim();
+      if (!uri) return;
+      openModal({
+        title: "跳转到帖子",
+        bodyHtml: `
+          <div class="small" style="line-height:1.6">
+            <div class="hint"><b>这里会打开帖子详情页</b>（Demo 仅做含义表达）</div>
+            <div class="divider"></div>
+            <div class="muted small">可跳转：<span class="mono">${uri}</span></div>
+          </div>
+        `,
+        footerHtml: `<button class="btn btn--brand" id="btnDeeplinkOk">知道了</button>`,
+      });
+      $("#btnDeeplinkOk")?.addEventListener("click", closeModal);
+    }
+  };
+  root?.addEventListener("click", wireFirstRecap._onClick);
+
+  applyFlow();
 }
 
 // Deprecated: replaced by role-based binding modal.
@@ -3560,7 +4496,6 @@ function discoverInlineView(s) {
       `;
     const score = Number(g.score || 0);
     const scoreHtml = score ? `<span class="mutual-score" aria-label="评分">⭐ ${score.toFixed(1)}</span>` : "";
-    const exclusiveHtml = g.tapExclusive ? `<span class="pill pill--brand mutual-exclusive">Tap独家</span>` : "";
 
     return `
       <div class="item mutual-item">
@@ -3577,7 +4512,6 @@ function discoverInlineView(s) {
             </div>
           </div>
           ${scoreHtml}
-          ${exclusiveHtml}
         </div>
         <div class="mutual-bottom row">
           <div class="mutual-marquee">${marquee}</div>
@@ -3610,13 +4544,18 @@ function discoverInlineView(s) {
       const items = page
         .map(({ p, claimable, claimed }) => {
           const icon = iconChar(p.title);
-          const tags = (p.tags || []).slice(0, 4).map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join("");
+          // Remove the "minutes" tag (e.g. "10分钟") for the TapTap 制造 GameJam module.
+          const tags = (p.tags || [])
+            .filter((t) => !/^\s*\d+\s*分钟\s*$/g.test(String(t || "")))
+            .slice(0, 4)
+            .map((t) => `<span class="tag">${escapeHtml(t)}</span>`)
+            .join("");
           const heat = Math.max(0, Number(p.heat || 0));
           const btn = claimable
             ? `<button class="btn btn--brand" type="button" data-play-claim="${p.id}">领奖</button>`
             : claimed
               ? `<button class="btn" type="button" disabled>已领取</button>`
-              : `<button class="btn btn--brand" type="button" data-play-go="${p.id}">前往游玩并评价</button>`;
+              : `<button class="btn btn--brand btn--sm" type="button" data-play-go="${p.id}">游玩并评价</button>`;
           const cardClass = claimable ? "play-card--claim" : claimed ? "play-card--claimed" : "";
           return `
             <div class="item play-card ${cardClass}">
@@ -3655,33 +4594,37 @@ function discoverInlineView(s) {
     .join("");
 
   return `
-    <section class="card">
-      <div class="row">
-        <p class="h1 grow">发现好游戏</p>
-      </div>
-      <p class="muted small" style="margin:6px 0 0">
-        TapTap 的坚持：<b>发现好游戏</b> · <b>零分成</b> · <b>评分真实</b>
-      </p>
-      <div class="divider"></div>
-      <div class="list">${mutualList}</div>
-    </section>
+    <div class="home-module" id="section-discover">
+      <section class="card">
+        <div class="row">
+          <p class="h1 grow">发现好游戏</p>
+        </div>
+        <p class="muted small" style="margin:6px 0 0">
+          TapTap 的坚持： · <b>零分成</b> · <b>评分真实</b>
+        </p>
+        <div class="divider"></div>
+        <div class="list">${mutualList}</div>
+      </section>
+    </div>
 
-    <section class="card">
-      <div class="row">
-        <p class="h2 grow">TapTap制造 GameJam 游戏展出</p>
-      </div>
-      <p class="muted small" style="margin:6px 0 0">
-        玩游戏写评价领取积分，请友善交流，支持开发者发布作品。
-      </p>
-      <div style="margin-top:10px" class="carousel" aria-label="GameJam 试玩列表">
-        <div class="hscroll carousel__track" id="playCarousel" role="list">
-          ${playPagesHtml}
+    <div class="home-module" id="section-gamejam">
+      <section class="card">
+        <div class="row">
+          <p class="h2 grow">TapTap制造 GameJam 游戏体验</p>
         </div>
-        <div class="carousel__dots" id="playDots" aria-label="试玩分页">
-          ${playDotsHtml}
+        <p class="muted small" style="margin:6px 0 0">
+          玩游戏写评价领取积分，请友善交流，支持开发者发布作品。
+        </p>
+        <div style="margin-top:10px" class="carousel" aria-label="GameJam 试玩列表">
+          <div class="hscroll carousel__track" id="playCarousel" role="list">
+            ${playPagesHtml}
+          </div>
+          <div class="carousel__dots" id="playDots" aria-label="试玩分页">
+            ${playDotsHtml}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   `;
 }
 
@@ -3867,7 +4810,7 @@ function wireDiscoverInline() {
       const body = `
         <div class="small" style="line-height:1.6">
           <div class="hint">
-            <b>前往游玩并评价</b>：会跳转到游戏详情页，填写评价后可领取积分。
+            <b>游玩并评价</b>：会跳转到游戏详情页，填写评价后可领取积分。
             <div class="muted small" style="margin-top:6px">此 demo 为测试机制：点击下方按钮即可视为“已玩过且已评价”，解锁“领奖”。</div>
           </div>
           <div class="divider"></div>
@@ -3900,6 +4843,7 @@ function wireDiscoverInline() {
       const p = PLAYTEST_GAMES.find((x) => x.id === id);
       if (!p) return;
 
+      const fromRect = b.getBoundingClientRect();
       const pageIdx = Number(b.closest?.(".play-page")?.getAttribute("data-card-idx") || 0);
       requestCarouselInit("playCarousel", pageIdx);
 
@@ -3913,11 +4857,7 @@ function wireDiscoverInline() {
       saveState();
       requestCarouselInit("playCarousel", 0);
       render();
-      openRewardModal({
-        title: "领取成功",
-        grant: { points: p.points, coupons: 0 },
-        subtitle: p.title,
-      });
+      flyGrantToSticky({ fromRect, grant: { points: p.points, coupons: 0 } });
     }),
   );
 
@@ -3963,7 +4903,7 @@ function shopView(s) {
         <div class="row">
           <div class="grow">
             <div class="item__title">${SHOP_ITEMS.lottery.title}</div>
-            <div class="item__desc">每日限 1 次，消耗 ${SHOP_ITEMS.lottery.cost} 积分获得点券（demo：保底 1 点券）。</div>
+            <div class="item__desc">每日限 1 次，消耗 ${SHOP_ITEMS.lottery.cost} 积分抽取点券（可能抽不到）。</div>
           </div>
           <span class="pill">-${SHOP_ITEMS.lottery.cost} 积分</span>
         </div>
@@ -4039,12 +4979,13 @@ function wireShop() {
     if (state.points < SHOP_ITEMS.lottery.cost) return toast("积分不足");
     state.points -= SHOP_ITEMS.lottery.cost;
     state.daily.lotteryDayKey = today;
-    const big = Math.random() < 0.18;
-    const add = big ? SHOP_ITEMS.lottery.prize.value : 1;
-    addCoupons(state, add);
+    // No pity: random 1 coupon or none.
+    const hit = Math.random() < 0.5;
+    const add = hit ? 1 : 0;
+    if (add > 0) addCoupons(state, add);
     saveState();
     render();
-    toast(big ? `恭喜你：点券 +${SHOP_ITEMS.lottery.prize.value}` : "点券 +1（保底）");
+    toast(hit ? "恭喜你：点券 +1" : "很遗憾：没抽到点券");
   });
 }
 
@@ -4254,6 +5195,7 @@ function runOpeningGate() {
   if (!opening || !appRoot) return Promise.resolve();
 
   const btn = document.getElementById("btnEnterRecap");
+  const debugBtn = document.getElementById("btnOpeningDebug");
   const hint = document.getElementById("openingHint");
 
   // Ensure the activity page won't appear during opening
@@ -4262,33 +5204,32 @@ function runOpeningGate() {
   opening.setAttribute("aria-hidden", "false");
 
   const prefersReduce = !!window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-  const readyDelay = prefersReduce ? 120 : 1700;
 
-  // After the opening show ends, reveal the CTA button
-  const t = setTimeout(() => {
-    opening.classList.add("opening--ready");
-    if (hint) hint.textContent = "";
-    if (btn) btn.classList.remove("hidden");
-  }, readyDelay);
+  // Remove "loading phase": reveal CTA immediately.
+  opening.classList.add("opening--ready");
+  if (hint) hint.textContent = "";
+  if (btn) btn.classList.remove("hidden");
+  if (debugBtn) debugBtn.classList.remove("hidden");
+
+  // Allow tweaking demo state BEFORE entering the recap page
+  debugBtn?.addEventListener("click", () => openDebug());
 
   return new Promise((resolve) => {
     // If button missing for any reason, auto-enter after a short delay.
     if (!btn) {
       setTimeout(() => {
-        clearTimeout(t);
         opening.classList.add("opening--exit");
         appRoot.classList.remove("hidden");
         opening.classList.add("hidden");
         opening.setAttribute("aria-hidden", "true");
         resolve();
-      }, readyDelay + 300);
+      }, prefersReduce ? 0 : 220);
       return;
     }
 
     btn.addEventListener(
       "click",
       () => {
-        clearTimeout(t);
         opening.classList.add("opening--exit");
         // Reveal the app only after exit animation starts (avoid any flash)
         setTimeout(() => {
@@ -4306,12 +5247,13 @@ function runOpeningGate() {
 }
 
 async function init() {
-  // By default, reset demo state on each page load (avoid manual reset).
-  // Add `?persist=1` to the URL if you want to keep localStorage state.
+  // Default: keep localStorage so "second entry" experience works.
+  // Use `?persist=0` to always reset state, or `?reset=1` to clear once.
   try {
     const params = new URLSearchParams(location.search || "");
-    const persist = params.get("persist") === "1";
-    if (!persist) {
+    const reset = params.get("reset") === "1";
+    const persist = params.get("persist") !== "0";
+    if (reset || !persist) {
       localStorage.removeItem(STORAGE_KEY);
       state = loadState();
     }
@@ -4319,31 +5261,31 @@ async function init() {
     // ignore
   }
 
-  // Opening show gate: do not render activity page until user enters.
-  await runOpeningGate();
+  // Wire modal dismiss early so it works in opening gate debug.
+  wireModalDismiss();
 
-  // Enter into current activity page (home) after opening
-  location.hash = "#/home";
+  const opening = document.getElementById("opening");
+  const appRoot = document.getElementById("app");
+
+  // Only show opening gate once (unless explicitly reset).
+  // After the user refreshes / re-opens, go straight to the activity hall.
+  if (!state.entryGateDone) {
+    await runOpeningGate();
+    state.entryGateDone = true;
+    saveState();
+    location.hash = "#/firstrecap";
+  } else {
+    // Re-open: skip opening, go straight to activity home
+    try {
+      opening?.classList.add("hidden");
+      opening?.setAttribute("aria-hidden", "true");
+      appRoot?.classList.remove("hidden");
+    } catch {}
+    location.hash = "#/home";
+  }
 
   // Back
   $("#btnBack")?.addEventListener("click", () => navigate("home"));
-
-  // Modal close
-  const canCloseModal = () => $("#modal")?.getAttribute("data-lock-close") !== "1";
-  $("#modalClose")?.addEventListener("click", () => {
-    if (!canCloseModal()) return;
-    closeModal();
-  });
-  $("#modalBackdrop")?.addEventListener("click", () => {
-    if (!canCloseModal()) return;
-    closeModal();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      if (!canCloseModal()) return;
-      closeModal();
-    }
-  });
 
   // Debug
   $("#btnOpenDebug")?.addEventListener("click", openDebug);
