@@ -4845,13 +4845,12 @@ function discoverInlineView(s) {
   }).join("");
 
   const playStates = PLAYTEST_GAMES.map((p, idx) => {
-    const feedback = String(s.playtest.feedback?.[p.id] || "").trim();
-    const playedAndRated = s.playtest.completed.includes(p.id) && !!feedback;
+    const completed = s.playtest.completed.includes(p.id);
     const claimed = (s.playtest.claimed || []).includes(p.id);
-    const claimable = playedAndRated && !claimed;
+    const claimable = completed && !claimed;
     const group = claimable ? 0 : claimed ? 2 : 1;
     const heat = Math.max(0, Number(p.heat || 0));
-    return { p, idx, feedback, playedAndRated, claimed, claimable, group, heat };
+    return { p, idx, completed, claimed, claimable, group, heat };
   })
     .sort((a, b) => (a.group - b.group) || (b.heat - a.heat) || (a.idx - b.idx));
 
@@ -4878,7 +4877,7 @@ function discoverInlineView(s) {
             ? `<button class="btn btn--brand" type="button" data-play-claim="${p.id}">领奖</button>`
             : claimed
               ? `<button class="btn" type="button" disabled>已领取</button>`
-              : `<button class="btn btn--brand btn--sm" type="button" data-play-go="${p.id}">游玩并评价</button>`;
+              : `<button class="btn btn--brand btn--sm" type="button" data-play-go="${p.id}">试玩</button>`;
           const cardClass = claimable ? "play-card--claim" : claimed ? "play-card--claimed" : "";
           return `
             <div class="item play-card ${cardClass}">
@@ -4936,7 +4935,7 @@ function discoverInlineView(s) {
           <p class="h2 grow">TapTap制造 GameJam 游戏体验</p>
         </div>
         <p class="muted small" style="margin:6px 0 0">
-          玩游戏写评价领取积分，请友善交流，支持开发者发布作品。
+          完成试玩即可领取积分，请友善交流，支持开发者发布作品。
         </p>
         <div style="margin-top:10px" class="carousel" aria-label="GameJam 试玩列表">
           <div class="hscroll carousel__track" id="playCarousel" role="list">
@@ -4954,10 +4953,9 @@ function discoverInlineView(s) {
 function wireDiscoverInline() {
   const playOrderList = (st) =>
     PLAYTEST_GAMES.map((p, idx) => {
-      const feedback = String(st.playtest.feedback?.[p.id] || "").trim();
-      const playedAndRated = st.playtest.completed.includes(p.id) && !!feedback;
+      const completed = st.playtest.completed.includes(p.id);
       const claimed = (st.playtest.claimed || []).includes(p.id);
-      const claimable = playedAndRated && !claimed;
+      const claimable = completed && !claimed;
       const group = claimable ? 0 : claimed ? 2 : 1;
       const heat = Math.max(0, Number(p.heat || 0));
       return { id: p.id, idx, group, heat };
@@ -5133,8 +5131,7 @@ function wireDiscoverInline() {
       const body = `
         <div class="small" style="line-height:1.6">
           <div class="hint">
-            <b>游玩并评价</b>：会跳转到游戏详情页，填写评价后可领取积分。
-            <div class="muted small" style="margin-top:6px">此 demo 为测试机制：点击下方按钮即可视为“已玩过且已评价”，解锁“领奖”。</div>
+            完成试玩即可领奖。此 demo 为测试机制：点击下方按钮即视为已试玩完成，可返回列表领取积分。
           </div>
           <div class="divider"></div>
           <div class="small"><b>${escapeHtml(p.title)}</b></div>
@@ -5142,19 +5139,18 @@ function wireDiscoverInline() {
         </div>
       `;
       const footer = `
-        <button class="btn btn--brand" id="btnSubmitPlayReview">已写好评价</button>
-        <button class="btn" id="btnCancelPlayReview">稍后再说</button>
+        <button class="btn btn--brand" id="btnCompletePlay">已完成试玩</button>
+        <button class="btn" id="btnCancelPlay">稍后再说</button>
       `;
       openModal({ title: "试玩", bodyHtml: body, footerHtml: footer });
-      $("#btnCancelPlayReview")?.addEventListener("click", closeModal);
-      $("#btnSubmitPlayReview")?.addEventListener("click", () => {
-        state.playtest.feedback[p.id] = String(state.playtest.feedback?.[p.id] || "").trim() || "（测试）已评价";
+      $("#btnCancelPlay")?.addEventListener("click", closeModal);
+      $("#btnCompletePlay")?.addEventListener("click", () => {
         if (!state.playtest.completed.includes(p.id)) state.playtest.completed.push(p.id);
         saveState();
         closeModal();
         requestCarouselInit("playCarousel", playPageIndexOf(state, p.id));
         render();
-        toast("已提交评价，可领奖");
+        toast("已试玩完成，可领奖");
       });
     }),
   );
@@ -5170,9 +5166,8 @@ function wireDiscoverInline() {
       const pageIdx = Number(b.closest?.(".play-page")?.getAttribute("data-card-idx") || 0);
       requestCarouselInit("playCarousel", pageIdx);
 
-      const feedback = String(state.playtest.feedback?.[p.id] || "").trim();
-      const playedAndRated = state.playtest.completed.includes(p.id) && !!feedback;
-      if (!playedAndRated) return toast("请先试玩并写一句评价");
+      const completed = state.playtest.completed.includes(p.id);
+      if (!completed) return toast("请先完成试玩");
       if ((state.playtest.claimed || []).includes(p.id)) return toast("已领取过该奖励");
 
       state.playtest.claimed.push(p.id);
