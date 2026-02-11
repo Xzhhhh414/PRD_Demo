@@ -334,7 +334,6 @@ const MUTUAL_GAMES = [
     id: "m1",
     title: "Phigros",
     desc: "全球千万下载的免费音游，指尖上的极致节奏体验",
-    bond: "Phigros 在 TapTap 首发上线，凭借硬核判定和创新谱面设计，从社区口碑一路走到全球千万下载。TapTap 是许多音游玩家第一次遇见它的地方。",
     icon: "🎵",
     hint: "一款让指尖跳舞的游戏",
     layerColor: "#6C5CE7",
@@ -344,12 +343,17 @@ const MUTUAL_GAMES = [
     score: 9.6,
     tapExclusive: true,
     postUrl: "https://www.taptap.cn/moment/754506735720334977",
+    story: [
+      { emoji: "🎹", text: "2019 年，一群热爱音乐的年轻人做了一款不一样的音游。没有内购，没有体力，只有纯粹的节奏与判定。" },
+      { emoji: "📱", text: "Phigros 选择在 TapTap 首发上线。社区里第一批玩家的热情评价，让这款小众音游开始被更多人看见。" },
+      { emoji: "🌍", text: "从 TapTap 社区出发，Phigros 的口碑一路发酵，最终走向全球，累计下载突破千万。" },
+      { emoji: "💜", text: "TapTap 是许多音游玩家第一次遇见 Phigros 的地方。每一次版本更新，社区都会迎来一场指尖上的狂欢。" },
+    ],
   },
   {
     id: "m2",
     title: "香肠派对",
     desc: "欢乐吃鸡大乱斗，和好友一起开黑的快乐回来了",
-    bond: "香肠派对在 TapTap 上拥有超高人气的社区氛围，搞笑的画风和欢乐的吃鸡体验让它成为好友开黑首选。无数快乐时光从这里开始。",
     icon: "🌭",
     hint: "和朋友一起，笑着吃鸡",
     layerColor: "#FDCB6E",
@@ -359,12 +363,17 @@ const MUTUAL_GAMES = [
     score: 8.8,
     tapExclusive: false,
     postUrl: "https://www.taptap.cn/moment/756862887149965161",
+    story: [
+      { emoji: "🎉", text: "当吃鸡遇上搞笑画风，香肠派对证明了——射击游戏也可以让人笑到肚子疼。" },
+      { emoji: "👫", text: "在 TapTap 社区里，玩家们自发组队、分享搞笑时刻，让香肠派对成为好友开黑的首选游戏。" },
+      { emoji: "🔥", text: "社区氛围带来了超高人气。无数欢乐的游戏片段在 TapTap 上传播，吸引了一波又一波新玩家加入。" },
+      { emoji: "🌭", text: "从一款休闲小游戏到全民开黑现象，TapTap 见证了香肠派对带来的无数快乐时光。" },
+    ],
   },
   {
     id: "m3",
     title: "心动小镇",
     desc: "治愈系模拟经营，在小镇里过上向往的慢生活",
-    bond: "心动小镇是 TapTap 独占的治愈系经营游戏，玩家在社区里分享小镇日常，组成了最温暖的游戏社区之一。每一次更新都是一场小小的惊喜。",
     icon: "🏡",
     hint: "一个让人想住进去的小世界",
     layerColor: "#00B894",
@@ -374,12 +383,17 @@ const MUTUAL_GAMES = [
     score: 8.6,
     tapExclusive: true,
     postUrl: "https://www.taptap.cn/moment/755000000000000000",
+    story: [
+      { emoji: "🌿", text: "在快节奏的世界里，心动小镇是一片温柔的慢生活净土。种田、钓鱼、装扮小屋，每一天都值得期待。" },
+      { emoji: "✨", text: "作为 TapTap 独占游戏，心动小镇从立项之初就与 TapTap 社区紧密相连。玩家的每一条建议都在塑造这个小世界。" },
+      { emoji: "📸", text: "社区里满是玩家分享的小镇日常——精心布置的小屋、和朋友的合影，组成了最温暖的游戏社区之一。" },
+      { emoji: "🏡", text: "每一次更新都是一场小小的惊喜。心动小镇和 TapTap 一起，为玩家守护着这份治愈的归属感。" },
+    ],
   },
   {
     id: "m4",
     title: "鬼谷八荒",
     desc: "修仙开放世界，书写属于你自己的仙侠传说",
-    bond: "鬼谷八荒在 TapTap 上获得了修仙爱好者的热烈讨论，开放世界与修仙题材的结合让它成为社区长期热议的作品。从预约到正式上线，TapTap 见证了它的成长。",
     icon: "⛩️",
     hint: "御剑飞行，踏入仙途",
     layerColor: "#636E72",
@@ -389,6 +403,12 @@ const MUTUAL_GAMES = [
     score: 8.2,
     tapExclusive: false,
     postUrl: "https://www.taptap.cn/moment/755000000000000001",
+    story: [
+      { emoji: "⚔️", text: "修仙题材遇上开放世界，鬼谷八荒让每位玩家都能书写属于自己的仙侠传说。" },
+      { emoji: "📣", text: "游戏还在预约阶段，TapTap 社区的修仙爱好者就开始了热烈讨论。从玩法猜测到剧情分析，期待值一路飙升。" },
+      { emoji: "🎮", text: "正式上线后，社区内涌现出大量攻略、流派讨论和剧情解读，鬼谷八荒成为 TapTap 上长期热议的作品。" },
+      { emoji: "⛩️", text: "从预约到正式上线，再到每一次版本迭代，TapTap 见证了鬼谷八荒的成长，也见证了修仙玩家社区的壮大。" },
+    ],
   },
 ];
 
@@ -5387,8 +5407,6 @@ function discoverInlineView(s) {
     const cards = MUTUAL_GAMES.map((g) => {
       const isRevealed = revealedIds.includes(g.id);
       const isClaimed = claimedIds.includes(g.id);
-      const tags = (g.tags || []).slice(0, 3).map((t) => `<span class="tag">${t}</span>`).join("");
-      const score = Number(g.score || 0);
 
       if (!isRevealed) {
         // 未揭示：神秘卡
@@ -5396,24 +5414,24 @@ function discoverInlineView(s) {
           <button class="guess-card guess-card--mystery" type="button" data-guess-reveal="${g.id}" style="--layer-color:${g.layerColor}">
             <div class="guess-card__q">?</div>
             <div class="guess-card__hint">${escapeHtml(g.hint || "")}</div>
-            <div class="guess-card__tags">${tags}</div>
-            <div class="guess-card__cta">点击揭晓</div>
+            <div class="guess-card__cta">看看它的故事…</div>
           </button>
         `;
       }
 
-      // 已揭示
-      const claimBtn = isClaimed
-        ? ""
-        : `<button class="btn btn--brand guess-card__claim" type="button" data-guess-claim="${g.id}">领取 ${g.points} 积分</button>`;
+      // 已揭示：带背景色的卡片
+      const actionBtn = isClaimed
+        ? `<button class="btn guess-card__action" type="button" data-guess-go="${g.id}">查看游戏</button>`
+        : `<button class="btn btn--brand guess-card__action" type="button" data-guess-claim="${g.id}">领取 ${g.points} 积分</button>`;
 
       return `
         <div class="guess-card guess-card--open" style="--layer-color:${g.layerColor}">
           <div class="guess-card__icon">${g.icon}</div>
-          <div class="guess-card__name">${escapeHtml(g.title)}${score ? ` <span class="guess-card__score">⭐${score.toFixed(1)}</span>` : ""}</div>
-          <div class="guess-card__tags">${tags}</div>
-          ${claimBtn}
-          <button class="guess-card__go" type="button" data-guess-go="${g.id}">前往详情页 →</button>
+          <div class="guess-card__name">${escapeHtml(g.title)}</div>
+          <div class="guess-card__btns">
+            ${actionBtn}
+            <button class="btn guess-card__story-btn" type="button" data-guess-story="${g.id}">再看一次</button>
+          </div>
         </div>
       `;
     }).join("");
@@ -5499,7 +5517,7 @@ function discoverInlineView(s) {
           <p class="h1 grow">发现好游戏</p>
         </div>
         <p class="muted small" style="margin:6px 0 0">
-          TapTap 的坚持： · <b>零分成</b> · <b>评分真实</b>
+          TapTap 坚持： <b>零分成</b>
         </p>
         <div class="divider"></div>
         ${capsuleHtml}
@@ -5545,7 +5563,60 @@ function wireDiscoverInline() {
   };
 
   // ── 猜猜是什么游戏 交互 ──
-  // 点击神秘卡 -> 揭示 + 弹出介绍
+
+  // 打开游戏故事弹窗（分页图文）
+  function openGameStoryModal(game, onClose) {
+    const pages = game.story || [];
+    if (!pages.length) return;
+    let idx = 0;
+
+    function renderPage() {
+      const p = pages[idx];
+      const isLast = idx === pages.length - 1;
+      const isFirst = idx === 0;
+      const dots = pages.map((_, i) =>
+        `<span class="story-dot${i === idx ? " story-dot--active" : ""}" data-story-dot="${i}"></span>`
+      ).join("");
+
+      openModal({
+        title: `${game.icon} ${game.title} 的故事`,
+        hideClose: true,
+        bodyHtml: `
+          <div class="story-page" style="--layer-color:${game.layerColor}">
+            <div class="story-page__emoji">${p.emoji || game.icon}</div>
+            <p class="story-page__text">${escapeHtml(p.text)}</p>
+            <div class="story-page__dots">${dots}</div>
+            <div class="story-page__nav">
+              ${isFirst ? "" : `<button class="btn story-page__prev" type="button" id="storyPrev">上一页</button>`}
+              ${isLast
+                ? `<button class="btn btn--brand story-page__next" type="button" id="storyClose">关闭</button>`
+                : `<button class="btn btn--brand story-page__next" type="button" id="storyNext">下一页</button>`}
+            </div>
+            <div class="story-page__counter">${idx + 1} / ${pages.length}</div>
+          </div>
+        `,
+      });
+
+      // 绑定翻页事件
+      $("#storyPrev")?.addEventListener("click", () => { idx--; renderPage(); });
+      $("#storyNext")?.addEventListener("click", () => { idx++; renderPage(); });
+      $("#storyClose")?.addEventListener("click", () => {
+        closeModal();
+        if (typeof onClose === "function") onClose();
+      });
+      // 点击圆点跳页
+      $$("[data-story-dot]").forEach((dot) =>
+        dot.addEventListener("click", () => {
+          idx = Number(dot.dataset.storyDot) || 0;
+          renderPage();
+        })
+      );
+    }
+
+    renderPage();
+  }
+
+  // 点击神秘卡 -> 揭示 + 打开故事
   $$("[data-guess-reveal]").forEach((el) =>
     el.addEventListener("click", () => {
       const g = MUTUAL_GAMES.find((x) => x.id === el.dataset.guessReveal);
@@ -5563,20 +5634,19 @@ function wireDiscoverInline() {
         }
         saveState();
 
-        // 弹出游戏与 TapTap 的羁绊介绍
-        _modalAfterClose.push(() => render());
-        openModal({
-          title: `${g.icon} ${g.title}`,
-          bodyHtml: `<div class="guess-bond">
-            <div class="guess-bond__icon">${g.icon}</div>
-            <div class="guess-bond__title">${escapeHtml(g.title)}</div>
-            <div class="guess-bond__score">${g.score ? "⭐ " + g.score.toFixed(1) : ""}</div>
-            <p class="guess-bond__text">${escapeHtml(g.bond || g.desc)}</p>
-            <div class="guess-bond__tags">${(g.tags || []).map((t) => `<span class="tag">${t}</span>`).join("")}</div>
-            <button class="btn btn--brand guess-bond__go" type="button" onclick="try{window.open('${g.url}','_blank','noopener,noreferrer')}catch(e){}">前往 TapTap 详情页 →</button>
-          </div>`,
-        });
+        // 打开分页故事，关闭后刷新页面
+        openGameStoryModal(g, () => render());
       }, 400);
+    }),
+  );
+
+  // 已揭示卡片 - 重新听故事
+  $$("[data-guess-story]").forEach((el) =>
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const g = MUTUAL_GAMES.find((x) => x.id === el.dataset.guessStory);
+      if (!g) return;
+      openGameStoryModal(g);
     }),
   );
 
@@ -5601,7 +5671,7 @@ function wireDiscoverInline() {
     }),
   );
 
-  // 前往详情页
+  // 查看游戏（已领取后按钮变成查看游戏）
   $$("[data-guess-go]").forEach((el) =>
     el.addEventListener("click", (e) => {
       e.stopPropagation();
