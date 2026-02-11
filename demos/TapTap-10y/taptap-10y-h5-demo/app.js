@@ -333,6 +333,10 @@ const MUTUAL_GAMES = [
   {
     id: "m1",
     title: "Phigros",
+    desc: "全球千万下载的免费音游，指尖上的极致节奏体验",
+    icon: "🎵",
+    layerColor: "#6C5CE7",
+    points: 30,
     url: "https://www.taptap.cn/app/165287?os=android",
     tags: ["音游", "节奏", "下落式"],
     score: 9.6,
@@ -342,6 +346,10 @@ const MUTUAL_GAMES = [
   {
     id: "m2",
     title: "香肠派对",
+    desc: "欢乐吃鸡大乱斗，和好友一起开黑的快乐回来了",
+    icon: "🌭",
+    layerColor: "#FDCB6E",
+    points: 30,
     url: "https://www.taptap.cn/app/58881?os=pc",
     tags: ["射击", "吃鸡", "多人"],
     score: 8.8,
@@ -351,6 +359,10 @@ const MUTUAL_GAMES = [
   {
     id: "m3",
     title: "心动小镇",
+    desc: "治愈系模拟经营，在小镇里过上向往的慢生活",
+    icon: "🏡",
+    layerColor: "#00B894",
+    points: 30,
     url: "https://www.taptap.cn/app/45213?os=pc",
     tags: ["治愈", "模拟经营", "多人"],
     score: 8.6,
@@ -360,6 +372,10 @@ const MUTUAL_GAMES = [
   {
     id: "m4",
     title: "鬼谷八荒",
+    desc: "修仙开放世界，书写属于你自己的仙侠传说",
+    icon: "⛩️",
+    layerColor: "#636E72",
+    points: 40,
     url: "https://www.taptap.cn/app/700558?os=android",
     tags: ["修仙", "开放世界", "单机"],
     score: 8.2,
@@ -405,6 +421,7 @@ const MEM_STICKERS = [
 ];
 
 const MEM_AVATARS = [
+  { id: "ma_me", icon: "👤", label: "我的头像", isProfileAvatar: true },
   { id: "ma_bunny", icon: "🐰", label: "兔帽" },
   { id: "ma_cat", icon: "🐱", label: "猫猫" },
   { id: "ma_robot", icon: "🤖", label: "机甲" },
@@ -412,6 +429,15 @@ const MEM_AVATARS = [
   { id: "ma_panda", icon: "🐼", label: "熊猫" },
   { id: "ma_penguin", icon: "🐧", label: "企鹅" },
 ];
+
+/** 渲染角色头像内容：ma_me 显示白底方块 + "TapTap头像"文字，其他显示 emoji */
+function avatarDisplayHtml(avatar, nickname, { size = "normal" } = {}) {
+  if (avatar.isProfileAvatar) {
+    const cls = size === "small" ? "mem-avatar--profile mem-avatar--profile-sm" : "mem-avatar--profile";
+    return `<span class="${cls}" title="我的头像"><span class="mem-avatar--profile__text">TapTap<br>头像</span></span>`;
+  }
+  return escapeHtml(avatar.icon);
+}
 
 const MEM_SHOP = {
   frame: SHOP_ITEMS.frames[0],
@@ -459,9 +485,9 @@ function loadState() {
       activeStickerIdx: 0,
       // Legacy field (kept for migration)
       stickerId: "ms_star",
-      avatarId: "ma_bunny",
+      avatarId: "ma_me",
     },
-    memorialUnlocks: { colors: ["mc_cream"], stickers: ["ms_star"], avatars: ["ma_bunny"] },
+    memorialUnlocks: { colors: ["mc_cream"], stickers: ["ms_star"], avatars: ["ma_me", "ma_bunny"] },
     daily: { lotteryDayKey: "" },
     mutualMessages: {
       m1: [
@@ -485,6 +511,7 @@ function loadState() {
     firstRecapDone: false,
     firstRecapFlow: { phase: "snap", idx: 0 },
     firstRecapRun: { startPoints: 0, startCoupons: 0, doneModalShown: false },
+    capsule: { revealedLayers: [] },
   };
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -537,6 +564,8 @@ function loadState() {
     if (!Array.isArray(merged.memorialUnlocks.colors)) merged.memorialUnlocks.colors = [...fallback.memorialUnlocks.colors];
     if (!Array.isArray(merged.memorialUnlocks.stickers)) merged.memorialUnlocks.stickers = [...fallback.memorialUnlocks.stickers];
     if (!Array.isArray(merged.memorialUnlocks.avatars)) merged.memorialUnlocks.avatars = [...fallback.memorialUnlocks.avatars];
+    // 确保"我的头像"始终解锁
+    if (!merged.memorialUnlocks.avatars.includes("ma_me")) merged.memorialUnlocks.avatars.unshift("ma_me");
 
     merged.daily = { ...fallback.daily, ...(parsed?.daily || {}) };
     if (!merged.daily || typeof merged.daily !== "object") merged.daily = { ...fallback.daily };
@@ -555,6 +584,11 @@ function loadState() {
     merged.firstRecapRun.startPoints = Math.max(0, Number(merged.firstRecapRun.startPoints || 0));
     merged.firstRecapRun.startCoupons = Math.max(0, Number(merged.firstRecapRun.startCoupons || 0));
     merged.firstRecapRun.doneModalShown = !!merged.firstRecapRun.doneModalShown;
+
+    // 时间胶囊状态
+    if (!merged.capsule || typeof merged.capsule !== "object") merged.capsule = { ...fallback.capsule };
+    if (!Array.isArray(merged.capsule.revealedLayers)) merged.capsule.revealedLayers = [];
+
     return merged;
   } catch {
     return fallback;
@@ -688,7 +722,8 @@ const SNAP_REWARD_ALIASES = {
 function snapshotClaimGrant(s, rewardId) {
   const grants = s.careerSnapshot?.grants;
   const base = grants?.[rewardId];
-  if (!base) return null;
+  // 如果没有配置奖励（空状态卡片），返回保底10积分
+  if (!base) return { points: 10, coupons: 0 };
   const aliases = SNAP_REWARD_ALIASES[rewardId];
   if (!aliases?.length) return base;
 
@@ -734,6 +769,13 @@ function toast(msg) {
 const _modalAfterClose = [];
 
 function openModal({ title, bodyHtml, footerHtml, hideClose = false, lockClose = false, variant = "" }) {
+  // 清理 header 中之前注入的额外按钮（保留 #modalTitle 和 #modalClose）
+  const header = document.querySelector("#modal .modal__header");
+  if (header) {
+    Array.from(header.children).forEach((el) => {
+      if (el.id !== "modalTitle" && el.id !== "modalClose") el.remove();
+    });
+  }
   $("#modalTitle").textContent = title;
   $("#modalBody").innerHTML = bodyHtml || "";
   $("#modalFooter").innerHTML = footerHtml || "";
@@ -1172,7 +1214,7 @@ function pillClass(type) {
 }
 
 function fmt(n) {
-  return new Intl.NumberFormat("zh-CN").format(n);
+  return String(n);
 }
 
 // ---------- QR (pure JS, SVG output) ----------
@@ -1676,7 +1718,7 @@ function render() {
     setTimeout(() => {
       if (route === "recap") return scrollToId("section-recap");
       if (route === "discover") return scrollToId("section-discover");
-      if (route === "shop") return scrollToId("section-memorial");
+      if (route === "shop") { openShopModal(); return; }
       return;
     }, 60);
     return;
@@ -1775,26 +1817,44 @@ function setTopbarHeightVar() {
 }
 
 function stickyStatsView(s) {
+  const recap = s.careerSnapshot?.recap || recapDataForState(s);
+  const color = MEM_CARD_COLORS.find((c) => c.id === s.memorial?.colorId) || MEM_CARD_COLORS[0];
+  const avatar = MEM_AVATARS.find((x) => x.id === s.memorial?.avatarId) || MEM_AVATARS[0];
+  const stickersHtml = (Array.isArray(s.memorial?.stickers) ? s.memorial.stickers : [])
+    .slice(0, 4)
+    .map((st) => {
+      const id = String(st?.id || "").trim();
+      const def = MEM_STICKERS.find((x) => x.id === id) || MEM_STICKERS[0];
+      const x = Math.max(5, Math.min(95, Number(st?.x ?? 50)));
+      const y = Math.max(5, Math.min(95, Number(st?.y ?? 22)));
+      return `<span class="sticky-hub__sticker" style="left:${x}%; top:${y}%;">${escapeHtml(def.icon)}</span>`;
+    })
+    .join("");
   return `
     <section class="card sticky-stats__card" style="border-radius:0; box-shadow:none;">
-      <div class="row" style="gap:12px">
-        <div style="flex:1">
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px">
-            <div class="pill pill--brand" id="pillPoints">
-              积分 <b>${fmt(s.points)}</b>
-            </div>
-            <button class="link-btn" id="btnGoShop" type="button">我的十周年名片</button>
+      <div class="sticky-hub">
+        <div class="sticky-hub__left">
+          <div class="sticky-hub__thumb" id="btnOpenMemorial" role="button" tabindex="0" aria-label="编辑十周年名片" style="--mem-bg:${color.bg};">
+            <div class="sticky-hub__avatar">${avatarDisplayHtml(avatar, String(s.profile?.nickname || ""), { size: "small" })}</div>
+            ${stickersHtml}
           </div>
-          <div class="muted small">积分兑换装饰和参与点券抽奖</div>
+          <button class="link-btn" id="btnEditMemorial" type="button" style="font-size:11px; margin-top:4px">编辑十周年名片</button>
         </div>
-        <div style="flex:1">
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px">
-            <div class="pill" id="pillCoupons">
-              已得点券 <b>${fmt(s.walletCoupons || 0)}</b>
+        <div class="sticky-hub__info">
+          <div class="sticky-hub__row">
+            <div class="sticky-hub__stat">
+              <div class="pill pill--brand" id="pillPoints">积分 <b>${fmt(s.points)}</b></div>
+              <div class="muted small">积分兑换装饰和参与点券抽奖</div>
             </div>
-            <button class="link-btn" id="btnWallet" type="button">我的钱包</button>
+            <button class="link-btn" id="btnGoShop" type="button">积分商店入口</button>
           </div>
-          <div class="muted small">购买游戏、PC CDKey、云玩服务等</div>
+          <div class="sticky-hub__row">
+            <div class="sticky-hub__stat">
+              <div class="pill" id="pillCoupons">已得点券 <b>${fmt(s.walletCoupons || 0)}</b></div>
+              <div class="muted small">购买游戏、PC CDKey、云玩服务等</div>
+            </div>
+            <button class="link-btn" id="btnWallet" type="button">查看我的钱包</button>
+          </div>
         </div>
       </div>
     </section>
@@ -1813,11 +1873,10 @@ function stickyStatsLiteView(s) {
 }
 
 function wireStickyStats() {
-  $("#btnGoShop")?.addEventListener("click", () => {
-    if (getRoute() !== "home") navigate("home");
-    setTimeout(() => scrollToId("section-memorial"), 60);
-  });
+  $("#btnGoShop")?.addEventListener("click", () => openShopModal());
   $("#btnWallet")?.addEventListener("click", openWalletModal);
+  $("#btnOpenMemorial")?.addEventListener("click", () => openMemorialEditModal());
+  $("#btnEditMemorial")?.addEventListener("click", () => openMemorialEditModal());
 }
 
 function firstRecapView(s, recap) {
@@ -1858,23 +1917,20 @@ function firstRecapView(s, recap) {
 }
 
 function homeView(s, recap) {
+  const recapHtml = recapInlineView(s, recap, { sortUnclaimedFirst: false });
   return `
     <div class="home-module" id="section-recap">
-      ${recapInlineView(s, recap, { sortUnclaimedFirst: false })}
+      ${recapHtml}
     </div>
 
     ${discoverInlineView(s)}
-
-    <div class="home-module" id="section-memorial">
-      ${memorialInlineView(s, recap)}
-    </div>
   `;
+  // 十周年名片和积分商店已拆到顶部置顶区域的弹窗入口中
 }
 
 function wireHome() {
   wireRecapInline();
   wireDiscoverInline();
-  wireMemorialInline();
 }
 
 function dayKeyLocal(d = new Date()) {
@@ -1891,7 +1947,7 @@ function identityTitleForRecap(recap) {
   return "";
 }
 
-function memorialInlineView(s, recap) {
+function memorialInlineView(s, recap, { editOnly = false } = {}) {
   const prof = s.profile || { nickname: "玩家", id: "—", identity: "", bio: "" };
   const nickname = String(prof.nickname || "").trim() || "玩家";
   const pid = String(prof.id || "").trim() || "—";
@@ -1982,7 +2038,9 @@ function memorialInlineView(s, recap) {
     optionBtn({
       id: av.id,
       kind: "avatar",
-      icon: av.icon,
+      icon: av.isProfileAvatar
+        ? `<span class="mem-opt__profile-ico">TapTap<br>头像</span>`
+        : av.icon,
       active: (s.memorial?.avatarId || "") === av.id,
       used: (s.memorial?.avatarId || "") === av.id,
       locked: !isUnlockedKind("avatar", av.id),
@@ -2006,16 +2064,7 @@ function memorialInlineView(s, recap) {
     ? `<button class="btn" id="btnMemLottery" disabled>今日已抽</button>`
     : `<button class="btn btn--brand" id="btnMemLottery">${fmt(MEM_SHOP.lottery.cost)}积分抽</button>`;
 
-  return `
-    <section class="card">
-      <div class="row">
-        <p class="h1 grow">十周年名片</p>
-        <button class="btn btn--brand" id="btnShareMemorial" type="button" style="min-height:36px; padding:8px 10px">分享</button>
-      </div>
-      <p class="muted small" style="margin:6px 0 0">用积分兑换装饰，DIY 一张属于你的纪念卡。</p>
-
-      <div class="divider"></div>
-
+  const cardHtml = `
       <div class="mem-card-shell" style="--mem-bg:${color.bg}; --mem-panel:${color.panel}; --mem-accent:${color.accent};">
         <div class="mem-card">
           <div class="mem-stickers" aria-label="贴纸">
@@ -2051,7 +2100,7 @@ function memorialInlineView(s, recap) {
           </div>
 
           <div class="mem-photo">
-            <div class="mem-avatar" aria-label="角色">${escapeHtml(avatar.icon)}</div>
+            <div class="mem-avatar" aria-label="角色">${avatarDisplayHtml(avatar, nickname)}</div>
           </div>
 
           <div class="mem-fields">
@@ -2074,7 +2123,9 @@ function memorialInlineView(s, recap) {
           ${bio ? `<div class="mem-slogan">${escapeHtml(bio)}</div>` : ""}
         </div>
       </div>
+  `;
 
+  const diyHtml = `
       <div class="mem-diy">
       <div class="mem-tabs" role="tablist" aria-label="DIY 选项">
         ${tabBtn("color", "背景")}
@@ -2091,10 +2142,13 @@ function memorialInlineView(s, recap) {
           <div class="mem-grid" style="margin-top:10px">${stickerOpts}</div>
         </div>
         <div class="mem-panel ${tab === "avatar" ? "" : "hidden"}" data-mem-panel="avatar">
-          <div class="mem-grid">${avatarOpts}</div>
+          <div class="muted small" style="margin-top:2px">选择名片上展示的角色形象。</div>
+          <div class="mem-grid" style="margin-top:10px">${avatarOpts}</div>
         </div>
       </div>
+  `;
 
+  const shopHtml = `
       <div class="divider"></div>
       <div class="list">
         <div class="item">
@@ -2133,6 +2187,25 @@ function memorialInlineView(s, recap) {
           </div>
         </div>
       </div>
+  `;
+
+  // editOnly 模式：只返回名片 + DIY 选项（用于弹窗编辑）
+  if (editOnly) {
+    return `<div>${cardHtml}${diyHtml}</div>`;
+  }
+
+  return `
+    <section class="card">
+      <div class="row">
+        <p class="h1 grow">十周年名片</p>
+        <button class="btn btn--brand" id="btnShareMemorial" type="button" style="min-height:36px; padding:8px 10px">分享</button>
+      </div>
+      <p class="muted small" style="margin:6px 0 0">用积分兑换装饰，DIY 一张属于你的纪念卡。</p>
+
+      <div class="divider"></div>
+      ${cardHtml}
+      ${diyHtml}
+      ${shopHtml}
     </section>
   `;
 }
@@ -2307,7 +2380,7 @@ function memorialCardOnlyHtml(s, recap, { hideProfileFields = false } = {}) {
         </div>
 
         <div class="mem-photo">
-          <div class="mem-avatar" aria-label="角色">${escapeHtml(avatar.icon)}</div>
+          <div class="mem-avatar" aria-label="角色">${avatarDisplayHtml(avatar, nickname)}</div>
         </div>
 
         <div class="mem-fields">
@@ -2373,7 +2446,23 @@ function openShareMemorialModal({ onClose } = {}) {
     <button class="btn btn--brand" id="btnDownloadShareImg" type="button">下载图片</button>
   `;
 
-  openModal({ title: "TapTap十周年名片", bodyHtml: body, footerHtml: footer });
+  openModal({ title: "分享我的十周年名片", bodyHtml: body, footerHtml: footer });
+
+  // 在关闭按钮旁插入「返回我的名片」按钮
+  const shareHeader = document.querySelector("#modal .modal__header");
+  if (shareHeader && !shareHeader.querySelector("#btnBackToMemorial")) {
+    const backBtn = document.createElement("button");
+    backBtn.className = "btn btn--ghost";
+    backBtn.id = "btnBackToMemorial";
+    backBtn.type = "button";
+    backBtn.style.cssText = "min-height:32px; padding:6px 10px; font-size:11px; margin-right:6px;";
+    backBtn.textContent = "返回我的名片";
+    shareHeader.querySelector("#modalClose")?.before(backBtn);
+    backBtn.addEventListener("click", () => {
+      closeModal();
+      openMemorialEditModal();
+    });
+  }
 
   $("#btnShareTo")?.addEventListener("click", async () => {
     const text = shareMemorialTextForShare();
@@ -2446,7 +2535,12 @@ function openShareMemorialModal({ onClose } = {}) {
 
         ${stickers}
 
-        <text x="${cardX + 120}" y="${cardY + 170}" font-size="96">${escapeXml(avatar.icon)}</text>
+        ${avatar.isProfileAvatar
+          ? `<rect x="${cardX + 68}" y="${cardY + 88}" width="104" height="104" rx="22" fill="#FFFFFF" stroke="rgba(15,23,42,0.10)" stroke-width="2"/>
+             <text x="${cardX + 120}" y="${cardY + 135}" font-size="22" font-weight="800" fill="rgba(15,23,42,0.45)" text-anchor="middle">TapTap</text>
+             <text x="${cardX + 120}" y="${cardY + 165}" font-size="22" font-weight="800" fill="rgba(15,23,42,0.45)" text-anchor="middle">头像</text>`
+          : `<text x="${cardX + 120}" y="${cardY + 170}" font-size="96">${escapeXml(avatar.icon)}</text>`
+        }
         <text x="${cardX + 120}" y="${cardY + 520}" font-size="28" font-weight="800" fill="#0F172A">昵称</text>
         <text x="${cardX + 120}" y="${cardY + 580}" font-size="44" font-weight="900" fill="#0F172A">${escapeXml(nick)}</text>
         <text x="${cardX + 120}" y="${cardY + 670}" font-size="28" font-weight="800" fill="#0F172A">ID</text>
@@ -2581,8 +2675,439 @@ function wireSharePage() {
   });
 }
 
-function wireMemorialInline() {
+function openMemorialEditModal() {
+  const recap = state.careerSnapshot?.recap || recapDataForState(state);
+  const body = memorialInlineView(state, recap, { editOnly: true });
+  openModal({ title: "十周年名片", bodyHtml: body, footerHtml: "" });
+  // 在弹窗 header 的关闭按钮旁插入「保存为图片」和「分享」按钮
+  const header = document.querySelector("#modal .modal__header");
+  if (header) {
+    const closeBtnEl = header.querySelector("#modalClose");
+    if (!header.querySelector("#btnSaveImage")) {
+      const saveImgBtn = document.createElement("button");
+      saveImgBtn.className = "btn btn--brand";
+      saveImgBtn.id = "btnSaveImage";
+      saveImgBtn.type = "button";
+      saveImgBtn.style.cssText = "min-height:32px; padding:6px 12px; font-size:12px; margin-right:4px;";
+      saveImgBtn.textContent = "保存为图片";
+      closeBtnEl?.before(saveImgBtn);
+    }
+    if (!header.querySelector("#btnShareMemorial")) {
+      const shareBtn = document.createElement("button");
+      shareBtn.className = "btn btn--brand";
+      shareBtn.id = "btnShareMemorial";
+      shareBtn.type = "button";
+      shareBtn.style.cssText = "min-height:32px; padding:6px 12px; font-size:12px; margin-right:8px;";
+      shareBtn.textContent = "分享";
+      closeBtnEl?.before(shareBtn);
+    }
+  }
+  wireMemorialInline({ inModal: true });
+}
+
+/* ── 存图功能 ──────────────────────────────────── */
+
+/** 从 CSS bg 字符串末尾提取纯色值，如 "radial-gradient(...), #F7E3C5" → "#F7E3C5" */
+function extractSolidColor(cssBg) {
+  const m = cssBg.match(/#[0-9A-Fa-f]{3,8}(?:\s*$)/);
+  if (m) return m[0].trim();
+  const m2 = cssBg.match(/(rgba?\([^)]+\))\s*$/);
+  if (m2) return m2[1];
+  return "#FFFFFF";
+}
+
+function openSaveImageModal() {
+  const s = state;
+  const prof = s.profile || { nickname: "玩家", id: "—", identity: "", bio: "" };
+  const nickname = String(prof.nickname || "").trim() || "玩家";
+  const pid = String(prof.id || "").trim() || "—";
+  const identity = String(prof.identity || "").trim() || identityTitleForRecap(s.careerSnapshot?.recap || recapDataForState(s));
+  const bio = String(prof.bio || "").trim();
+  const color = MEM_CARD_COLORS.find((c) => c.id === s.memorial?.colorId) || MEM_CARD_COLORS[0];
+  const avatar = MEM_AVATARS.find((x) => x.id === s.memorial?.avatarId) || MEM_AVATARS[0];
+  const frameEquipped = s.equipped.frame === MEM_SHOP.frame.id;
+  const badgeEquipped = s.equipped.badge === MEM_SHOP.badge.id;
+  const stickerList = (Array.isArray(s.memorial?.stickers) ? s.memorial.stickers : []).slice(0, 10);
+
+  // 从 CSS 渐变字符串中提取可用的纯色
+  const bgSolid = extractSolidColor(color.bg);
+  const bgPanel = color.panel || "#FFFFFF";
+  const bgAccent = color.accent || "#00b894";
+
+  const body = `
+    <div class="save-img">
+      <div class="save-img__preview-area">
+        <div class="save-img__canvas-wrap" id="canvasWrap">
+          <canvas id="saveImgCanvas"></canvas>
+          <div class="save-img__crop-ring" id="cropRing"></div>
+        </div>
+      </div>
+
+      <div class="save-img__controls">
+        <div class="save-img__section">
+          <div class="save-img__label">显示内容</div>
+          <div class="save-img__checks">
+            <label class="save-img__check"><input type="checkbox" id="chkBg" checked> 背景</label>
+            <label class="save-img__check"><input type="checkbox" id="chkSticker" checked> 贴纸</label>
+            <label class="save-img__check"><input type="checkbox" id="chkAvatar" checked> 角色</label>
+          </div>
+        </div>
+
+        <div class="save-img__section">
+          <div class="save-img__label">裁剪形状</div>
+          <div class="save-img__shapes">
+            <button class="btn save-img__shape-btn save-img__shape-btn--active" data-shape="square" type="button">◻ 方形</button>
+            <button class="btn save-img__shape-btn" data-shape="circle" type="button">◯ 圆形</button>
+          </div>
+        </div>
+
+        <div class="save-img__section" id="sizeSquareSection">
+          <div class="save-img__label">宽度</div>
+          <input type="range" id="cropW" class="save-img__range" min="20" max="100" value="80">
+          <span class="save-img__val" id="valW">80%</span>
+        </div>
+        <div class="save-img__section" id="sizeSquareSection2">
+          <div class="save-img__label">高度</div>
+          <input type="range" id="cropH" class="save-img__range" min="20" max="100" value="80">
+          <span class="save-img__val" id="valH">80%</span>
+        </div>
+        <div class="save-img__section hidden" id="sizeCircleSection">
+          <div class="save-img__label">大小</div>
+          <input type="range" id="cropD" class="save-img__range" min="20" max="100" value="80">
+          <span class="save-img__val" id="valD">80%</span>
+        </div>
+
+        <button class="btn btn--brand save-img__download" id="btnDownloadImg" type="button">保存图片</button>
+      </div>
+    </div>
+  `;
+
+  openModal({ title: "保存为图片", bodyHtml: body, footerHtml: "" });
+  // header 加入「返回名片」按钮
+  const header = document.querySelector("#modal .modal__header");
+  if (header && !header.querySelector("#btnBackToMemorial")) {
+    const backBtn = document.createElement("button");
+    backBtn.className = "btn";
+    backBtn.id = "btnBackToMemorial";
+    backBtn.type = "button";
+    backBtn.style.cssText = "min-height:32px; padding:6px 12px; font-size:12px; margin-right:8px;";
+    backBtn.textContent = "返回名片";
+    header.querySelector("#modalClose")?.before(backBtn);
+    backBtn.addEventListener("click", () => openMemorialEditModal());
+  }
+
+  // ── 状态 ──
+  let showBg = true;
+  let showSticker = true;
+  let showAvatar = true;
+  let cropShape = "square";
+  let cropWPct = 80;   // 方形：宽%
+  let cropHPct = 80;   // 方形：高%
+  let cropDPct = 80;   // 圆形：直径%
+  let cropCx = 50;     // 裁剪中心 x%
+  let cropCy = 50;     // 裁剪中心 y%
+
+  const canvas = $("#saveImgCanvas");
+  const ctx = canvas?.getContext("2d");
+  const cropRing = $("#cropRing");
+  const canvasWrap = $("#canvasWrap");
+  if (!canvas || !ctx || !canvasWrap) return;
+
+  const CARD_W = 600;
+  const CARD_H = 600;
+  canvas.width = CARD_W;
+  canvas.height = CARD_H;
+
+  // ── 绘制名片到 canvas ──
+  function drawCard() {
+    ctx.clearRect(0, 0, CARD_W, CARD_H);
+
+    // 背景
+    if (showBg) {
+      // 底色
+      ctx.fillStyle = bgSolid;
+      ctx.fillRect(0, 0, CARD_W, CARD_H);
+      // 叠加渐变装饰
+      ctx.save();
+      const g1 = ctx.createRadialGradient(CARD_W * 0.2, 0, 0, CARD_W * 0.2, 0, CARD_W * 0.7);
+      g1.addColorStop(0, "rgba(255,255,255,0.32)");
+      g1.addColorStop(1, "transparent");
+      ctx.fillStyle = g1;
+      ctx.fillRect(0, 0, CARD_W, CARD_H);
+      const g2 = ctx.createRadialGradient(CARD_W * 0.8, CARD_H * 0.1, 0, CARD_W * 0.8, CARD_H * 0.1, CARD_W * 0.6);
+      g2.addColorStop(0, bgAccent + "18");
+      g2.addColorStop(1, "transparent");
+      ctx.fillStyle = g2;
+      ctx.fillRect(0, 0, CARD_W, CARD_H);
+      ctx.restore();
+    } else {
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, 0, CARD_W, CARD_H);
+    }
+
+    // 角色（居中显示）
+    if (showAvatar) {
+      const avX = CARD_W / 2, avY = CARD_H / 2;
+      if (avatar.isProfileAvatar) {
+        ctx.save();
+        // 白底方块
+        const boxS = 100;
+        const bx = avX - boxS / 2, by = avY - boxS / 2;
+        ctx.fillStyle = "#FFFFFF";
+        ctx.strokeStyle = "rgba(15,23,42,0.10)";
+        ctx.lineWidth = 2;
+        roundRect(ctx, bx, by, boxS, boxS, 20);
+        ctx.fill();
+        ctx.stroke();
+        // 文字
+        ctx.fillStyle = "rgba(15,23,42,0.45)";
+        ctx.font = "bold 20px system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("TapTap", avX, avY - 10);
+        ctx.fillText("头像", avX, avY + 16);
+        ctx.restore();
+      } else {
+        ctx.save();
+        ctx.font = "80px serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(avatar.icon, avX, avY);
+        ctx.restore();
+      }
+    }
+
+    // 贴纸
+    if (showSticker && stickerList.length) {
+      stickerList.forEach((st) => {
+        const id = String(st?.id || "").trim();
+        const def = MEM_STICKERS.find((x) => x.id === id) || MEM_STICKERS[0];
+        const sx = (Number(st?.x ?? 50) / 100) * CARD_W;
+        const sy = (Number(st?.y ?? 22) / 100) * CARD_H;
+        const sc = Math.max(0.6, Math.min(1.8, Number(st?.s ?? 1)));
+        const r = Number(st?.r ?? 0) * Math.PI / 180;
+        ctx.save();
+        ctx.translate(sx, sy);
+        ctx.rotate(r);
+        ctx.font = `${Math.round(40 * sc)}px serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(def.icon, 0, 0);
+        ctx.restore();
+      });
+    }
+
+    // 文本信息不绘制，存图仅保留视觉元素（背景/贴纸/角色）
+  }
+
+  /** Canvas 圆角矩形辅助 */
+  function roundRect(c, x, y, w, h, r) {
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.lineTo(x + w - r, y);
+    c.quadraticCurveTo(x + w, y, x + w, y + r);
+    c.lineTo(x + w, y + h - r);
+    c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    c.lineTo(x + r, y + h);
+    c.quadraticCurveTo(x, y + h, x, y + h - r);
+    c.lineTo(x, y + r);
+    c.quadraticCurveTo(x, y, x + r, y);
+    c.closePath();
+  }
+
+  // ── 裁剪框更新 ──
+  function clampCenter() {
+    if (cropShape === "circle") {
+      const half = cropDPct / 2;
+      cropCx = Math.max(half, Math.min(100 - half, cropCx));
+      cropCy = Math.max(half, Math.min(100 - half, cropCy));
+    } else {
+      const halfW = cropWPct / 2, halfH = cropHPct / 2;
+      cropCx = Math.max(halfW, Math.min(100 - halfW, cropCx));
+      cropCy = Math.max(halfH, Math.min(100 - halfH, cropCy));
+    }
+  }
+
+  function updateCropRing() {
+    if (!cropRing) return;
+    clampCenter();
+    if (cropShape === "circle") {
+      cropRing.style.width = cropDPct + "%";
+      cropRing.style.height = cropDPct + "%";
+      cropRing.style.borderRadius = "50%";
+    } else {
+      cropRing.style.width = cropWPct + "%";
+      cropRing.style.height = cropHPct + "%";
+      cropRing.style.borderRadius = "8px";
+    }
+    cropRing.style.left = cropCx + "%";
+    cropRing.style.top = cropCy + "%";
+  }
+
+  function updateSizeUI() {
+    const sqSec1 = $("#sizeSquareSection");
+    const sqSec2 = $("#sizeSquareSection2");
+    const cirSec = $("#sizeCircleSection");
+    if (cropShape === "square") {
+      sqSec1?.classList.remove("hidden");
+      sqSec2?.classList.remove("hidden");
+      cirSec?.classList.add("hidden");
+    } else {
+      sqSec1?.classList.add("hidden");
+      sqSec2?.classList.add("hidden");
+      cirSec?.classList.remove("hidden");
+    }
+  }
+
+  function redraw() {
+    drawCard();
+    updateCropRing();
+  }
+
+  // ── 事件：勾选 ──
+  $("#chkBg")?.addEventListener("change", (e) => { showBg = e.target.checked; redraw(); });
+  $("#chkSticker")?.addEventListener("change", (e) => { showSticker = e.target.checked; redraw(); });
+  $("#chkAvatar")?.addEventListener("change", (e) => { showAvatar = e.target.checked; redraw(); });
+
+  // ── 事件：形状切换 ──
+  $$("[data-shape]").forEach((b) => b.addEventListener("click", () => {
+    cropShape = b.dataset.shape || "square";
+    $$("[data-shape]").forEach((x) => x.classList.toggle("save-img__shape-btn--active", x.dataset.shape === cropShape));
+    updateSizeUI();
+    redraw();
+  }));
+
+  // ── 事件：大小滑块 ──
+  $("#cropW")?.addEventListener("input", (e) => { cropWPct = Number(e.target.value) || 80; $("#valW").textContent = cropWPct + "%"; redraw(); });
+  $("#cropH")?.addEventListener("input", (e) => { cropHPct = Number(e.target.value) || 80; $("#valH").textContent = cropHPct + "%"; redraw(); });
+  $("#cropD")?.addEventListener("input", (e) => { cropDPct = Number(e.target.value) || 80; $("#valD").textContent = cropDPct + "%"; redraw(); });
+
+  // ── 事件：拖拽裁剪框中心 ──
+  {
+    let dragging = false;
+    let startMx = 0, startMy = 0;
+    let startCx = 0, startCy = 0;
+
+    const onPointerDown = (e) => {
+      dragging = true;
+      startMx = e.clientX;
+      startMy = e.clientY;
+      startCx = cropCx;
+      startCy = cropCy;
+      cropRing.setPointerCapture(e.pointerId);
+      cropRing.style.cursor = "grabbing";
+      e.preventDefault();
+    };
+    const onPointerMove = (e) => {
+      if (!dragging) return;
+      const rect = canvasWrap.getBoundingClientRect();
+      const dx = ((e.clientX - startMx) / rect.width) * 100;
+      const dy = ((e.clientY - startMy) / rect.height) * 100;
+      cropCx = startCx + dx;
+      cropCy = startCy + dy;
+      updateCropRing();
+    };
+    const onPointerUp = () => {
+      dragging = false;
+      cropRing.style.cursor = "";
+    };
+    cropRing.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+  }
+
+  // ── 下载 ──
+  $("#btnDownloadImg")?.addEventListener("click", () => {
+    const exportLong = 1200;
+    const off = document.createElement("canvas");
+    const octx = off.getContext("2d");
+    if (!octx) return;
+
+    clampCenter();
+
+    if (cropShape === "circle") {
+      const srcD = Math.round(CARD_W * cropDPct / 100);
+      const srcX = Math.round(CARD_W * cropCx / 100 - srcD / 2);
+      const srcY = Math.round(CARD_H * cropCy / 100 - srcD / 2);
+      off.width = exportLong;
+      off.height = exportLong;
+      octx.beginPath();
+      octx.arc(exportLong / 2, exportLong / 2, exportLong / 2, 0, Math.PI * 2);
+      octx.closePath();
+      octx.clip();
+      octx.drawImage(canvas, srcX, srcY, srcD, srcD, 0, 0, exportLong, exportLong);
+    } else {
+      const srcW = Math.round(CARD_W * cropWPct / 100);
+      const srcH = Math.round(CARD_H * cropHPct / 100);
+      const srcX = Math.round(CARD_W * cropCx / 100 - srcW / 2);
+      const srcY = Math.round(CARD_H * cropCy / 100 - srcH / 2);
+      // 按较长边缩放到 exportLong
+      const aspect = srcW / srcH;
+      let outW, outH;
+      if (aspect >= 1) { outW = exportLong; outH = Math.round(exportLong / aspect); }
+      else { outH = exportLong; outW = Math.round(exportLong * aspect); }
+      off.width = outW;
+      off.height = outH;
+      octx.drawImage(canvas, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
+    }
+
+    off.toBlob((blob) => {
+      if (!blob) return toast("导出失败");
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `taptap-10y-card-${Date.now()}.png`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      toast("图片已保存");
+    }, "image/png");
+  });
+
+  // 首次绘制
+  updateSizeUI();
+  redraw();
+}
+
+function openShopModal() {
+  const body = shopModalView(state);
+  openModal({ title: "积分商店", bodyHtml: body, footerHtml: "" });
+  wireShop({ inModal: true });
+}
+
+function shopModalView(s) {
+  const frameCards = SHOP_ITEMS.frames.map((f) => shopItemCard("frame", f, s)).join("");
+  const badgeCards = SHOP_ITEMS.badges.map((b) => shopItemCard("badge", b, s)).join("");
+  const today = dayKeyLocal();
+  const already = String(s.daily?.lotteryDayKey || "") === today;
+  return `
+    <div>
+      <div style="margin-bottom:12px">
+        <span class="pill pill--brand">当前积分：<b>${fmt(s.points)}</b></span>
+      </div>
+      <div class="list">${frameCards}</div>
+      <div class="divider"></div>
+      <div class="list">${badgeCards}</div>
+      <div class="divider"></div>
+      <div class="item" style="margin-top:10px">
+        <div class="row">
+          <div class="grow">
+            <div class="item__title">${SHOP_ITEMS.lottery.title}</div>
+            <div class="item__desc">每日限 1 次，消耗 ${SHOP_ITEMS.lottery.cost} 积分抽取点券（可能抽不到）。</div>
+          </div>
+          <span class="pill">-${SHOP_ITEMS.lottery.cost} 积分</span>
+        </div>
+        <div class="item__meta">
+          <span class="tag">${already ? "今天已抽" : "今日可抽"}</span>
+          <button class="btn btn--brand" id="btnLottery" ${already ? "disabled" : ""}>${already ? "今日已抽" : "每日抽一次"}</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function wireMemorialInline({ inModal = false } = {}) {
   $("#btnShareMemorial")?.addEventListener("click", () => openShareMemorialModal());
+  $("#btnSaveImage")?.addEventListener("click", () => openSaveImageModal());
 
   const MEM_PRICING = { color: 20, sticker: 15, avatar: 30 };
   const unlockKindMap = { color: "colors", sticker: "stickers", avatar: "avatars" };
@@ -2622,7 +3147,7 @@ function wireMemorialInline() {
       if (!["color", "sticker", "avatar"].includes(t)) return;
       state.memorial.tab = t;
       saveState();
-      render();
+      if (inModal) { openMemorialEditModal(); } else { render(); }
     }),
   );
 
@@ -2632,7 +3157,7 @@ function wireMemorialInline() {
     return state.memorialUnlocks[k];
   };
   const ensureStickers = () => {
-    if (!state.memorial || typeof state.memorial !== "object") state.memorial = { tab: "color", colorId: "mc_cream", stickers: [], activeStickerIdx: 0, stickerId: "", avatarId: "ma_bunny" };
+    if (!state.memorial || typeof state.memorial !== "object") state.memorial = { tab: "color", colorId: "mc_cream", stickers: [], activeStickerIdx: 0, stickerId: "", avatarId: "ma_me" };
     if (!Array.isArray(state.memorial.stickers)) state.memorial.stickers = [];
     return state.memorial.stickers;
   };
@@ -2671,6 +3196,9 @@ function wireMemorialInline() {
     }
     return applyStickerOnce(sid);
   };
+  const refreshAfterChange = () => {
+    if (inModal) { openMemorialEditModal(); } else { render(); }
+  };
   const setOrBuy = (kind, id) => {
     const k = unlockKindMap[kind];
     const list = ensureUnlockList(k);
@@ -2683,7 +3211,7 @@ function wireMemorialInline() {
       }
       if (kind === "avatar") state.memorial.avatarId = id;
       saveState();
-      render();
+      refreshAfterChange();
       return;
     }
     const cost = MEM_PRICING[kind] || 0;
@@ -2702,8 +3230,8 @@ function wireMemorialInline() {
         if (kind === "avatar") state.memorial.avatarId = id;
         saveState();
         closeModal();
-        render();
         toast("已解锁并应用");
+        refreshAfterChange();
       },
     });
   };
@@ -2827,8 +3355,8 @@ function wireMemorialInline() {
             state.equipped.frame = item.id;
             saveState();
             closeModal();
-            render();
             toast(`已兑换：${item.title}`);
+            refreshAfterChange();
           },
         });
       }
@@ -2844,8 +3372,8 @@ function wireMemorialInline() {
             state.equipped.badge = item.id;
             saveState();
             closeModal();
-            render();
             toast(`已兑换：${item.title}`);
+            refreshAfterChange();
           },
         });
       }
@@ -2858,8 +3386,8 @@ function wireMemorialInline() {
       if (kind === "frame") state.equipped.frame = MEM_SHOP.frame.id;
       if (kind === "badge") state.equipped.badge = MEM_SHOP.badge.id;
       saveState();
-      render();
       toast("已设置为当前");
+      refreshAfterChange();
     }),
   );
 
@@ -2879,7 +3407,7 @@ function wireMemorialInline() {
         if (add > 0) addCoupons(state, add);
         saveState();
         closeModal();
-        render();
+        refreshAfterChange();
         openLotteryResultModal({ hit, add, cost: MEM_SHOP.lottery.cost });
       },
     });
@@ -3782,7 +4310,38 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         Number(snap.creatorWorks || 0) > 0,
     },
   ];
-  let snapshotCards = snapshotCardsAll.filter((c) => c.visible);
+  // 无数据卡片的温暖提示（15 字以内）
+  const emptyHints = {
+    snap_reg_active:  "旅程才刚开始<br>欢迎来到TapTap",
+    snap_downloads:   "好游戏等你发现",
+    snap_spend:       "好物等你来挑",
+    snap_badges:      "徽章等你来集",
+    snap_top3games:   "精彩旅程待开启",
+    snap_genre_tags:  "偏好等你来解锁",
+    snap_pc_play:     "PC 之旅待启程",
+    snap_cloud_play:  "云端之旅待开启",
+    snap_achievements:"成就等你解锁",
+    snap_leaderboards:"榜单等你来冲",
+    snap_night_game:  "好梦不打扰",
+    snap_reviews:     "你的声音很珍贵",
+    snap_top_review:  "期待你的好评",
+    snap_zuiti:       "等你来发声",
+    snap_niche:       "宝藏等你发掘",
+    snap_critic:      "期待你的品鉴",
+    snap_forum_stats: "社区等你来聊",
+    snap_top_post:    "好内容等你发现",
+    snap_night_community: "早点休息也挺好",
+    snap_friend_msgs: "好友等你来交",
+    snap_dev_games:   "期待你的创作",
+    snap_gamejam:     "创意等你绽放",
+    snap_creator:     "期待你的灵感",
+  };
+
+  let snapshotCards = snapshotCardsAll.map((c) => {
+    if (c.visible) return c;
+    const hint = emptyHints[c.rewardId] || "未来可期";
+    return { ...c, value: "", emptyHint: hint };
+  });
   if (sortUnclaimedFirst) {
     snapshotCards = snapshotCards
       .map((c, i) => ({ c, i }))
@@ -3869,14 +4428,22 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
   `;
 
   return `
-    <section class="card">
-      <div class="row">
-        <div class="grow">
-          <p class="h1">我的TapTap十年回顾</p>
+    <section class="card recap-card">
+      <div class="recap-card__hero">
+        <div class="home-hero__deco" aria-hidden="true">
+          <span class="home-hero__spark s1"></span>
+          <span class="home-hero__spark s2"></span>
+          <span class="home-hero__spark s3"></span>
+          <span class="home-hero__spark s4"></span>
+          <span class="home-hero__ring"></span>
         </div>
-        <button class="btn btn--brand" id="btnToggleShare" type="button" style="min-height:36px; padding:8px 10px">分享</button>
+        <div class="home-hero__text">
+          <div class="home-hero__title">🎉 十年有你</div>
+          <div class="home-hero__sub">回顾你与 TapTap 一起走过的时光</div>
+          <div class="home-hero__note">数据统计截止到 2026年4月17日</div>
+        </div>
+        <button class="btn btn--brand recap-card__share" id="btnToggleShare" type="button">分享</button>
       </div>
-
       <div class="divider"></div>
       ${snapshotSection}
       ${bindSection}
@@ -3891,15 +4458,18 @@ function grantPillsHtml(grant) {
   return parts.join(" ");
 }
 
-function rewardBlockHtml(rewardId, s, recap) {
+function rewardBlockHtml(rewardId, s, recap, isEmpty = false) {
   const claimed = hasClaimed(s, rewardId);
 
   // Snapshot rewards: visible cards are always claimable (no “未达成”)
   if (String(rewardId).startsWith("snap_")) {
     const baseGrant = s.careerSnapshot?.grants?.[rewardId];
-    if (!baseGrant) return "";
-    const claimGrant = snapshotClaimGrant(s, rewardId) || baseGrant;
-    const grant = claimed ? baseGrant : claimGrant;
+    // 空状态卡片保底10积分
+    const defaultGrant = isEmpty ? { points: 10, coupons: 0 } : null;
+    const finalBaseGrant = baseGrant || defaultGrant;
+    if (!finalBaseGrant) return "";
+    const claimGrant = snapshotClaimGrant(s, rewardId) || finalBaseGrant;
+    const grant = claimed ? finalBaseGrant : claimGrant;
     const btn = claimed
       ? `<button class="btn" disabled>已领</button>`
       : `<button class="btn btn--brand" data-claim="${rewardId}">领取</button>`;
@@ -4007,12 +4577,22 @@ function rewardBlockHtml(rewardId, s, recap) {
 
 function miniCardHtml(card, idx, s, recap) {
   const kindClass = String(card.rewardId || "").startsWith("bind_") ? "mini-card--bind" : "mini-card--snap";
+  const isEmpty = !!card.emptyHint;
+  if (isEmpty) {
+    return `
+      <div class="mini-card ${kindClass} mini-card--empty" role="listitem" data-card-idx="${idx}" data-reward-id="${escapeHtml(card.rewardId || "")}">
+        <div class="mini-card__k">${card.label}</div>
+        <div class="mini-card__empty-hint">${card.emptyHint}</div>
+        ${rewardBlockHtml(card.rewardId, s, recap, true)}
+      </div>
+    `;
+  }
   return `
     <div class="mini-card ${kindClass}" role="listitem" data-card-idx="${idx}" data-reward-id="${escapeHtml(card.rewardId || "")}">
       <div class="mini-card__k">${card.label}</div>
       ${card.value ? `<div class="mini-card__v">${card.value}</div>` : ""}
       ${kindClass === "mini-card--bind" && card.desc ? `<div class="mini-card__d">${card.desc}</div>` : ""}
-      ${rewardBlockHtml(card.rewardId, s, recap)}
+      ${rewardBlockHtml(card.rewardId, s, recap, false)}
     </div>
   `;
 }
@@ -4776,20 +5356,6 @@ function openBindRolesModal() {
 }
 
 function discoverInlineView(s) {
-  const getTopLiked = (gameId) => {
-    const arr = s.mutualMessages?.[gameId] || [];
-    return arr
-      .slice()
-      .filter((m) => String(m?.text || "").trim())
-      .sort((a, b) => Number(b.likes || 0) - Number(a.likes || 0))
-      .slice(0, 6);
-  };
-  const cut16 = (str) => {
-    const arr = Array.from(String(str || "").trim());
-    const MAX = 24;
-    if (arr.length <= MAX) return arr.join("");
-    return `${arr.slice(0, MAX).join("")}...`;
-  };
   const iconChar = (name) => {
     const raw = String(name || "").trim();
     if (!raw) return "";
@@ -4798,51 +5364,68 @@ function discoverInlineView(s) {
     const cleaned = inside.replace(/^TapTap制造[:：]/, "").split(/[:：]/).pop().trim();
     return Array.from(cleaned)[0] || "";
   };
-  const mutualList = MUTUAL_GAMES.map((g) => {
-    const tags = (g.tags || []).slice(0, 4).map((t) => `<span class="tag">${t}</span>`).join("");
-    const top = getTopLiked(g.id);
-    const marquee = top.length
-      ? `
-        <div class="marquee" aria-label="高赞留言">
-          <div class="marquee__track">
-            ${top.map((m) => `<button type="button" class="marquee__item marquee__item--btn" data-mutual-marquee="${g.id}" data-mutual-comment="${escapeHtml(String(m.text || ""))}" data-mutual-likes="${Number(m.likes || 0)}">👍 ${fmt(Number(m.likes || 0))} ${escapeHtml(cut16(m.text))}</button>`).join("")}
-            ${top.map((m) => `<button type="button" class="marquee__item marquee__item--btn" data-mutual-marquee="${g.id}" data-mutual-comment="${escapeHtml(String(m.text || ""))}" data-mutual-likes="${Number(m.likes || 0)}">👍 ${fmt(Number(m.likes || 0))} ${escapeHtml(cut16(m.text))}</button>`).join("")}
-          </div>
-        </div>
-      `
-      : `
-        <div class="marquee" aria-label="高赞留言">
-          <div class="marquee__track marquee__track--static">
-            <span class="marquee__item">还没有热评，快来留言做第一个上墙的人吧</span>
-          </div>
+
+  // ── 时间胶囊 ──
+  const revealed = s.capsule?.revealedLayers || [];
+  const allDone = revealed.length >= MUTUAL_GAMES.length;
+  const nextIdx = revealed.length;
+
+  const capsuleHtml = (() => {
+    if (allDone) {
+      // 全部拆完：2x2 游戏展台
+      const grid = MUTUAL_GAMES.map((g) => {
+        const tags = (g.tags || []).slice(0, 3).map((t) => `<span class="tag">${t}</span>`).join("");
+        const score = Number(g.score || 0);
+        return `
+          <button class="capsule-card capsule-card--done" type="button" data-capsule-game="${g.id}" style="--layer-color:${g.layerColor}">
+            <div class="capsule-card__icon">${g.icon}</div>
+            <div class="capsule-card__name">${escapeHtml(g.title)}</div>
+            <div class="capsule-card__score">${score ? "⭐ " + score.toFixed(1) : ""}</div>
+            <div class="capsule-card__tags">${tags}</div>
+            <div class="capsule-card__desc">${escapeHtml(g.desc)}</div>
+            <div class="capsule-card__go">前往详情页 →</div>
+          </button>
+        `;
+      }).join("");
+      return `
+        <div class="capsule-done">
+          <div class="capsule-done__title">🎉 你发现了 TapTap 的好游戏</div>
+          <div class="capsule-grid">${grid}</div>
         </div>
       `;
-    const score = Number(g.score || 0);
-    const scoreHtml = score ? `<span class="mutual-score" aria-label="评分">⭐ ${score.toFixed(1)}</span>` : "";
+    }
+
+    // 未全部拆完：胶囊 + 已拆卡片
+    const layersLeft = MUTUAL_GAMES.length - revealed.length;
+    const revealedCards = revealed.map((idx) => {
+      const g = MUTUAL_GAMES[idx];
+      if (!g) return "";
+      return `
+        <button class="capsule-card capsule-card--revealed" type="button" data-capsule-game="${g.id}" style="--layer-color:${g.layerColor}">
+          <div class="capsule-card__icon">${g.icon}</div>
+          <div class="capsule-card__name">${escapeHtml(g.title)}</div>
+          <div class="capsule-card__desc">${escapeHtml(g.desc)}</div>
+          <div class="capsule-card__go">前往详情页 →</div>
+        </button>
+      `;
+    }).join("");
 
     return `
-      <div class="item mutual-item">
-        <div class="mutual-top row">
-          <button type="button" class="mutual-detail" data-mutual-detail="${g.id}" aria-label="打开详情">
-            <span class="game-ico" aria-hidden="true">${iconChar(g.title)}</span>
-          </button>
-          <div class="grow" style="min-width:0">
-            <div class="mutual-titleline">
-              <button type="button" class="mutual-detail" data-mutual-detail="${g.id}">
-                <span class="mutual-title">${g.title}</span>
-              </button>
-              <span class="mutual-tags">${tags}</span>
-            </div>
+      <div class="capsule-stage">
+        <button class="capsule-box" id="btnCapsuleOpen" type="button" style="--layer-color:${MUTUAL_GAMES[nextIdx]?.layerColor || '#00b894'}">
+          <div class="capsule-box__layers">
+            ${Array.from({ length: layersLeft }, (_, i) => `<div class="capsule-box__layer" style="--i:${i};--total:${layersLeft}"></div>`).join("")}
           </div>
-          ${scoreHtml}
-        </div>
-        <div class="mutual-bottom row">
-          <div class="mutual-marquee">${marquee}</div>
-          <button class="btn btn--brand" type="button" data-mutual-open="${g.id}">留言</button>
-        </div>
+          <div class="capsule-box__center">🎁</div>
+          <div class="capsule-box__hint">${revealed.length === 0 ? "点击开启时间胶囊" : "继续开启"}</div>
+          <div class="capsule-box__remaining">还有 ${layersLeft} 份惊喜</div>
+        </button>
+        ${revealedCards ? `<div class="capsule-revealed">${revealedCards}</div>` : ""}
       </div>
     `;
-  }).join("");
+  })();
+
+  const progressHtml = `<div class="capsule-progress">已发现 <b>${revealed.length}</b> / <b>${MUTUAL_GAMES.length}</b> 款好游戏</div>`;
 
   const playStates = PLAYTEST_GAMES.map((p, idx) => {
     const completed = s.playtest.completed.includes(p.id);
@@ -4925,7 +5508,7 @@ function discoverInlineView(s) {
           TapTap 的坚持： · <b>零分成</b> · <b>评分真实</b>
         </p>
         <div class="divider"></div>
-        <div class="list">${mutualList}</div>
+        ${capsuleHtml}
       </section>
     </div>
 
@@ -4967,151 +5550,53 @@ function wireDiscoverInline() {
     return pos < 0 ? 0 : Math.floor(pos / 3);
   };
 
-  const wireStepMarquees = () => {
-    const prefersReduce = !!window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-    if (prefersReduce) return;
+  // ── 时间胶囊交互 ──
+  $("#btnCapsuleOpen")?.addEventListener("click", () => {
+    const revealed = state.capsule?.revealedLayers || [];
+    const nextIdx = revealed.length;
+    if (nextIdx >= MUTUAL_GAMES.length) return;
 
-    /** @type {HTMLElement[]} */
-    const tracks = Array.from(document.querySelectorAll(".marquee__track"));
-    tracks.forEach((track) => {
-      if (!track) return;
-      if (track.getAttribute("data-marquee-wired") === "1") return;
-      track.setAttribute("data-marquee-wired", "1");
+    const game = MUTUAL_GAMES[nextIdx];
+    if (!game) return;
 
-      const items = Array.from(track.querySelectorAll(".marquee__item"));
-      if (items.length < 2) return;
+    // 播放碎裂动画
+    const box = $("#btnCapsuleOpen");
+    if (box) {
+      box.classList.add("capsule-box--breaking");
+      box.style.pointerEvents = "none";
+    }
 
-      // Mark: stop CSS animation, use step-scrolling with pause.
-      track.classList.add("marquee__track--step");
+    setTimeout(() => {
+      // 更新状态
+      if (!state.capsule) state.capsule = { revealedLayers: [] };
+      state.capsule.revealedLayers.push(nextIdx);
+      addPoints(state, game.points);
+      saveState();
 
-      // The view duplicates items twice for seamless loop.
-      const total = items.length;
-      const originalCount = total % 2 === 0 ? total / 2 : total;
-      if (originalCount <= 1) return;
+      // 积分飞出动画
+      const fromRect = box?.getBoundingClientRect();
+      if (fromRect) flyGrantToSticky({ fromRect, grant: { points: game.points, coupons: 0 } });
 
-      // Make the viewport show exactly ONE item (avoid leaking next row)
-      const viewport = track.closest?.(".marquee");
-      const firstItem = items[0];
-      if (viewport && firstItem) {
-        const h = Math.max(0, Math.round(firstItem.getBoundingClientRect().height || firstItem.offsetHeight || 0));
-        if (h >= 16) viewport.style.height = `${h}px`;
+      render();
+
+      // 全部拆完后庆祝
+      if (state.capsule.revealedLayers.length >= MUTUAL_GAMES.length) {
+        toast("🎉 恭喜！你发现了所有好游戏");
+      } else {
+        toast(`发现了 ${game.title}！获得 ${game.points} 积分`);
       }
+    }, 650);
+  });
 
-      const step = (() => {
-        const a = items[0];
-        const b = items[1];
-        if (a && b) {
-          const ra = a.getBoundingClientRect();
-          const rb = b.getBoundingClientRect();
-          const d = rb.top - ra.top;
-          if (Number.isFinite(d) && d > 0) return Math.round(d);
-        }
-        return (a?.offsetHeight || 22) + 8; // fallback: height + gap
-      })();
-
-      const pauseMs = 1200; // pause when a row is fully visible
-      const moveMs = 240; // faster move to next row
-      let idx = 0;
-
-      // Ensure initial position
-      track.style.transform = "translateY(0px)";
-      track.style.transition = "none";
-
-      const tick = () => {
-        if (!document.contains(track)) return;
-        setTimeout(() => {
-          if (!document.contains(track)) return;
-          // If we're currently showing the duplicated "first" row (idx===originalCount),
-          // reset back to 0 RIGHT BEFORE moving to next, so the loop is seamless.
-          let nextIdx = idx + 1;
-          if (idx >= originalCount) {
-            track.style.transition = "none";
-            track.style.transform = "translateY(0px)";
-            // force style flush so the next transition applies
-            void track.offsetHeight;
-            idx = 0;
-            nextIdx = 1;
-          }
-
-          track.style.transition = `transform ${moveMs}ms ease-out`;
-          track.style.transform = `translateY(-${step * nextIdx}px)`;
-          idx = nextIdx;
-
-          // After movement, keep the row visible for pauseMs (handled by next tick)
-          setTimeout(() => tick(), moveMs + 40);
-        }, pauseMs);
-      };
-
-      tick();
-    });
-  };
-
-  const openMutualPost = (gameId) => {
-    const g = MUTUAL_GAMES.find((x) => x.id === gameId);
-    if (!g) return;
-    const body = `
-      <div class="small" style="line-height:1.55">
-        <div class="hint">
-          <b>留言跳转</b>：提前创建好的帖子详情页，让大家来评论盖楼。每个游戏一个帖子。
-        </div>
-        <div class="divider"></div>
-        <div class="muted small">当前游戏：<b>${escapeHtml(g.title)}</b></div>
-      </div>
-    `;
-    const footer = `<button class="btn btn--brand" id="btnCloseMutualPost">知道了</button>`;
-    openModal({ title: "留言", bodyHtml: body, footerHtml: footer });
-    $("#btnCloseMutualPost")?.addEventListener("click", closeModal);
-  };
-
-  $$("[data-mutual-open]").forEach((el) =>
-    el.addEventListener("click", (e) => {
-      e.stopPropagation();
-      openMutualPost(el.dataset.mutualOpen);
-    }),
-  );
-
-  $$("[data-mutual-marquee]").forEach((el) =>
-    el.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const gameId = el.dataset.mutualMarquee;
-      const g = MUTUAL_GAMES.find((x) => x.id === gameId);
-      if (!g) return;
-      const comment = String(el.getAttribute("data-mutual-comment") || "").trim();
-      const likes = Number(el.dataset.mutualLikes || 0);
-      const postUrl = String(g.postUrl || "").trim() || g.url;
-      const body = `
-        <div class="small" style="line-height:1.55">
-          <div class="hint">
-            <b>跳转评论</b>：进入创建好的帖子详情页，并自动滚动/定位到这句评论的位置。
-          </div>
-          <div class="divider"></div>
-          <div class="small"><b>将定位到的评论</b></div>
-          <div class="item" style="margin-top:8px; border-color: rgba(0,184,148,.28); background: rgba(0,184,148,.06)">
-            <div class="small">${escapeHtml(comment)}</div>
-            <div class="muted small" style="margin-top:8px">👍 ${fmt(likes)} · 来自：${escapeHtml(g.title)}</div>
-          </div>
-        </div>
-      `;
-      const footer = `<button class="btn btn--brand" id="btnCloseMutualJump">知道了</button>`;
-      openModal({ title: "跳转", bodyHtml: body, footerHtml: footer });
-      $("#btnCloseMutualJump")?.addEventListener("click", closeModal);
-    }),
-  );
-
-  $$("[data-mutual-detail]").forEach((el) =>
-    el.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const g = MUTUAL_GAMES.find((x) => x.id === el.dataset.mutualDetail);
+  // 点击已揭示的游戏卡片 -> 跳转详情页
+  $$("[data-capsule-game]").forEach((el) =>
+    el.addEventListener("click", () => {
+      const g = MUTUAL_GAMES.find((x) => x.id === el.dataset.capsuleGame);
       if (!g) return;
       try {
         window.open(g.url, "_blank", "noopener,noreferrer");
       } catch {
-        openModal({
-          title: "跳转",
-          bodyHtml: `<div class="muted small">可跳转：<span class="mono">${g.url}</span></div>`,
-          footerHtml: `<button class="btn btn--brand" id="btnCloseDeeplink">知道了</button>`,
-        });
-        $("#btnCloseDeeplink")?.addEventListener("click", closeModal);
+        toast("跳转失败，请稍后重试");
       }
     }),
   );
@@ -5179,7 +5664,6 @@ function wireDiscoverInline() {
     }),
   );
 
-  wireStepMarquees();
 }
 
 function shopView(s) {
@@ -5236,12 +5720,11 @@ function shopView(s) {
 
 function shopItemCard(kind, item, s) {
   const owned = kind === "frame" ? s.inventory.frames.includes(item.id) : s.inventory.badges.includes(item.id);
-  const equipped = kind === "frame" ? s.equipped.frame === item.id : s.equipped.badge === item.id;
   const canBuy = s.points >= item.cost;
 
   const rightBtn = owned
-    ? `<button class="btn ${equipped ? "" : "btn--brand"}" data-equip="${kind}:${item.id}">${equipped ? "已装备" : "装备"}</button>`
-    : `<button class="btn btn--brand" data-buy="${kind}:${item.id}" ${canBuy ? "" : "disabled"}>${canBuy ? "兑换" : "积分不足"}</button>`;
+    ? `<button class="btn" disabled>已拥有</button>`
+    : `<button class="btn btn--brand" data-buy="${kind}:${item.id}" ${canBuy ? "" : "disabled"}>${canBuy ? `${fmt(item.cost)}积分兑换` : "积分不足"}</button>`;
 
   return `
     <div class="item">
@@ -5249,45 +5732,56 @@ function shopItemCard(kind, item, s) {
         <div class="equip ${kind === "frame" ? "equip--frame" : "equip--badge"}">${item.icon}</div>
         <div class="grow">
           <div class="item__title">${item.title}</div>
-          <div class="item__desc">兑换后收藏为纪念（本期不做个人资料展示）；后续阶段可扩展展示位。</div>
         </div>
-        <span class="pill">-${item.cost}</span>
-      </div>
-      <div class="item__meta">
-        <span class="tag">${owned ? "已拥有" : "未拥有"}</span>
         ${rightBtn}
       </div>
     </div>
   `;
 }
 
-function wireShop() {
+function wireShop({ inModal = false } = {}) {
   $$("[data-buy]").forEach((b) =>
     b.addEventListener("click", () => {
       const [kind, id] = (b.dataset.buy || "").split(":");
       const item = kind === "frame" ? SHOP_ITEMS.frames.find((x) => x.id === id) : SHOP_ITEMS.badges.find((x) => x.id === id);
       if (!item) return;
-      if (state.points < item.cost) return toast("积分不足");
-      state.points -= item.cost;
-      if (kind === "frame") state.inventory.frames.push(id);
-      if (kind === "badge") state.inventory.badges.push(id);
-      // auto-equip first time
-      if (kind === "frame" && !state.equipped.frame) state.equipped.frame = id;
-      if (kind === "badge" && !state.equipped.badge) state.equipped.badge = id;
-      saveState();
-      render();
-      toast(`已兑换：${item.title}`);
-    }),
-  );
-
-  $$("[data-equip]").forEach((b) =>
-    b.addEventListener("click", () => {
-      const [kind, id] = (b.dataset.equip || "").split(":");
-      if (kind === "frame") state.equipped.frame = id;
-      if (kind === "badge") state.equipped.badge = id;
-      saveState();
-      render();
-      toast("已设置为当前");
+      const owned = kind === "frame" ? state.inventory.frames.includes(id) : state.inventory.badges.includes(id);
+      if (owned) return toast("已拥有");
+      const enough = state.points >= item.cost;
+      const body = `
+        <div class="small" style="line-height:1.6">
+          <div class="hint">
+            <b>${escapeHtml(item.title)}</b>
+            <div class="muted small" style="margin-top:6px">消耗 <b>${fmt(item.cost)}</b> 积分</div>
+          </div>
+          <div class="divider"></div>
+          <div class="muted small">当前积分：<b>${fmt(state.points || 0)}</b></div>
+          ${enough ? "" : `<div class="muted small" style="margin-top:6px">积分不足，去试玩/回顾领奖赚积分吧。</div>`}
+        </div>
+      `;
+      const footer = enough
+        ? `<button class="btn" id="btnSpendCancel">取消</button><button class="btn btn--brand" id="btnSpendOk">${fmt(item.cost)}积分兑换</button>`
+        : `<button class="btn btn--brand" id="btnSpendOk">知道了</button>`;
+      openModal({ title: enough ? "确认兑换" : "积分不足", bodyHtml: body, footerHtml: footer });
+      $("#btnSpendCancel")?.addEventListener("click", () => {
+        closeModal();
+        if (inModal) openShopModal();
+      });
+      $("#btnSpendOk")?.addEventListener("click", () => {
+        if (!enough) {
+          closeModal();
+          if (inModal) openShopModal();
+          return;
+        }
+        state.points -= item.cost;
+        if (kind === "frame") state.inventory.frames.push(id);
+        if (kind === "badge") state.inventory.badges.push(id);
+        saveState();
+        closeModal();
+        render();
+        toast(`已兑换：${item.title}`);
+        if (inModal) openShopModal();
+      });
     }),
   );
 
@@ -5350,7 +5844,8 @@ function debugModalHtml() {
         <div><b>生涯数据（JSON，可编辑）</b></div>
         <div class="muted small">用于控制回顾卡片的数据结构与展示内容（为 0 的卡片不会展示）。</div>
         <textarea id="txtRecapJson" rows="10" style="width:100%; margin-top:8px; border-radius:12px; border:1px solid var(--border); background: rgba(255,255,255,.02); color: var(--text); padding:10px; resize:vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace; font-size:12px; line-height:1.45;"></textarea>
-        <div class="row" style="justify-content:flex-end; margin-top:8px">
+        <div class="row" style="justify-content:flex-end; margin-top:8px; gap:8px">
+          <button class="btn btn--ghost" id="btnNewPlayerRecapJson" type="button">新注册玩家</button>
           <button class="btn btn--ghost" id="btnResetRecapJson" type="button">恢复默认生涯数据</button>
         </div>
       </div>
@@ -5453,6 +5948,49 @@ function openDebug() {
   if (inpPid) inpPid.value = String(state.profile?.id || "");
   if (inpIdentity) inpIdentity.value = String(state.profile?.identity || "");
   if (txtBio) txtBio.value = String(state.profile?.bio || "");
+
+  $("#btnNewPlayerRecapJson")?.addEventListener("click", () => {
+    const emptyRecap = {
+      regDate: new Date().toLocaleDateString("zh-CN", { year: "numeric", month: "numeric", day: "numeric" }).replace(/\//g, "年").replace(/年(\d+)$/, "年$1日").replace(/(\d+)日$/, "月$1日"),
+      downloadsCount: 0,
+      firstDownloadedGame: "",
+      spendTotal: 0,
+      badgesTotal: 0,
+      badgesBlackGoldTotal: 0,
+      playTimeTotal: "",
+      topGame1: "",
+      topGame2: "",
+      topGame3: "",
+      favoriteGenre: "",
+      pcPlayTimeTotal: "",
+      cloudPlayTimeTotal: "",
+      achievementsTotal: 0,
+      platinumAchievementsTotal: 0,
+      leaderboardsCount: 0,
+      nightPlayCount: 0,
+      reviewsCount: 0,
+      reviewLikesTotal: 0,
+      reviewCommentsTotal: 0,
+      reviewsLikedCount: 0,
+      zuitiReviewsCount: 0,
+      taptapCriticYears: [],
+      postsCount: 0,
+      repliesCount: 0,
+      likedPostsCount: 0,
+      receivedLikesCount: 0,
+      nightCommunityCount: 0,
+      friendsCount: 0,
+      followingCount: 0,
+      followersCount: 0,
+      friendMessagesCount: 0,
+      devGamesCount: 0,
+      spotlightGamejamFirstPublishDate: "",
+      tapmakerFirstPublishDate: "",
+      creatorWorks: 0
+    };
+    txt.value = JSON.stringify(emptyRecap, null, 2);
+    toast("已切换为新注册玩家数据（未应用）");
+  });
 
   $("#btnResetRecapJson")?.addEventListener("click", () => {
     txt.value = JSON.stringify(defaultRecap(), null, 2);
@@ -5592,7 +6130,9 @@ async function init() {
     await runOpeningGate();
     state.entryGateDone = true;
     saveState();
-    location.hash = "#/firstrecap";
+    // [DISABLED] 首次进入不再走前置十年回顾流程，直接进主会场
+    // location.hash = "#/firstrecap";
+    location.hash = "#/home";
   } else {
     // Re-open: skip opening, go straight to activity home
     try {
