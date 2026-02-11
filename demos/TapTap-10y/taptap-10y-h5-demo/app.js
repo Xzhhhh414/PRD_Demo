@@ -334,7 +334,9 @@ const MUTUAL_GAMES = [
     id: "m1",
     title: "Phigros",
     desc: "全球千万下载的免费音游，指尖上的极致节奏体验",
+    bond: "Phigros 在 TapTap 首发上线，凭借硬核判定和创新谱面设计，从社区口碑一路走到全球千万下载。TapTap 是许多音游玩家第一次遇见它的地方。",
     icon: "🎵",
+    hint: "一款让指尖跳舞的游戏",
     layerColor: "#6C5CE7",
     points: 30,
     url: "https://www.taptap.cn/app/165287?os=android",
@@ -347,7 +349,9 @@ const MUTUAL_GAMES = [
     id: "m2",
     title: "香肠派对",
     desc: "欢乐吃鸡大乱斗，和好友一起开黑的快乐回来了",
+    bond: "香肠派对在 TapTap 上拥有超高人气的社区氛围，搞笑的画风和欢乐的吃鸡体验让它成为好友开黑首选。无数快乐时光从这里开始。",
     icon: "🌭",
+    hint: "和朋友一起，笑着吃鸡",
     layerColor: "#FDCB6E",
     points: 30,
     url: "https://www.taptap.cn/app/58881?os=pc",
@@ -360,7 +364,9 @@ const MUTUAL_GAMES = [
     id: "m3",
     title: "心动小镇",
     desc: "治愈系模拟经营，在小镇里过上向往的慢生活",
+    bond: "心动小镇是 TapTap 独占的治愈系经营游戏，玩家在社区里分享小镇日常，组成了最温暖的游戏社区之一。每一次更新都是一场小小的惊喜。",
     icon: "🏡",
+    hint: "一个让人想住进去的小世界",
     layerColor: "#00B894",
     points: 30,
     url: "https://www.taptap.cn/app/45213?os=pc",
@@ -373,7 +379,9 @@ const MUTUAL_GAMES = [
     id: "m4",
     title: "鬼谷八荒",
     desc: "修仙开放世界，书写属于你自己的仙侠传说",
+    bond: "鬼谷八荒在 TapTap 上获得了修仙爱好者的热烈讨论，开放世界与修仙题材的结合让它成为社区长期热议的作品。从预约到正式上线，TapTap 见证了它的成长。",
     icon: "⛩️",
+    hint: "御剑飞行，踏入仙途",
     layerColor: "#636E72",
     points: 40,
     url: "https://www.taptap.cn/app/700558?os=android",
@@ -511,7 +519,7 @@ function loadState() {
     firstRecapDone: false,
     firstRecapFlow: { phase: "snap", idx: 0 },
     firstRecapRun: { startPoints: 0, startCoupons: 0, doneModalShown: false },
-    capsule: { revealedLayers: [] },
+    capsule: { revealed: [], claimed: [] },
   };
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -585,9 +593,16 @@ function loadState() {
     merged.firstRecapRun.startCoupons = Math.max(0, Number(merged.firstRecapRun.startCoupons || 0));
     merged.firstRecapRun.doneModalShown = !!merged.firstRecapRun.doneModalShown;
 
-    // 时间胶囊状态
+    // 发现好游戏状态
     if (!merged.capsule || typeof merged.capsule !== "object") merged.capsule = { ...fallback.capsule };
-    if (!Array.isArray(merged.capsule.revealedLayers)) merged.capsule.revealedLayers = [];
+    if (!Array.isArray(merged.capsule.revealed)) merged.capsule.revealed = [];
+    if (!Array.isArray(merged.capsule.claimed)) merged.capsule.claimed = [];
+    // 兼容旧字段
+    if (Array.isArray(merged.capsule.revealedLayers)) {
+      merged.capsule.revealed = merged.capsule.revealedLayers.map((i) => MUTUAL_GAMES[i]?.id).filter(Boolean);
+      merged.capsule.claimed = [...merged.capsule.revealed];
+      delete merged.capsule.revealedLayers;
+    }
 
     return merged;
   } catch {
@@ -4438,8 +4453,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
           <span class="home-hero__ring"></span>
         </div>
         <div class="home-hero__text">
-          <div class="home-hero__title">🎉 十年有你</div>
-          <div class="home-hero__sub">回顾你与 TapTap 一起走过的时光</div>
+          <div class="home-hero__title">🎉 回顾你与 TapTap 走过的十年时光</div>
           <div class="home-hero__note">数据统计截止到 2026年4月17日</div>
         </div>
         <button class="btn btn--brand recap-card__share" id="btnToggleShare" type="button">分享</button>
@@ -5365,67 +5379,47 @@ function discoverInlineView(s) {
     return Array.from(cleaned)[0] || "";
   };
 
-  // ── 时间胶囊 ──
-  const revealed = s.capsule?.revealedLayers || [];
-  const allDone = revealed.length >= MUTUAL_GAMES.length;
-  const nextIdx = revealed.length;
+  // ── 猜猜是什么游戏 ──
+  const revealedIds = s.capsule?.revealed || [];
+  const claimedIds = s.capsule?.claimed || [];
 
   const capsuleHtml = (() => {
-    if (allDone) {
-      // 全部拆完：2x2 游戏展台
-      const grid = MUTUAL_GAMES.map((g) => {
-        const tags = (g.tags || []).slice(0, 3).map((t) => `<span class="tag">${t}</span>`).join("");
-        const score = Number(g.score || 0);
+    const cards = MUTUAL_GAMES.map((g) => {
+      const isRevealed = revealedIds.includes(g.id);
+      const isClaimed = claimedIds.includes(g.id);
+      const tags = (g.tags || []).slice(0, 3).map((t) => `<span class="tag">${t}</span>`).join("");
+      const score = Number(g.score || 0);
+
+      if (!isRevealed) {
+        // 未揭示：神秘卡
         return `
-          <button class="capsule-card capsule-card--done" type="button" data-capsule-game="${g.id}" style="--layer-color:${g.layerColor}">
-            <div class="capsule-card__icon">${g.icon}</div>
-            <div class="capsule-card__name">${escapeHtml(g.title)}</div>
-            <div class="capsule-card__score">${score ? "⭐ " + score.toFixed(1) : ""}</div>
-            <div class="capsule-card__tags">${tags}</div>
-            <div class="capsule-card__desc">${escapeHtml(g.desc)}</div>
-            <div class="capsule-card__go">前往详情页 →</div>
+          <button class="guess-card guess-card--mystery" type="button" data-guess-reveal="${g.id}" style="--layer-color:${g.layerColor}">
+            <div class="guess-card__q">?</div>
+            <div class="guess-card__hint">${escapeHtml(g.hint || "")}</div>
+            <div class="guess-card__tags">${tags}</div>
+            <div class="guess-card__cta">点击揭晓</div>
           </button>
         `;
-      }).join("");
-      return `
-        <div class="capsule-done">
-          <div class="capsule-done__title">🎉 你发现了 TapTap 的好游戏</div>
-          <div class="capsule-grid">${grid}</div>
-        </div>
-      `;
-    }
+      }
 
-    // 未全部拆完：胶囊 + 已拆卡片
-    const layersLeft = MUTUAL_GAMES.length - revealed.length;
-    const revealedCards = revealed.map((idx) => {
-      const g = MUTUAL_GAMES[idx];
-      if (!g) return "";
+      // 已揭示
+      const claimBtn = isClaimed
+        ? ""
+        : `<button class="btn btn--brand guess-card__claim" type="button" data-guess-claim="${g.id}">领取 ${g.points} 积分</button>`;
+
       return `
-        <button class="capsule-card capsule-card--revealed" type="button" data-capsule-game="${g.id}" style="--layer-color:${g.layerColor}">
-          <div class="capsule-card__icon">${g.icon}</div>
-          <div class="capsule-card__name">${escapeHtml(g.title)}</div>
-          <div class="capsule-card__desc">${escapeHtml(g.desc)}</div>
-          <div class="capsule-card__go">前往详情页 →</div>
-        </button>
+        <div class="guess-card guess-card--open" style="--layer-color:${g.layerColor}">
+          <div class="guess-card__icon">${g.icon}</div>
+          <div class="guess-card__name">${escapeHtml(g.title)}${score ? ` <span class="guess-card__score">⭐${score.toFixed(1)}</span>` : ""}</div>
+          <div class="guess-card__tags">${tags}</div>
+          ${claimBtn}
+          <button class="guess-card__go" type="button" data-guess-go="${g.id}">前往详情页 →</button>
+        </div>
       `;
     }).join("");
 
-    return `
-      <div class="capsule-stage">
-        <button class="capsule-box" id="btnCapsuleOpen" type="button" style="--layer-color:${MUTUAL_GAMES[nextIdx]?.layerColor || '#00b894'}">
-          <div class="capsule-box__layers">
-            ${Array.from({ length: layersLeft }, (_, i) => `<div class="capsule-box__layer" style="--i:${i};--total:${layersLeft}"></div>`).join("")}
-          </div>
-          <div class="capsule-box__center">🎁</div>
-          <div class="capsule-box__hint">${revealed.length === 0 ? "点击开启时间胶囊" : "继续开启"}</div>
-          <div class="capsule-box__remaining">还有 ${layersLeft} 份惊喜</div>
-        </button>
-        ${revealedCards ? `<div class="capsule-revealed">${revealedCards}</div>` : ""}
-      </div>
-    `;
+    return `<div class="guess-grid">${cards}</div>`;
   })();
-
-  const progressHtml = `<div class="capsule-progress">已发现 <b>${revealed.length}</b> / <b>${MUTUAL_GAMES.length}</b> 款好游戏</div>`;
 
   const playStates = PLAYTEST_GAMES.map((p, idx) => {
     const completed = s.playtest.completed.includes(p.id);
@@ -5550,48 +5544,68 @@ function wireDiscoverInline() {
     return pos < 0 ? 0 : Math.floor(pos / 3);
   };
 
-  // ── 时间胶囊交互 ──
-  $("#btnCapsuleOpen")?.addEventListener("click", () => {
-    const revealed = state.capsule?.revealedLayers || [];
-    const nextIdx = revealed.length;
-    if (nextIdx >= MUTUAL_GAMES.length) return;
+  // ── 猜猜是什么游戏 交互 ──
+  // 点击神秘卡 -> 揭示 + 弹出介绍
+  $$("[data-guess-reveal]").forEach((el) =>
+    el.addEventListener("click", () => {
+      const g = MUTUAL_GAMES.find((x) => x.id === el.dataset.guessReveal);
+      if (!g) return;
 
-    const game = MUTUAL_GAMES[nextIdx];
-    if (!game) return;
+      // 翻牌动画
+      el.classList.add("guess-card--flipping");
+      el.style.pointerEvents = "none";
 
-    // 播放碎裂动画
-    const box = $("#btnCapsuleOpen");
-    if (box) {
-      box.classList.add("capsule-box--breaking");
-      box.style.pointerEvents = "none";
-    }
+      setTimeout(() => {
+        // 更新状态
+        if (!state.capsule) state.capsule = { revealed: [], claimed: [] };
+        if (!state.capsule.revealed.includes(g.id)) {
+          state.capsule.revealed.push(g.id);
+        }
+        saveState();
 
-    setTimeout(() => {
-      // 更新状态
-      if (!state.capsule) state.capsule = { revealedLayers: [] };
-      state.capsule.revealedLayers.push(nextIdx);
-      addPoints(state, game.points);
+        // 弹出游戏与 TapTap 的羁绊介绍
+        _modalAfterClose.push(() => render());
+        openModal({
+          title: `${g.icon} ${g.title}`,
+          bodyHtml: `<div class="guess-bond">
+            <div class="guess-bond__icon">${g.icon}</div>
+            <div class="guess-bond__title">${escapeHtml(g.title)}</div>
+            <div class="guess-bond__score">${g.score ? "⭐ " + g.score.toFixed(1) : ""}</div>
+            <p class="guess-bond__text">${escapeHtml(g.bond || g.desc)}</p>
+            <div class="guess-bond__tags">${(g.tags || []).map((t) => `<span class="tag">${t}</span>`).join("")}</div>
+            <button class="btn btn--brand guess-bond__go" type="button" onclick="try{window.open('${g.url}','_blank','noopener,noreferrer')}catch(e){}">前往 TapTap 详情页 →</button>
+          </div>`,
+        });
+      }, 400);
+    }),
+  );
+
+  // 领取积分
+  $$("[data-guess-claim]").forEach((el) =>
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const g = MUTUAL_GAMES.find((x) => x.id === el.dataset.guessClaim);
+      if (!g) return;
+      if (!state.capsule) state.capsule = { revealed: [], claimed: [] };
+      if (state.capsule.claimed.includes(g.id)) return;
+
+      state.capsule.claimed.push(g.id);
+      addPoints(state, g.points);
       saveState();
 
-      // 积分飞出动画
-      const fromRect = box?.getBoundingClientRect();
-      if (fromRect) flyGrantToSticky({ fromRect, grant: { points: game.points, coupons: 0 } });
+      const fromRect = el.getBoundingClientRect();
+      if (fromRect) flyGrantToSticky({ fromRect, grant: { points: g.points, coupons: 0 } });
 
+      toast(`获得 ${g.points} 积分`);
       render();
+    }),
+  );
 
-      // 全部拆完后庆祝
-      if (state.capsule.revealedLayers.length >= MUTUAL_GAMES.length) {
-        toast("🎉 恭喜！你发现了所有好游戏");
-      } else {
-        toast(`发现了 ${game.title}！获得 ${game.points} 积分`);
-      }
-    }, 650);
-  });
-
-  // 点击已揭示的游戏卡片 -> 跳转详情页
-  $$("[data-capsule-game]").forEach((el) =>
-    el.addEventListener("click", () => {
-      const g = MUTUAL_GAMES.find((x) => x.id === el.dataset.capsuleGame);
+  // 前往详情页
+  $$("[data-guess-go]").forEach((el) =>
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const g = MUTUAL_GAMES.find((x) => x.id === el.dataset.guessGo);
       if (!g) return;
       try {
         window.open(g.url, "_blank", "noopener,noreferrer");
