@@ -535,6 +535,7 @@ function loadState() {
     },
     // Has the opening gate been passed at least once?
     // Used to ensure "re-open after refresh" goes straight to the hall unless explicitly reset.
+    loggedIn: true,
     entryGateDone: false,
     firstRecapDone: false,
     firstRecapFlow: { phase: "snap", idx: 0 },
@@ -599,6 +600,7 @@ function loadState() {
     if (!merged.daily || typeof merged.daily !== "object") merged.daily = { ...fallback.daily };
     if (!String(merged.daily.lotteryDayKey || "").trim()) merged.daily.lotteryDayKey = "";
 
+    if (typeof merged.loggedIn !== "boolean") merged.loggedIn = fallback.loggedIn;
     merged.entryGateDone = !!merged.entryGateDone;
     merged.firstRecapDone = !!merged.firstRecapDone;
     // Keep a small cursor so the ritual page can continue after reload.
@@ -845,6 +847,33 @@ function closeModal() {
       // ignore
     }
   }
+}
+
+// ── 登录弹窗 ──
+function openLoginModal(onSuccess) {
+  openModal({
+    title: "登录 TapTap 账号",
+    bodyHtml: `
+      <div class="login-modal">
+        <div class="login-modal__icon">👤</div>
+        <p class="login-modal__desc">登录后即可参与十周年活动，查看你的专属回顾数据</p>
+        <div class="login-modal__form">
+          <input class="login-modal__input" id="loginPhone" type="text" placeholder="请输入手机号 / 邮箱" autocomplete="off" />
+          <input class="login-modal__input" id="loginCode" type="text" placeholder="请输入验证码" autocomplete="off" />
+          <button class="btn btn--brand login-modal__submit" id="btnLoginSubmit" type="button">登录</button>
+        </div>
+        <p class="login-modal__tip">Demo 演示：点击登录即可模拟登录成功</p>
+      </div>
+    `,
+  });
+
+  $("#btnLoginSubmit")?.addEventListener("click", () => {
+    state.loggedIn = true;
+    saveState();
+    closeModal();
+    toast("登录成功");
+    if (typeof onSuccess === "function") onSuccess();
+  });
 }
 
 function openLotteryResultModal({ hit, add, cost } = {}) {
@@ -1852,6 +1881,26 @@ function setTopbarHeightVar() {
 }
 
 function stickyStatsView(s) {
+  // 未登录时，名片区域显示登录提示
+  if (!s.loggedIn) {
+    return `
+      <section class="card sticky-stats__card" style="border-radius:0; box-shadow:none;">
+        <div class="sticky-hub">
+          <div class="sticky-hub__left">
+            <div class="sticky-hub__thumb sticky-hub__thumb--login" id="btnStickyLogin" role="button" tabindex="0" aria-label="登录">
+              <div class="sticky-hub__login-icon">👤</div>
+            </div>
+          </div>
+          <div class="sticky-hub__info">
+            <p style="font-size:14px;font-weight:700;color:#0F172A;margin:0 0 4px">登录查看你的十周年名片</p>
+            <p class="muted small" style="margin:0 0 8px">登录后可查看专属回顾数据、领取积分奖励</p>
+            <button class="btn btn--brand" id="btnStickyLoginAction" type="button" style="font-size:13px;padding:6px 20px;min-height:0">登录</button>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
   const recap = s.careerSnapshot?.recap || recapDataForState(s);
   const color = MEM_CARD_COLORS.find((c) => c.id === s.memorial?.colorId) || MEM_CARD_COLORS[0];
   const avatar = MEM_AVATARS.find((x) => x.id === s.memorial?.avatarId) || MEM_AVATARS[0];
@@ -1908,6 +1957,12 @@ function stickyStatsLiteView(s) {
 }
 
 function wireStickyStats() {
+  // 未登录时的登录按钮
+  const loginHandler = () => openLoginModal(() => render());
+  $("#btnStickyLogin")?.addEventListener("click", loginHandler);
+  $("#btnStickyLoginAction")?.addEventListener("click", loginHandler);
+
+  // 已登录时的正常交互
   $("#btnGoShop")?.addEventListener("click", () => openShopModal());
   $("#btnWallet")?.addEventListener("click", openWalletModal);
   $("#btnOpenMemorial")?.addEventListener("click", () => openMemorialEditModal());
@@ -1952,11 +2007,18 @@ function firstRecapView(s, recap) {
 }
 
 function homeView(s, recap) {
-  const recapHtml = recapInlineView(s, recap, { sortUnclaimedFirst: false });
+  const recapHtml = s.loggedIn
+    ? recapInlineView(s, recap, { sortUnclaimedFirst: false })
+    : `<section class="card">
+        <div class="recap-login-placeholder">
+          <div class="recap-login-placeholder__icon">📖</div>
+          <p class="recap-login-placeholder__title">我的 TapTap 十年回顾</p>
+          <p class="recap-login-placeholder__desc">登录后即可开启你的专属生涯回顾，查看你与 TapTap 的故事</p>
+          <button class="btn btn--brand" id="btnRecapLogin" type="button" style="min-height:0;padding:8px 24px;font-size:14px">登录开启</button>
+        </div>
+      </section>`;
   return `
-    <div class="home-module" id="section-recap">
-      ${recapHtml}
-    </div>
+    <div class="home-module" id="section-recap">${recapHtml}</div>
 
     ${discoverInlineView(s)}
   `;
@@ -1966,6 +2028,8 @@ function homeView(s, recap) {
 function wireHome() {
   wireRecapInline();
   wireDiscoverInline();
+  // 未登录时回顾区域的登录按钮
+  $("#btnRecapLogin")?.addEventListener("click", () => openLoginModal(() => render()));
 }
 
 function dayKeyLocal(d = new Date()) {
@@ -5542,6 +5606,40 @@ function discoverInlineView(s) {
         </div>
       </section>
     </div>
+
+    <div class="home-module" id="section-related">
+      <section class="card">
+        <div class="row">
+          <p class="h2 grow">相关活动</p>
+        </div>
+        <div class="related-banners">
+          <button class="related-banner" type="button" data-related="spring" style="--banner-color:#FF6B6B">
+            <div class="related-banner__img">🌸</div>
+            <div class="related-banner__info">
+              <div class="related-banner__title">TapTap 春日祭</div>
+              <div class="related-banner__desc">限定春日活动，丰厚奖励等你来拿</div>
+            </div>
+            <div class="related-banner__arrow">→</div>
+          </button>
+          <button class="related-banner" type="button" data-related="tappc" style="--banner-color:#6C5CE7">
+            <div class="related-banner__img">💻</div>
+            <div class="related-banner__info">
+              <div class="related-banner__title">TapTap PC 十周年活动</div>
+              <div class="related-banner__desc">PC 端专属庆典，精彩不容错过</div>
+            </div>
+            <div class="related-banner__arrow">→</div>
+          </button>
+          <button class="related-banner" type="button" data-related="creator" style="--banner-color:#00B894">
+            <div class="related-banner__img">✏️</div>
+            <div class="related-banner__info">
+              <div class="related-banner__title">创作者招募计划</div>
+              <div class="related-banner__desc">加入 TapTap 创作者社区</div>
+            </div>
+            <div class="related-banner__arrow">→</div>
+          </button>
+        </div>
+      </section>
+    </div>
   `;
 }
 
@@ -5748,6 +5846,28 @@ function wireDiscoverInline() {
     }),
   );
 
+  // ── 相关活动 banner 点击 ──
+  const relatedInfo = {
+    spring: { title: "TapTap 春日祭", url: "https://www.taptap.cn/events/spring-festival", desc: "春日限定活动，参与互动赢取丰厚奖励，与好友一起迎接春天！" },
+    tappc: { title: "TapTap PC 十周年活动", url: "https://www.taptap.cn/events/tappc-10th-anniversary", desc: "TapTap PC 端十周年专属庆典，参与活动赢取 PC 游戏大奖！" },
+    creator: { title: "创作者招募计划", url: "https://www.taptap.cn/events/creator-program", desc: "加入 TapTap 创作者社区，分享你的游戏见解，获得专属权益！" },
+  };
+  $$("[data-related]").forEach((el) =>
+    el.addEventListener("click", () => {
+      const key = el.dataset.related;
+      const info = relatedInfo[key];
+      if (!info) return;
+      openModal({
+        title: info.title,
+        bodyHtml: `<div style="text-align:center;padding:12px 0">
+          <p style="font-size:14px;color:rgba(15,23,42,.7);line-height:1.8;margin:0 0 16px">${escapeHtml(info.desc)}</p>
+          <p style="font-size:12px;color:rgba(15,23,42,.4);margin:0 0 16px">点击下方按钮前往活动页面</p>
+          <button class="btn btn--brand" type="button" style="padding:8px 24px;font-size:14px" onclick="try{window.open('${info.url}','_blank','noopener,noreferrer')}catch(e){}">前往活动 →</button>
+        </div>`,
+      });
+    }),
+  );
+
 }
 
 function shopView(s) {
@@ -5921,7 +6041,10 @@ function debugModalHtml() {
       </div>
       <div class="divider"></div>
 
-      <div class="muted small">当前默认使用 <b>测试用户</b> 数据进行演示。</div>
+      <div class="row" style="align-items:center; gap:8px">
+        <div class="muted small grow">当前登录状态：<b>${state.loggedIn ? "已登录 ✅" : "未登录 ❌"}</b></div>
+        <button class="btn btn--ghost" id="btnToggleLogin" type="button" style="min-height:0;padding:4px 12px;font-size:12px">${state.loggedIn ? "模拟登出" : "模拟登录"}</button>
+      </div>
       <div class="divider"></div>
 
       <div>
@@ -6019,6 +6142,15 @@ function openDebug() {
   const inpPid = $("#inpPid");
   const inpIdentity = $("#inpIdentity");
   const txtBio = $("#txtBio");
+
+  // 登录状态切换
+  $("#btnToggleLogin")?.addEventListener("click", () => {
+    state.loggedIn = !state.loggedIn;
+    saveState();
+    closeModal();
+    toast(state.loggedIn ? "已切换为登录状态" : "已切换为未登录状态");
+    render();
+  });
 
   const defaultRecap = () => recapDataForState({ ...state, boundData: false });
   const currentRecap = () => state.careerSnapshot?.recap || defaultRecap();
@@ -6168,22 +6300,29 @@ function runOpeningGate() {
       return;
     }
 
-    btn.addEventListener(
-      "click",
-      () => {
-        opening.classList.add("opening--exit");
-        // Reveal the app only after exit animation starts (avoid any flash)
-        setTimeout(() => {
-          appRoot.classList.remove("hidden");
-        }, 80);
-        setTimeout(() => {
-          opening.classList.add("hidden");
-          opening.setAttribute("aria-hidden", "true");
-          resolve();
-        }, prefersReduce ? 0 : 340);
-      },
-      { once: true },
-    );
+    let gateResolved = false;
+    function proceedFromGate() {
+      if (gateResolved) return;
+      gateResolved = true;
+      opening.classList.add("opening--exit");
+      setTimeout(() => {
+        appRoot.classList.remove("hidden");
+      }, 80);
+      setTimeout(() => {
+        opening.classList.add("hidden");
+        opening.setAttribute("aria-hidden", "true");
+        resolve();
+      }, prefersReduce ? 0 : 340);
+    }
+
+    btn.addEventListener("click", () => {
+      if (!state.loggedIn) {
+        // 未登录：弹出登录弹窗，登录成功后继续进入
+        openLoginModal(() => proceedFromGate());
+        return;
+      }
+      proceedFromGate();
+    });
   });
 }
 
