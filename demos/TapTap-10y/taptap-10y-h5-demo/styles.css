@@ -2116,11 +2116,18 @@ html.is-firstrecap .firstrecap-body::before{
 
 /* ── 猜猜是什么游戏 ─────────────────────────── */
 
-/* 2x2 网格 */
+/* 2x2 网格（保留，不再使用） */
 .guess-grid{
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+  padding: 4px 0;
+}
+/* 单行列表 */
+.guess-list{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   padding: 4px 0;
 }
 
@@ -2144,40 +2151,36 @@ html.is-firstrecap .firstrecap-body::before{
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  min-height: 140px;
   border-color: var(--layer-color, rgba(0,184,148,.15));
   background:
-    radial-gradient(circle at 30% 25%, var(--layer-color, rgba(0,184,148,.08)) 0%, transparent 60%),
+    radial-gradient(circle at 0% 50%, var(--layer-color, rgba(0,184,148,.08)) 0%, transparent 60%),
     linear-gradient(145deg, rgba(255,255,255,.92), rgba(247,249,252,.8));
 }
 .guess-card--mystery:hover{
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 10px 28px rgba(15,23,42,.12);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(15,23,42,.12);
   border-color: var(--layer-color, rgba(0,184,148,.35));
 }
-.guess-card--mystery:active{ transform: scale(.97); }
+.guess-card--mystery:active{ transform: scale(.98); }
 
 .guess-card__q{
-  font-size: 42px;
+  font-size: 28px;
   font-weight: 900;
   color: var(--layer-color, #00B894);
-  opacity: .35;
+  opacity: .4;
   line-height: 1;
-  margin-bottom: 2px;
 }
 .guess-card__hint{
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: rgba(15,23,42,.55);
   line-height: 1.4;
-  padding: 0 4px;
 }
 .guess-card__cta{
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   color: var(--brand);
-  margin-top: 10px;
-  letter-spacing: .3px;
+  white-space: nowrap;
 }
 
 /* 翻牌动画 */
@@ -2191,16 +2194,86 @@ html.is-firstrecap .firstrecap-body::before{
   100%{ transform: rotateY(90deg) scale(.9); opacity: 0; }
 }
 
-/* ── 已揭示卡片：带游戏背景色 ── */
+/* ── 已揭示卡片：横向行布局 ── */
 .guess-card--open{
   border-color: var(--layer-color, rgba(0,184,148,.25));
   background:
-    radial-gradient(circle at 50% 20%, var(--layer-color, rgba(0,184,148,.15)) 0%, transparent 70%),
+    radial-gradient(circle at 0% 50%, var(--layer-color, rgba(0,184,148,.10)) 0%, transparent 60%),
     linear-gradient(160deg, rgba(255,255,255,.92), rgba(247,249,252,.85));
-  min-height: 140px;
-  justify-content: center;
+}
+.guess-card--row{
+  flex-direction: row;
+  align-items: center;
+  text-align: left;
+  gap: 12px;
+  padding: 18px 14px;
+}
+.guess-card__left{
+  flex-shrink: 0;
+}
+.guess-card__left .guess-card__icon{
+  font-size: 32px;
+  line-height: 1;
+  margin: 0;
+}
+.guess-card__body{
+  flex: 1;
+  min-width: 0;
+}
+.guess-card__head{
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.guess-card__head .guess-card__name{
+  font-size: 14px;
+  font-weight: 900;
+  color: #0F172A;
+  line-height: 1.3;
+}
+/* score 已移除，保留占位注释 */
+.guess-card__marquee{
+  overflow: hidden;
+  height: 18px;
+  position: relative;
+  z-index: 1;
+}
+.guess-card__marquee .marquee__track{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.guess-card__marquee .marquee__track--static{
+  /* 静态文本不做动画，直接显示 */
+  height: 18px;
+}
+.guess-card__marquee .marquee__track--step{
+  transition: transform .28s ease-out;
+}
+.guess-card__marquee .marquee__item{
+  font-size: 11px;
+  color: rgba(15,23,42,.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 18px;
+}
+.guess-card__marquee .marquee__track--static .marquee__item{
+  white-space: normal;
+  overflow: visible;
+  font-size: 10px;
+  line-height: 18px;
+}
+.guess-card__right{
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex-shrink: 0;
+  align-items: stretch;
 }
 
+/* icon (for 2x2 grid fallback) */
 .guess-card__icon{
   font-size: 36px;
   line-height: 1;
@@ -2213,7 +2286,7 @@ html.is-firstrecap .firstrecap-body::before{
   line-height: 1.3;
 }
 
-/* 两个按钮容器 */
+/* 按钮容器 (for 2x2 grid mystery fallback) */
 .guess-card__btns{
   display: flex;
   gap: 5px;

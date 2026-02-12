@@ -5467,40 +5467,78 @@ function discoverInlineView(s) {
   const revealedIds = s.capsule?.revealed || [];
   const claimedIds = s.capsule?.claimed || [];
 
+  const getTopLiked = (gameId) => {
+    const arr = s.mutualMessages?.[gameId] || [];
+    return arr
+      .slice()
+      .filter((m) => String(m?.text || "").trim())
+      .sort((a, b) => Number(b.likes || 0) - Number(a.likes || 0))
+      .slice(0, 6);
+  };
+  const cut24 = (str) => {
+    const arr = Array.from(String(str || "").trim());
+    if (arr.length <= 24) return arr.join("");
+    return `${arr.slice(0, 24).join("")}…`;
+  };
+
   const capsuleHtml = (() => {
     const cards = MUTUAL_GAMES.map((g) => {
       const isRevealed = revealedIds.includes(g.id);
       const isClaimed = claimedIds.includes(g.id);
 
       if (!isRevealed) {
-        // 未揭示：神秘卡
+        // 未揭示：神秘卡（横向单行）
         return `
-          <button class="guess-card guess-card--mystery" type="button" data-guess-reveal="${g.id}" style="--layer-color:${g.layerColor}">
-            <div class="guess-card__q">?</div>
-            <div class="guess-card__hint">${escapeHtml(g.hint || "")}</div>
-            <div class="guess-card__cta">看看它的故事…</div>
+          <button class="guess-card guess-card--mystery guess-card--row" type="button" data-guess-reveal="${g.id}" style="--layer-color:${g.layerColor}">
+            <div class="guess-card__left">
+              <div class="guess-card__q">?</div>
+            </div>
+            <div class="guess-card__body">
+              <div class="guess-card__hint">${escapeHtml(g.hint || "")}</div>
+            </div>
+            <div class="guess-card__right">
+              <div class="guess-card__cta">听听它的故事</div>
+            </div>
           </button>
         `;
       }
 
-      // 已揭示：带背景色的卡片
-      const actionBtn = isClaimed
-        ? `<button class="btn guess-card__action" type="button" data-guess-go="${g.id}">查看游戏</button>`
+      // 热门评论跑马灯
+      const top = getTopLiked(g.id);
+      const marqueeItems = top.length
+        ? top.map((m) => `<span class="marquee__item">👍 ${Number(m.likes || 0)} ${escapeHtml(cut24(m.text))}</span>`).join("")
+        : `<span class="marquee__item">还没有热评，快来留言做第一个上墙的人吧</span>`;
+      const marqueeTrackClass = top.length ? "marquee__track" : "marquee__track marquee__track--static";
+
+      // 合并按钮：未领取=领取积分，已领取=再听一次
+      const mainBtn = isClaimed
+        ? `<button class="btn guess-card__story-btn" type="button" data-guess-story="${g.id}">再听听它的故事</button>`
         : `<button class="btn btn--brand guess-card__action" type="button" data-guess-claim="${g.id}">领取 ${g.points} 积分</button>`;
 
       return `
-        <div class="guess-card guess-card--open" style="--layer-color:${g.layerColor}">
-          <div class="guess-card__icon">${g.icon}</div>
-          <div class="guess-card__name">${escapeHtml(g.title)}</div>
-          <div class="guess-card__btns">
-            ${actionBtn}
-            <button class="btn guess-card__story-btn" type="button" data-guess-story="${g.id}">再看一次</button>
+        <div class="guess-card guess-card--open guess-card--row" style="--layer-color:${g.layerColor}">
+          <div class="guess-card__left">
+            <div class="guess-card__icon">${g.icon}</div>
+          </div>
+          <div class="guess-card__body">
+            <div class="guess-card__head">
+              <span class="guess-card__name">${escapeHtml(g.title)}</span>
+            </div>
+            <div class="guess-card__marquee marquee" aria-label="热门评论">
+              <div class="${marqueeTrackClass}">
+                ${marqueeItems}${top.length ? marqueeItems : ""}
+              </div>
+            </div>
+          </div>
+          <div class="guess-card__right">
+            ${mainBtn}
+            <button class="btn guess-card__action" type="button" data-guess-post="${g.id}">留言板</button>
           </div>
         </div>
       `;
     }).join("");
 
-    return `<div class="guess-grid">${cards}</div>`;
+    return `<div class="guess-list">${cards}</div>`;
   })();
 
   const playStates = PLAYTEST_GAMES.map((p, idx) => {
@@ -5769,19 +5807,86 @@ function wireDiscoverInline() {
     }),
   );
 
-  // 查看游戏（已领取后按钮变成查看游戏）
-  $$("[data-guess-go]").forEach((el) =>
+  // 留言板
+  $$("[data-guess-post]").forEach((el) =>
     el.addEventListener("click", (e) => {
       e.stopPropagation();
-      const g = MUTUAL_GAMES.find((x) => x.id === el.dataset.guessGo);
+      const g = MUTUAL_GAMES.find((x) => x.id === el.dataset.guessPost);
       if (!g) return;
-      try {
-        window.open(g.url, "_blank", "noopener,noreferrer");
-      } catch {
-        toast("跳转失败，请稍后重试");
-      }
+      const postUrl = String(g.postUrl || "").trim() || g.url;
+      openModal({
+        title: `${g.icon} ${g.title} 留言板`,
+        bodyHtml: `<div style="text-align:center;padding:12px 0">
+          <p style="font-size:14px;color:rgba(15,23,42,.7);line-height:1.8;margin:0 0 8px">提前创建好的帖子详情页，请大家来评论盖楼。</p>
+        </div>`,
+      });
     }),
   );
+
+  // 跑马灯逐条滚动
+  (() => {
+    const prefersReduce = !!window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (prefersReduce) return;
+    const tracks = Array.from(document.querySelectorAll(".guess-card__marquee .marquee__track"));
+    tracks.forEach((track) => {
+      if (!track || track.classList.contains("marquee__track--static")) return;
+      if (track.getAttribute("data-marquee-wired") === "1") return;
+      track.setAttribute("data-marquee-wired", "1");
+
+      const items = Array.from(track.querySelectorAll(".marquee__item"));
+      if (items.length < 2) return;
+      track.classList.add("marquee__track--step");
+
+      const total = items.length;
+      const originalCount = total % 2 === 0 ? total / 2 : total;
+      if (originalCount <= 1) return;
+
+      const viewport = track.closest(".marquee");
+      const firstItem = items[0];
+      if (viewport && firstItem) {
+        const h = Math.max(0, Math.round(firstItem.getBoundingClientRect().height || firstItem.offsetHeight || 0));
+        if (h >= 12) viewport.style.height = `${h}px`;
+      }
+
+      const step = (() => {
+        const a = items[0];
+        const b = items[1];
+        if (a && b) {
+          const ra = a.getBoundingClientRect();
+          const rb = b.getBoundingClientRect();
+          const d = rb.top - ra.top;
+          if (Number.isFinite(d) && d > 0) return Math.round(d);
+        }
+        return (a?.offsetHeight || 18) + 4;
+      })();
+
+      const pauseMs = 2000;
+      const moveMs = 280;
+      let idx = 0;
+      track.style.transform = "translateY(0px)";
+      track.style.transition = "none";
+
+      const tick = () => {
+        if (!document.contains(track)) return;
+        setTimeout(() => {
+          if (!document.contains(track)) return;
+          let nextIdx = idx + 1;
+          if (idx >= originalCount) {
+            track.style.transition = "none";
+            track.style.transform = "translateY(0px)";
+            void track.offsetHeight;
+            idx = 0;
+            nextIdx = 1;
+          }
+          track.style.transition = `transform ${moveMs}ms ease-out`;
+          track.style.transform = `translateY(-${step * nextIdx}px)`;
+          idx = nextIdx;
+          setTimeout(() => tick(), moveMs + 40);
+        }, pauseMs);
+      };
+      tick();
+    });
+  })();
 
   wireCarousel("playCarousel", "playDots", { cardSelector: ".play-page", activeCardClass: "play-page--active" });
 
