@@ -2219,6 +2219,8 @@ html.is-firstrecap .firstrecap-body::before{
 .guess-card__body{
   flex: 1;
   min-width: 0;
+  position: relative;
+  z-index: 1;
 }
 .guess-card__head{
   display: flex;
@@ -2244,8 +2246,8 @@ html.is-firstrecap .firstrecap-body::before{
   flex-direction: column;
   gap: 4px;
 }
+/* 静态文本也保持 overflow hidden，用省略号截断 */
 .guess-card__marquee .marquee__track--static{
-  /* 静态文本不做动画，直接显示 */
   height: 18px;
 }
 .guess-card__marquee .marquee__track--step{
@@ -2260,9 +2262,10 @@ html.is-firstrecap .firstrecap-body::before{
   line-height: 18px;
 }
 .guess-card__marquee .marquee__track--static .marquee__item{
-  white-space: normal;
-  overflow: visible;
-  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 11px;
   line-height: 18px;
 }
 .guess-card__right{
