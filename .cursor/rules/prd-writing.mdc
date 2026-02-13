@@ -1,0 +1,40 @@
+---
+description: 从零撰写完整 PRD。当用户需要从头定义一个新产品/功能的背景、目标、方案时使用。
+globs: "**/*.md"
+alwaysApply: false
+---
+
+# 完整 PRD 撰写指导
+
+当用户需要从零撰写一份完整的 PRD 时，先阅读以下 skill 文件获取框架：
+
+## 核心参考 Skills
+
+1. **撰写 PRD** → 阅读 `.cursor/lenny-skills/skills/writing-prds/SKILL.md`
+2. **问题定义** → 阅读 `.cursor/lenny-skills/skills/problem-definition/SKILL.md`
+3. **产品愿景** → 阅读 `.cursor/lenny-skills/skills/defining-product-vision/SKILL.md`
+4. **编写规格与设计文档** → 阅读 `.cursor/lenny-skills/skills/writing-specs-designs/SKILL.md`
+
+## 可选参考 Skills（按需阅读）
+
+- 竞品分析 → `.cursor/lenny-skills/skills/competitive-analysis/SKILL.md`
+- 路线图优先级 → `.cursor/lenny-skills/skills/prioritizing-roadmap/SKILL.md`
+- 范围裁剪 → `.cursor/lenny-skills/skills/scoping-cutting/SKILL.md`
+- 利益相关者对齐 → `.cursor/lenny-skills/skills/stakeholder-alignment/SKILL.md`
+- 交付产品 → `.cursor/lenny-skills/skills/shipping-products/SKILL.md`
+- Working Backwards → `.cursor/lenny-skills/skills/working-backwards/SKILL.md`
+
+## 工作流程
+
+1. **先问再写**：向用户确认产品背景、目标用户、要解决的问题、成功指标
+2. **问题先行**：PRD 开头清晰描述问题和背景，而非直接列功能
+3. **定义成功**：每个 PRD 必须包含可衡量的成功标准
+4. **说明 Why Now**：解释为什么现在做这件事
+5. **保持精简**：聚焦关键结果，避免冗余细节
+6. **中文撰写**：默认使用中文，除非用户另有要求
+
+## 写作风格
+
+- 用「若…则…」的条件式描述分支逻辑
+- 状态与规则优先用表格呈现，提高可扫读性
+- 同一模块内的要点用列表组织，步骤用有序列表
