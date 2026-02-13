@@ -1,0 +1,3 @@
+[submodule ".cursor/lenny-skills"]
+	path = .cursor/lenny-skills
+	url = https://github.com/RefoundAI/lenny-skills.git
