@@ -6386,6 +6386,8 @@ function runOpeningGate() {
   // Remove "loading phase": reveal CTA immediately.
   opening.classList.add("opening--ready");
   if (hint) hint.textContent = "";
+  const agreeLabel = document.getElementById("openingAgree");
+  if (agreeLabel) agreeLabel.classList.remove("hidden");
   if (btn) btn.classList.remove("hidden");
   if (debugBtn) debugBtn.classList.remove("hidden");
 
@@ -6420,9 +6422,32 @@ function runOpeningGate() {
       }, prefersReduce ? 0 : 340);
     }
 
+    // 授权协议勾选校验
+    const chkAgree = document.getElementById("chkAgree");
+    const lnkAgreement = document.getElementById("lnkAgreement");
+    lnkAgreement?.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openModal({
+        title: "TapTap 十周年活动协议",
+        bodyHtml: `<div style="padding:16px;font-size:13px;line-height:1.8;color:var(--text-secondary);max-height:60vh;overflow-y:auto">
+          <p>欢迎参加 TapTap 十周年庆典活动（以下简称"本活动"）。在参与本活动之前，请您仔细阅读以下条款：</p>
+          <p><b>1. 活动规则</b><br>本活动由 TapTap 官方举办，活动期间用户可通过完成指定任务获取积分和奖励。活动最终解释权归 TapTap 所有。</p>
+          <p><b>2. 用户行为规范</b><br>参与用户应遵守相关法律法规及平台规则，不得利用技术手段或其他方式进行作弊、刷分等违规行为。</p>
+          <p><b>3. 数据使用</b><br>活动将基于您在 TapTap 平台的公开数据生成个性化回顾内容，相关数据仅用于本活动展示，不会用于其他商业用途。</p>
+          <p><b>4. 奖励发放</b><br>活动奖励将在活动结束后统一发放至用户的 TapTap 账户，具体发放时间以官方公告为准。</p>
+          <p><b>5. 免责声明</b><br>因不可抗力或系统故障等原因导致活动中断或数据异常，TapTap 不承担相关责任，但将尽力恢复并妥善处理。</p>
+          <p style="color:var(--text-tertiary);margin-top:12px">本协议为演示内容，仅供参考。</p>
+        </div>`,
+      });
+    });
+
     btn.addEventListener("click", () => {
+      if (chkAgree && !chkAgree.checked) {
+        toast("请先阅读并同意活动协议");
+        return;
+      }
       if (!state.loggedIn) {
-        // 未登录：弹出登录弹窗，登录成功后继续进入
         openLoginModal(() => proceedFromGate());
         return;
       }

@@ -1821,8 +1821,35 @@ html.is-firstrecap .firstrecap-body::before{
   color: var(--muted);
   font-size: 12px;
 }
+.opening__agree{
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 16px;
+  font-size: 11px;
+  color: rgba(0,0,0,.6);
+  cursor: pointer;
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
+  justify-content: center;
+  line-height: 1.5;
+}
+.opening__agree input[type="checkbox"]{
+  margin: 2px 0 0;
+  flex-shrink: 0;
+  accent-color: var(--brand);
+}
+.opening__agree a{
+  color: rgba(0,0,0,.85);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.opening__agree a:hover{
+  color: #000;
+}
 .opening__btn{
-  margin-top: 14px;
+  margin-top: 10px;
   /* Avoid looking too long on wide screens */
   width: min(320px, 100%);
   display:block;
