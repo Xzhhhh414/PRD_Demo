@@ -273,6 +273,21 @@ const PRESETS = {
       tapmaker5Tagged: false,
       firstHelpfulDateMonth: "2019年7月",
 
+      // 游戏预约
+      reserveCount: 1280,
+      reserveGames: [
+        "明日方舟", "原神", "崩坏：星穹铁道", "鸣潮", "绝区零",
+        "少女前线2", "尘白禁区", "万龙觉醒", "代号鸢", "火力苏打",
+        "猫之城", "白荆回廊", "世界之外", "深空之眼", "星际旅人",
+        "幻塔", "逆水寒手游",
+      ],
+      reserveLaunchedCount: 8,
+      reserveLaunchedGames: [
+        "明日方舟", "原神", "崩坏：星穹铁道", "鸣潮", "绝区零",
+        "少女前线2", "尘白禁区", "万龙觉醒", "代号鸢",
+      ],
+      taptapReserveTotal: "88,888,888",
+
       // legacy
       gamesPlayed: 128,
       reviewsHelpful: 42,
@@ -689,6 +704,7 @@ function calcSnapshotGrants(recap) {
     // 基础
     snap_reg_active: fixed(10),
     snap_time_habit: fixed(10),
+    snap_reserve: fixed(10),
     snap_streak: fixed(10),
     // TapTap 消费：积分按原规则，点券=消费金额的10%（向下取整）
     snap_spend: fixed(clamp(Math.floor(spendTotal / 100) * 10, 10, 300), Math.max(0, Math.floor(spendTotal * 0.1))),
@@ -3526,12 +3542,21 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
     // 基础数据
     {
       label: "什么时候来到 TapTap",
-      value: `
-        <div class="vlist">
-          <div>在${(snap.regDate || "").trim()}来到 TapTap </div>
-          <div>我们已经相伴了 ${fmt(togetherDays)} 天</div>
-        </div>
-      `,
+      value: (() => {
+        const regDate = (snap.regDate || "").trim();
+        if (!regDate || togetherDays === null) return "";
+        return `
+          <div class="arrival-card">
+            <div class="arrival-label">你来到 TapTap 的日子</div>
+            <div class="arrival-date">${regDate}</div>
+            <div class="arrival-days">
+              <span class="arrival-days__num">${fmt(togetherDays)}</span>
+              <span class="arrival-days__unit">天</span>
+            </div>
+            <div class="arrival-tagline">我们已经相伴走过这么多天了。</div>
+          </div>
+        `;
+      })(),
       desc: "",
       rewardId: "snap_reg_active",
       visible: !!(snap.regDate || "").trim() && togetherDays !== null,
@@ -3559,15 +3584,18 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
           return "偶尔晚睡，也许是因为舍不得放下手中的故事。";
         };
 
-        let html = '<div class="vlist">';
+        let html = '<div class="timehabit-card">';
         if (peak) {
-          html += `<div class="vsum">最常打开 TapTap 的时段</div>`;
-          html += `<div>${peak.range}</div>`;
-          html += `<div class="vdetail">${peak.text}</div>`;
+          html += `<div class="timehabit-label">最常打开 TapTap 的时段</div>`;
+          html += `<div class="timehabit-range">${peak.range}</div>`;
+          html += `<div class="timehabit-desc">${peak.text}</div>`;
         }
         if (nightCount > 0) {
-          html += `<div class="vsum" style="margin-top:8px">深夜打开了 ${fmt(nightCount)} 次 TapTap</div>`;
-          html += `<div class="vdetail">${nightTextFn(nightCount)}</div>`;
+          html += `<div class="timehabit-section">`;
+          html += `<div class="timehabit-label">深夜打开 TapTap</div>`;
+          html += `<div class="timehabit-hero"><span class="timehabit-hero__num">${fmt(nightCount)}</span><span class="timehabit-hero__unit">次</span></div>`;
+          html += `<div class="timehabit-desc">${nightTextFn(nightCount)}</div>`;
+          html += `</div>`;
         }
         html += '</div>';
         return html;
@@ -3575,6 +3603,86 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
       desc: "",
       rewardId: "snap_time_habit",
       visible: !!((snap.peakTimeSlot || "").trim()) || Number(snap.lateNightOpenCount || 0) > 0,
+    },
+    // 游戏预约
+    {
+      label: "游戏预约",
+      value: (() => {
+        const RESERVE_ICON_COLORS = [
+          "#F87171","#FB923C","#FBBF24","#34D399","#60A5FA",
+          "#A78BFA","#F472B6","#38BDF8","#4ADE80","#FB7185",
+          "#FACC15","#2DD4BF","#818CF8","#E879F9","#22D3EE",
+        ];
+        const rChar = (name) => {
+          const raw = String(name || "").trim();
+          const m = raw.match(/《([^》]+)》/);
+          const inside = (m ? m[1] : raw).trim();
+          const cleaned = inside.replace(/^TapTap制造[:：]/, "").split(/[:：]/).pop().trim();
+          return Array.from(cleaned)[0] || "?";
+        };
+        const rIcon = (name, idx, size) => {
+          const ch = rChar(name);
+          const color = RESERVE_ICON_COLORS[idx % RESERVE_ICON_COLORS.length];
+          const cls = size === "sm" ? "reserve-ico reserve-ico--sm" : "reserve-ico";
+          return `<span class="${cls}" style="background:${color}">${ch}</span>`;
+        };
+
+        const count = Number(snap.reserveCount || 0);
+        const allGames = Array.isArray(snap.reserveGames) ? snap.reserveGames : [];
+        const launchedCount = Number(snap.reserveLaunchedCount || 0);
+        const launchedGames = Array.isArray(snap.reserveLaunchedGames) ? snap.reserveLaunchedGames : [];
+        const totalReserve = String(snap.taptapReserveTotal || "").trim();
+
+        if (count <= 0 && allGames.length === 0) {
+          return `
+            <div class="reserve-card reserve-card--empty">
+              <div class="reserve-empty-main">你还没有在TapTap预约过新作。</div>
+              <div class="reserve-empty-sub">你的冒险地图上，仍有无限的未知等待你去探索。</div>
+              ${totalReserve ? `<div class="reserve-footer">TapTap 新作预约量达到 <strong>${totalReserve}</strong></div>` : ""}
+            </div>
+          `;
+        }
+
+        const displayCount = count > 999 ? "999" : String(count);
+        const showPlus = count > 999;
+
+        const MAX_ICONS = 15;
+        const needEllipsis = allGames.length > MAX_ICONS;
+        const visibleGames = needEllipsis ? allGames.slice(0, MAX_ICONS - 1) : allGames.slice(0, MAX_ICONS);
+        const gridHtml = visibleGames.map((g, i) => rIcon(g, i, "lg")).join("")
+          + (needEllipsis ? `<span class="reserve-ico reserve-ico--more">···</span>` : "");
+
+        const MAX_LAUNCHED = 10;
+        const launchNeedEllipsis = launchedGames.length > MAX_LAUNCHED;
+        const visibleLaunched = launchNeedEllipsis ? launchedGames.slice(0, MAX_LAUNCHED - 1) : launchedGames.slice(0, MAX_LAUNCHED);
+        const launchGridHtml = visibleLaunched.map((g, i) => rIcon(g, i, "sm")).join("")
+          + (launchNeedEllipsis ? `<span class="reserve-ico reserve-ico--sm reserve-ico--more">···</span>` : "");
+
+        const showLaunched = launchedCount > 0 && launchedGames.length > 0;
+
+        return `
+          <div class="reserve-card">
+            <div class="reserve-header">
+              <div class="reserve-title">你预约过的游戏</div>
+              <div class="reserve-hero">
+                <span class="reserve-count">${displayCount}</span>${showPlus ? `<span class="reserve-plus">+</span>` : ""}
+                <span class="reserve-unit">款</span>
+              </div>
+            </div>
+            <div class="reserve-grid">${gridHtml}</div>
+            ${showLaunched ? `
+              <div class="reserve-launched">
+                <div class="reserve-launched__text">你预约的游戏中，<br>有<strong>${fmt(launchedCount)}</strong>款已经上线啦！你的期待没有落空。</div>
+                <div class="reserve-launched__icons">${launchGridHtml}</div>
+              </div>
+            ` : ""}
+            ${totalReserve ? `<div class="reserve-footer">这十年间，TapTap 开启预约的游戏达到 <strong>${totalReserve}</strong> 款</div>` : ""}
+          </div>
+        `;
+      })(),
+      desc: "",
+      rewardId: "snap_reserve",
+      visible: true,
     },
     {
       label: "在TapTap买了什么",
@@ -4457,6 +4565,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
   // 无数据卡片的温暖提示（15 字以内）
   const emptyHints = {
     snap_reg_active:  "旅程才刚开始<br>欢迎来到TapTap",
+    snap_reserve:     "新作等你来预约",
     snap_downloads:   "好游戏等你发现",
     snap_spend:       "好物等你来挑",
     snap_badges:      "徽章等你来集",
