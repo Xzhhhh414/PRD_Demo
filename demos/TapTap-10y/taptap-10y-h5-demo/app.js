@@ -113,6 +113,9 @@ const PRESETS = {
       leaderTop3Game: "《Miao屋》",
       leaderTop3Board: "速通榜",
       leaderTop3Rank: "第16名",
+      peakTimeSlot: "6PM-12AM",
+      lateNightOpenCount: 156,
+
       nightSlot: "0:00–3:00",
       nightTopGame: "《哈迪斯》",
       nightPlayCount: 128,
@@ -685,6 +688,7 @@ function calcSnapshotGrants(recap) {
 
     // 基础
     snap_reg_active: fixed(10),
+    snap_time_habit: fixed(10),
     snap_streak: fixed(10),
     // TapTap 消费：积分按原规则，点券=消费金额的10%（向下取整）
     snap_spend: fixed(clamp(Math.floor(spendTotal / 100) * 10, 10, 300), Math.max(0, Math.floor(spendTotal * 0.1))),
@@ -3524,25 +3528,53 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
       label: "什么时候来到 TapTap",
       value: `
         <div class="vlist">
-          <div>在${(snap.regDate || "").trim()}加入</div>
-          <div>已互相陪伴 ${fmt(togetherDays)} 天</div>
+          <div>在${(snap.regDate || "").trim()}来到 TapTap </div>
+          <div>我们已经相伴了 ${fmt(togetherDays)} 天</div>
         </div>
       `,
       desc: "",
       rewardId: "snap_reg_active",
       visible: !!(snap.regDate || "").trim() && togetherDays !== null,
     },
+    // 打开 TapTap 的时间习惯
     {
-      label: "拥有多少游戏",
-      value: `
-        <div class="vlist">
-          <div class="vsum">下载了 ${fmt(snap.downloadsCount || 0)} 个游戏</div>
-          <div class="vdetail">第一个下载：${(snap.firstDownloadedGame || "").trim()}</div>
-        </div>
-      `,
+      label: "你和 TapTap 的时间默契",
+      value: (() => {
+        const slot = (snap.peakTimeSlot || "").trim();
+        const nightCount = Number(snap.lateNightOpenCount || 0);
+        if (!slot && nightCount <= 0) return "";
+
+        const peakMap = {
+          "12AM-6AM": { range: "00:00 — 05:59", text: "夜深了，世界在沉睡，你的故事才刚翻开新的一页。" },
+          "6AM-12PM": { range: "06:00 — 11:59", text: "清晨的第一束光，和你一起照亮今天的冒险。" },
+          "12PM-6PM": { range: "12:00 — 17:59", text: "午后的阳光洒进来，你按下了继续的按钮。" },
+          "6PM-12AM": { range: "18:00 — 23:59", text: "星星亮了，你的游戏之夜正式开场。" },
+        };
+        const peak = peakMap[slot];
+
+        const nightTextFn = (n) => {
+          if (n >= 200) return "你好呀夜行者，月亮已经是你的老朋友了。";
+          if (n >= 100) return "这些夜晚串起来，足够写一本冒险日记了。";
+          if (n >= 50)  return "深夜的时光，有游戏陪伴，格外安心。";
+          return "偶尔晚睡，也许是因为舍不得放下手中的故事。";
+        };
+
+        let html = '<div class="vlist">';
+        if (peak) {
+          html += `<div class="vsum">最常打开 TapTap 的时段</div>`;
+          html += `<div>${peak.range}</div>`;
+          html += `<div class="vdetail">${peak.text}</div>`;
+        }
+        if (nightCount > 0) {
+          html += `<div class="vsum" style="margin-top:8px">深夜打开了 ${fmt(nightCount)} 次 TapTap</div>`;
+          html += `<div class="vdetail">${nightTextFn(nightCount)}</div>`;
+        }
+        html += '</div>';
+        return html;
+      })(),
       desc: "",
-      rewardId: "snap_downloads",
-      visible: Number(snap.downloadsCount || 0) > 0 && !!(snap.firstDownloadedGame || "").trim(),
+      rewardId: "snap_time_habit",
+      visible: !!((snap.peakTimeSlot || "").trim()) || Number(snap.lateNightOpenCount || 0) > 0,
     },
     {
       label: "在TapTap买了什么",
@@ -3560,6 +3592,19 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
       rewardId: "snap_spend",
       visible: Number(snap.spendTotal || 0) > 0,
     },
+    {
+      label: "拥有多少游戏",
+      value: `
+        <div class="vlist">
+          <div class="vsum">下载了 ${fmt(snap.downloadsCount || 0)} 个游戏</div>
+          <div class="vdetail">第一个下载：${(snap.firstDownloadedGame || "").trim()}</div>
+        </div>
+      `,
+      desc: "",
+      rewardId: "snap_downloads",
+      visible: Number(snap.downloadsCount || 0) > 0 && !!(snap.firstDownloadedGame || "").trim(),
+    },
+
     {
       label: "徽章",
       value: (() => {
@@ -4676,10 +4721,10 @@ function rewardBlockHtml(rewardId, s, recap, isEmpty = false) {
 function miniCardHtml(card, idx, s, recap) {
   const kindClass = String(card.rewardId || "").startsWith("bind_") ? "mini-card--bind" : "mini-card--snap";
   const isEmpty = !!card.emptyHint;
+  // card.label 保留在数据中作为卡片含义注释，不在界面上显示
   if (isEmpty) {
     return `
       <div class="mini-card ${kindClass} mini-card--empty" role="listitem" data-card-idx="${idx}" data-reward-id="${escapeHtml(card.rewardId || "")}">
-        <div class="mini-card__k">${card.label}</div>
         <div class="mini-card__empty-hint">${card.emptyHint}</div>
         ${rewardBlockHtml(card.rewardId, s, recap, true)}
       </div>
@@ -4687,7 +4732,6 @@ function miniCardHtml(card, idx, s, recap) {
   }
   return `
     <div class="mini-card ${kindClass}" role="listitem" data-card-idx="${idx}" data-reward-id="${escapeHtml(card.rewardId || "")}">
-      <div class="mini-card__k">${card.label}</div>
       ${card.value ? `<div class="mini-card__v">${card.value}</div>` : ""}
       ${kindClass === "mini-card--bind" && card.desc ? `<div class="mini-card__d">${card.desc}</div>` : ""}
       ${rewardBlockHtml(card.rewardId, s, recap, false)}
