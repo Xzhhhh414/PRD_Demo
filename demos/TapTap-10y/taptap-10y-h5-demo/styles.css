@@ -879,7 +879,7 @@ html.is-firstrecap .firstrecap-body::before{
   flex: 0 0 auto;
   width: 340px;
   min-width: 340px;
-  height: 270px;
+  height: 200px;
   border: 1px solid var(--border);
   background: linear-gradient(180deg, rgba(242,246,255,.95), rgba(255,255,255,.95));
   border-radius: 14px;
@@ -2354,7 +2354,7 @@ html.is-firstrecap .firstrecap-body::before{
   align-items: center;
   text-align: center;
   padding: 10px 0 4px;
-  min-height: 240px;
+  min-height: 200px;
 }
 .story-page__emoji{
   font-size: 56px;
@@ -2586,7 +2586,7 @@ html.is-firstrecap .firstrecap-body::before{
 /* ── Arrival card (什么时候来到 TapTap) ── */
 .mini-card[data-reward-id="snap_reg_active"]{
   height: auto;
-  min-height: 270px;
+  min-height: 200px;
   background: linear-gradient(165deg, rgba(224,242,254,.95) 0%, rgba(240,230,255,.90) 100%);
 }
 .arrival-card{
@@ -2637,7 +2637,7 @@ html.is-firstrecap .firstrecap-body::before{
 /* ── Time habit card (时间默契) ── */
 .mini-card[data-reward-id="snap_time_habit"]{
   height: auto;
-  min-height: 270px;
+  min-height: 200px;
   background: linear-gradient(165deg, rgba(254,243,199,.92) 0%, rgba(224,242,254,.90) 100%);
 }
 .timehabit-card{
@@ -2692,12 +2692,12 @@ html.is-firstrecap .firstrecap-body::before{
 /* ── Reserve card (游戏预约卡片) ── */
 .mini-card[data-reward-id="snap_reserve"]{
   height: auto;
-  min-height: 270px;
+  min-height: 200px;
   background: linear-gradient(165deg, rgba(255,248,220,.96) 0%, rgba(220,245,230,.92) 100%);
 }
 .firstrecap-body .mini-card[data-reward-id="snap_reserve"]{
   height: auto;
-  min-height: 270px;
+  min-height: 200px;
 }
 
 .reserve-card{
@@ -2835,4 +2835,834 @@ html.is-firstrecap .firstrecap-body::before{
   font-weight: 700;
   color: rgba(15,23,42,.5);
   line-height: 1.6;
+}
+
+/* ── 消费卡片 ── */
+.mini-card[data-reward-id="snap_spend"]{
+  height: auto;
+  min-height: 200px;
+  background: linear-gradient(165deg, rgba(255,237,213,.92) 0%, rgba(254,226,226,.90) 100%);
+}
+.spend-card{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+.spend-hero{
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.spend-label{
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(15,23,42,.5);
+  line-height: 1.3;
+  margin-right: 2px;
+}
+.spend-hero__num{
+  font-size: 42px;
+  font-weight: 950;
+  line-height: 1.1;
+  color: #0F172A;
+  letter-spacing: -1.5px;
+}
+.spend-hero__unit{
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(15,23,42,.55);
+  margin-left: 2px;
+}
+.spend-list{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.spend-game{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(15,23,42,.75);
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.spend-game--more{
+  color: rgba(15,23,42,.35);
+  letter-spacing: 2px;
+}
+.spend-footer{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(15,23,42,.06);
+}
+.spend-footer__amount{
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(15,23,42,.5);
+  line-height: 1.3;
+}
+.spend-footer__amount strong{
+  font-size: 28px;
+  font-weight: 950;
+  color: #0F172A;
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+.spend-footer__tagline{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(15,23,42,.45);
+  line-height: 1.45;
+}
+.spend-card--empty{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 6px;
+}
+.spend-empty-main{
+  font-size: 15px;
+  font-weight: 900;
+  color: #0F172A;
+  line-height: 1.5;
+}
+.spend-empty-sub{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(15,23,42,.5);
+  line-height: 1.6;
+}
+
+/* ── 十年生涯游玩数据卡片 ── */
+.mini-card[data-reward-id="snap_top3games"]{
+  height: auto;
+  min-height: 200px;
+  background: linear-gradient(165deg, rgba(224,242,254,.92) 0%, rgba(220,245,230,.90) 100%);
+}
+.playtime-card{
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 4px;
+}
+.playtime-section{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.playtime-label{
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(15,23,42,.5);
+  line-height: 1.3;
+}
+.playtime-hero{
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+.playtime-hero__num{
+  font-size: 42px;
+  font-weight: 950;
+  line-height: 1.1;
+  color: #0F172A;
+  letter-spacing: -1.5px;
+}
+.playtime-hero__unit{
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(15,23,42,.55);
+  margin-left: 2px;
+}
+.playtime-first{
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(15,23,42,.65);
+  line-height: 1.5;
+  margin-top: 2px;
+}
+.playtime-first__icon{
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.playtime-empty-main{
+  font-size: 15px;
+  font-weight: 900;
+  color: #0F172A;
+  line-height: 1.5;
+}
+.playtime-empty-sub{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(15,23,42,.5);
+  line-height: 1.6;
+}
+
+/* 柱状图 */
+.playtime-chart{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(15,23,42,.06);
+}
+.ychart-header{
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2px;
+}
+.ychart-axis-label{
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(15,23,42,.35);
+}
+.ychart{
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 100px;
+  padding: 0 2px;
+}
+.ychart-col{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  cursor: pointer;
+  min-width: 0;
+}
+.ychart-bars{
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  width: 100%;
+  height: 80px;
+}
+.ychart-bar{
+  flex: 1;
+  border-radius: 3px 3px 0 0;
+  min-height: 3px;
+  transition: opacity .15s;
+}
+.ychart-bar--games{
+  background: rgba(96,165,250,.75);
+}
+.ychart-bar--hours{
+  background: rgba(52,211,153,.75);
+}
+.ychart-col:hover .ychart-bar--games{ background: rgba(96,165,250,1); }
+.ychart-col:hover .ychart-bar--hours{ background: rgba(52,211,153,1); }
+.ychart-year{
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(15,23,42,.4);
+  white-space: nowrap;
+}
+.ychart-bubble{
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0F172A;
+  color: #fff;
+  border-radius: 6px;
+  padding: 4px 8px;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.4;
+  pointer-events: none;
+  z-index: 5;
+  box-shadow: 0 2px 8px rgba(0,0,0,.18);
+  transition: opacity .15s;
+}
+.ychart-bubble--hidden{
+  opacity: 0;
+  pointer-events: none;
+}
+.ychart-bubble--visible{
+  opacity: 1;
+}
+.ychart-bubble__row{
+  text-align: center;
+}
+.ychart-legend{
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding-top: 2px;
+}
+.ychart-legend__item{
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(15,23,42,.45);
+}
+.ychart-legend__dot{
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.ychart-legend__dot--games{ background: rgba(96,165,250,.75); }
+.ychart-legend__dot--hours{ background: rgba(52,211,153,.75); }
+.playtime-note{
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(15,23,42,.3);
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ── 游戏时长年历卡片 ── */
+.mini-card[data-reward-id="snap_yearbook"]{
+  height: auto;
+  min-height: 200px;
+  background: linear-gradient(165deg, rgba(219,234,254,.92) 0%, rgba(237,233,254,.90) 100%);
+}
+.yearbook-card{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+.yearbook-header{
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0 2px;
+}
+.yearbook-title{
+  font-size: 14px;
+  font-weight: 950;
+  color: #0F172A;
+}
+.yearbook-subtitle{
+  font-size: 9px;
+  font-weight: 800;
+  color: rgba(15,23,42,.25);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+.yearbook-grid{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.yearbook-cell{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px 8px;
+  background: rgba(255,255,255,.65);
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.8);
+  box-shadow: 0 1px 3px rgba(15,23,42,.03);
+}
+.yearbook-cell__year{
+  font-size: 10px;
+  font-weight: 800;
+  color: rgba(15,23,42,.4);
+  line-height: 1.2;
+}
+.yearbook-cell__icon{
+  font-size: 28px;
+  line-height: 1;
+  margin: 3px 0;
+}
+.yearbook-cell__name{
+  font-size: 10px;
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.3;
+  text-align: center;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.yearbook-cell__hours{
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--brand, #00B894);
+  line-height: 1.2;
+}
+.yearbook-note{
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(15,23,42,.25);
+  text-align: center;
+  line-height: 1.4;
+  margin-top: 2px;
+}
+.yearbook-share-btn{
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 16px;
+  background: var(--brand, #00B894);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  min-height: 0;
+  white-space: nowrap;
+}
+.yearbook-share-btn:hover{
+  opacity: .85;
+}
+.yearbook-card--empty{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 6px;
+}
+.yearbook-empty-main{
+  font-size: 15px;
+  font-weight: 900;
+  color: #0F172A;
+  line-height: 1.5;
+}
+.yearbook-empty-sub{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(15,23,42,.5);
+  line-height: 1.6;
+}
+
+/* ── 类别偏好 & 游戏成就（合并卡） ── */
+.mini-card[data-reward-id="snap_profile"]{
+  height: auto;
+  min-height: 200px;
+  background: linear-gradient(165deg, rgba(236,252,243,.92) 0%, rgba(224,242,254,.90) 100%);
+}
+.profile-card{
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 4px;
+}
+
+/* 雷达图区 */
+.profile-radar__title{
+  font-size: 14px;
+  font-weight: 950;
+  color: #0F172A;
+  margin-bottom: 2px;
+}
+.profile-radar{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.profile-radar__svg{
+  width: 140px;
+  height: 140px;
+  flex-shrink: 0;
+}
+.profile-radar__info{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.profile-radar__top-label{
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(15,23,42,.45);
+}
+.profile-radar__top-genre{
+  font-size: 22px;
+  font-weight: 950;
+  color: #0F172A;
+  line-height: 1.2;
+}
+.profile-radar__top-pct{
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--brand, #00B894);
+  margin-left: 4px;
+}
+.profile-radar__site-pct{
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(15,23,42,.4);
+}
+
+/* 雷达图空状态 */
+.profile-radar--empty{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0;
+}
+
+/* 成就区 */
+.profile-ach{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(15,23,42,.06);
+}
+.profile-ach__summary{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(15,23,42,.65);
+  line-height: 1.5;
+}
+.profile-ach__summary strong{
+  font-size: 18px;
+  font-weight: 950;
+  color: #0F172A;
+}
+.profile-ach__stats{
+  display: flex;
+  gap: 16px;
+}
+.profile-ach__stat{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.profile-ach__stat-num{
+  font-size: 24px;
+  font-weight: 950;
+  color: #0F172A;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+.profile-ach__stat-label{
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(15,23,42,.4);
+}
+.profile-ach__rare-title{
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(15,23,42,.5);
+  margin-top: 4px;
+}
+.profile-ach__rare-list{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.profile-ach__rare-item{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.profile-ach__rare-rank{
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+  color: #fff;
+  background: var(--brand, #00B894);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.profile-ach__rare-info{
+  flex: 1;
+  min-width: 0;
+}
+.profile-ach__rare-name{
+  font-size: 13px;
+  font-weight: 800;
+  color: #0F172A;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.profile-ach__rare-game{
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(15,23,42,.4);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.profile-ach__rare-rate{
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--brand, #00B894);
+  flex-shrink: 0;
+}
+
+/* 成就空状态 */
+.profile-ach--empty{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0;
+  border-top: 1px solid rgba(15,23,42,.06);
+}
+
+/* 空状态文本 */
+.profile-empty__title{
+  font-size: 15px;
+  font-weight: 900;
+  color: #0F172A;
+  line-height: 1.5;
+}
+.profile-empty__sub{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(15,23,42,.5);
+  line-height: 1.6;
+}
+
+/* ── 挚爱游戏卡片 ── */
+.mini-card[data-reward-id="snap_beloved"]{
+  height: auto;
+  min-height: 200px;
+  background: linear-gradient(165deg, rgba(254,226,226,.92) 0%, rgba(252,231,243,.90) 100%);
+}
+.beloved-card{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0 4px;
+  text-align: center;
+}
+.beloved-card__title{
+  font-size: 14px;
+  font-weight: 950;
+  color: #0F172A;
+  align-self: flex-start;
+}
+.beloved-card__icon{
+  font-size: 56px;
+  line-height: 1;
+}
+.beloved-card__name{
+  font-size: 18px;
+  font-weight: 950;
+  color: #0F172A;
+  line-height: 1.3;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.beloved-card__hours{
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.beloved-card__hours-num{
+  font-size: 36px;
+  font-weight: 950;
+  color: #0F172A;
+  line-height: 1.1;
+  letter-spacing: -1px;
+}
+.beloved-card__hours-unit{
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(15,23,42,.5);
+}
+.beloved-card__pct{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(15,23,42,.55);
+  line-height: 1.5;
+}
+.beloved-card__pct strong{
+  font-weight: 900;
+  color: var(--brand, #00B894);
+}
+.beloved-card__same{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(15,23,42,.45);
+  line-height: 1.5;
+}
+.beloved-card__note{
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(15,23,42,.25);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* ── 挚爱游戏 Top10 卡片 ── */
+.mini-card[data-reward-id="snap_beloved_top10"]{
+  height: auto;
+  min-height: 200px;
+  background: linear-gradient(165deg, rgba(252,231,243,.92) 0%, rgba(237,233,254,.90) 100%);
+}
+.top10-card{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+.top10-card__title{
+  font-size: 14px;
+  font-weight: 950;
+  color: #0F172A;
+}
+.top10-grid{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.top10-item{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  min-width: 0;
+  border-radius: 8px;
+  background: rgba(255,255,255,.5);
+  border: 1px solid rgba(255,255,255,.7);
+}
+.top10-item:nth-child(1){ background: linear-gradient(135deg, rgba(251,191,36,.15), rgba(255,255,255,.5)); }
+.top10-item:nth-child(2){ background: linear-gradient(135deg, rgba(148,163,184,.15), rgba(255,255,255,.5)); }
+.top10-item:nth-child(3){ background: linear-gradient(135deg, rgba(217,119,6,.12), rgba(255,255,255,.5)); }
+.top10-item__rank{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(15,23,42,.45);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.top10-item:nth-child(1) .top10-item__rank{ background: #F59E0B; }
+.top10-item:nth-child(2) .top10-item__rank{ background: #94A3B8; }
+.top10-item:nth-child(3) .top10-item__rank{ background: #D97706; }
+.top10-item__icon{
+  font-size: 22px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.top10-item__name{
+  font-size: 13px;
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.top10-card__note{
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(15,23,42,.25);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+/* ── Tap独家 & 编辑推荐 卡片 ── */
+.mini-card[data-reward-id="snap_taplist"]{
+  height: auto;
+  min-height: 200px;
+  background: linear-gradient(165deg, rgba(224,242,254,.92) 0%, rgba(236,252,243,.90) 100%);
+}
+.taplist-card{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 4px;
+}
+.taplist__section{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.taplist__header{
+  font-size: 14px;
+  font-weight: 950;
+  color: #0F172A;
+}
+.taplist__stats{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(15,23,42,.55);
+  line-height: 1.5;
+}
+.taplist__stats strong{
+  font-weight: 900;
+  color: #0F172A;
+}
+.taplist__quote{
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--brand, #00B894);
+  line-height: 1.5;
+}
+.taplist__icons{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+.taplist__icon{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
+  line-height: 1;
+  background: rgba(255,255,255,.6);
+  border: 1px solid rgba(255,255,255,.8);
+  border-radius: 8px;
+}
+.taplist__icon--more{
+  font-size: 14px;
+  font-weight: 900;
+  color: rgba(15,23,42,.35);
+}
+.taplist__empty-main{
+  font-size: 14px;
+  font-weight: 900;
+  color: #0F172A;
+  line-height: 1.5;
+}
+.taplist__empty-sub{
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(15,23,42,.45);
+  line-height: 1.5;
+}
+.taplist__note{
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(15,23,42,.25);
+  line-height: 1.4;
+  margin-top: 2px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(15,23,42,.04);
 }
