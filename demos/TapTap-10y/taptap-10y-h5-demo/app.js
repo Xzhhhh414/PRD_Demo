@@ -322,7 +322,7 @@ const BIND_REWARDS = [
   },
   {
     id: "bind_roles",
-    title: "绑定更多游戏角色",
+    title: "绑定更多角色",
     desc: "每绑定 1 个角色即可领奖励，可持续绑定。",
     perRole: { points: 20, coupons: 0 },
   },
@@ -2460,7 +2460,7 @@ function shareRecapTextForShare(recap) {
   if (kw.keyword && kw.keyword !== "神秘旅人") parts.push(`我是「${kw.keyword}」`);
   if (beloved) parts.push(`十年挚爱${beloved}`);
   const gamesTotal = Number(recap.gamesPlayedTotal || 0);
-  if (gamesTotal > 0) parts.push(`玩了 ${fmt(gamesTotal)} 款游戏`);
+  if (gamesTotal > 0) parts.push(`玩了 ${fmt(gamesTotal)} 款佳作`);
   return `我的 TapTap 十年回顾：${parts.join("，") || "来看看我的十年旅程"}。#十年同行`;
 }
 
@@ -2790,7 +2790,7 @@ function buildSharePosterSvg(s, recap, nick, pid, url, qr) {
     Number(recap.reviewsCount || 0) > 0 && { dim: "reviews", label: "评价数", value: fmtK(recap.reviewsCount, 999) },
     Number(recap.communityPublished || 0) > 0 && { dim: "published", label: "社区发布", value: fmtK(recap.communityPublished, 9999) },
     Number(recap.communityLikesReceived || 0) > 0 && { dim: "likes", label: "获赞数", value: fmtW(recap.communityLikesReceived) },
-    devGames.length > 0 && { dim: "dev", label: "创作游戏", value: String(devGames.length) },
+    devGames.length > 0 && { dim: "dev", label: "我的作品", value: String(devGames.length) },
     (Number(recap.friendsCount || 0) + Number(recap.followersCount || 0)) > 0 && { dim: "social", label: "好友与粉丝", value: fmtK(Number(recap.friendsCount || 0) + Number(recap.followersCount || 0), 9999) },
     Number(recap.nightSurfDays || 0) > 0 && { dim: "night", label: "深夜冲浪", value: fmtK(recap.nightSurfDays, 999) },
   ].filter(Boolean);
@@ -3746,14 +3746,14 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
           "12AM-6AM": { range: "00:00 — 05:59", text: "夜深了，世界在沉睡，你的故事才刚翻开新的一页。" },
           "6AM-12PM": { range: "06:00 — 11:59", text: "清晨的第一束光，和你一起照亮今天的冒险。" },
           "12PM-6PM": { range: "12:00 — 17:59", text: "午后的阳光洒进来，你按下了继续的按钮。" },
-          "6PM-12AM": { range: "18:00 — 23:59", text: "星星亮了，你的游戏之夜正式开场。" },
+          "6PM-12AM": { range: "18:00 — 23:59", text: "星星亮了，你的冒险之夜正式开场。" },
         };
         const peak = peakMap[slot];
 
         const nightTextFn = (n) => {
           if (n >= 200) return "你好呀夜行者，月亮已经是你的老朋友了。";
           if (n >= 100) return "这些夜晚串起来，足够写一本冒险日记了。";
-          if (n >= 50)  return "深夜的时光，有游戏陪伴，格外安心。";
+          if (n >= 50)  return "夜深人静，屏幕微光里藏着属于你的小世界。";
           return "偶尔晚睡，也许是因为舍不得放下手中的故事。";
         };
 
@@ -3779,7 +3779,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
     },
     // 游戏预约
     {
-      label: "游戏预约",
+      label: "我的预约",
       value: (() => {
         const RESERVE_ICON_COLORS = [
           "#F87171","#FB923C","#FBBF24","#34D399","#60A5FA",
@@ -3836,7 +3836,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         return `
           <div class="reserve-card">
             <div class="reserve-header">
-              <div class="reserve-title">你预约过的游戏</div>
+              <div class="reserve-title">你预约过的佳作</div>
               <div class="reserve-hero">
                 <span class="reserve-count">${displayCount}</span>${showPlus ? `<span class="reserve-plus">+</span>` : ""}
                 <span class="reserve-unit">款</span>
@@ -3845,11 +3845,11 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
             <div class="reserve-grid">${gridHtml}</div>
             ${showLaunched ? `
               <div class="reserve-launched">
-                <div class="reserve-launched__text">你预约的游戏中，<br>有<strong>${fmt(launchedCount)}</strong>款已经上线啦！你的期待没有落空。</div>
+                <div class="reserve-launched__text">你预约的佳作中，<br>有<strong>${fmt(launchedCount)}</strong>款已经上线啦！你的期待没有落空。</div>
                 <div class="reserve-launched__icons">${launchGridHtml}</div>
               </div>
             ` : ""}
-            ${totalReserve ? `<div class="reserve-footer">这十年间，TapTap 开启预约的游戏达到 <strong>${totalReserve}</strong> 款</div>` : ""}
+            ${totalReserve ? `<div class="reserve-footer">这十年间，TapTap 开启预约的新作达到 <strong>${totalReserve}</strong> 款</div>` : ""}
           </div>
         `;
       })(),
@@ -3892,7 +3892,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         return `
           <div class="spend-card">
             <div class="spend-hero">
-              <span class="spend-label">购买游戏</span><span class="spend-hero__num">${displayCount}</span><span class="spend-hero__unit">款</span>
+              <span class="spend-label">购买作品</span><span class="spend-hero__num">${displayCount}</span><span class="spend-hero__unit">款</span>
             </div>
             <div class="spend-list">${listHtml}${moreHtml}</div>
             <div class="spend-footer">
@@ -3935,9 +3935,9 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
             <div class="playtime-section">
               <div class="playtime-label">十年生涯玩了</div>
               <div class="playtime-hero">
-                <span class="playtime-hero__num">${fmtGameCount(totalGames)}</span><span class="playtime-hero__unit">款游戏</span>
+                <span class="playtime-hero__num">${fmtGameCount(totalGames)}</span><span class="playtime-hero__unit">款佳作</span>
               </div>
-              ${firstName ? `<div class="playtime-first">${firstIcon ? `<span class="playtime-first__icon">${firstIcon}</span>` : ""}我的第一款游戏：${escapeHtml(firstName)}</div>` : ""}
+              ${firstName ? `<div class="playtime-first">${firstIcon ? `<span class="playtime-first__icon">${firstIcon}</span>` : ""}我的首次游玩旅程：${escapeHtml(firstName)}</div>` : ""}
             </div>`;
         } else {
           gamesHtml = `
@@ -3952,7 +3952,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         if (hasTime) {
           timeHtml = `
             <div class="playtime-section">
-              <div class="playtime-label">十年生涯游戏时长</div>
+              <div class="playtime-label">十年生涯游玩时长</div>
               <div class="playtime-hero">
                 <span class="playtime-hero__num">${fmtHours(totalHours)}</span><span class="playtime-hero__unit">小时</span>
               </div>
@@ -3963,7 +3963,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
             : "没有记录冒险时长。开启TapTap时长同步功能，为你的冒险时光存档。";
           timeHtml = `
             <div class="playtime-section playtime-section--empty">
-              <div class="playtime-label">十年生涯游戏时长</div>
+              <div class="playtime-label">十年生涯游玩时长</div>
               <div class="playtime-empty-sub">${emptyTimeText}</div>
             </div>`;
         }
@@ -3999,8 +3999,8 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
               </div>
               <div class="ychart">${barsHtml}</div>
               <div class="ychart-legend">
-                <span class="ychart-legend__item"><span class="ychart-legend__dot ychart-legend__dot--games"></span>游戏数量</span>
-                <span class="ychart-legend__item"><span class="ychart-legend__dot ychart-legend__dot--hours"></span>游戏时长</span>
+                <span class="ychart-legend__item"><span class="ychart-legend__dot ychart-legend__dot--games"></span>佳作数量</span>
+                <span class="ychart-legend__item"><span class="ychart-legend__dot ychart-legend__dot--hours"></span>游玩时长</span>
               </div>
               <div class="playtime-note">数据由预约下载、冒险时长、内容浏览等综合行为产生</div>
             </div>`;
@@ -4019,7 +4019,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
     },
     // 游戏时长年历
     {
-      label: "游戏时长年历",
+      label: "游玩时长年历",
       value: (() => {
         const topGames = Array.isArray(snap.yearlyTopGames)
           ? snap.yearlyTopGames.filter(d => Number(d.hours) > 0 && String(d.gameName || "").trim())
@@ -4029,7 +4029,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
           return `
             <div class="yearbook-card yearbook-card--empty">
               <div class="yearbook-empty-main">你的年历空空如也。</div>
-              <div class="yearbook-empty-sub">快去开始吧，体验游戏世界的魅力！</div>
+              <div class="yearbook-empty-sub">快去开始吧，体验佳作世界的魅力！</div>
             </div>
           `;
         }
@@ -4068,7 +4068,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
     },
     // 类别偏好 + 游戏成就（合并卡）
     {
-      label: "类别偏好 & 游戏成就",
+      label: "成就",
       value: (() => {
         const rA = Number(snap.radarAction || 0);
         const rS = Number(snap.radarStrategy || 0);
@@ -4130,7 +4130,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         ` : "";
 
         const radarSection = hasRadar ? `
-          <div class="profile-radar__title">游戏偏好</div>
+          <div class="profile-radar__title">游玩偏好</div>
           <div class="profile-radar">
             ${radarSvg}
             ${genreInfoHtml}
@@ -4146,7 +4146,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         const achSection = hasAch ? `
           <div class="profile-ach">
             <div class="profile-ach__summary">
-              在 <strong>${fmt(achGames)}</strong> 款游戏里留下了点亮成就的足迹
+              在 <strong>${fmt(achGames)}</strong> 款佳作里留下了点亮成就的足迹
             </div>
             <div class="profile-ach__stats">
               <div class="profile-ach__stat">
@@ -4193,7 +4193,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
     },
     // 挚爱游戏
     {
-      label: "挚爱游戏",
+      label: "挚爱佳作",
       value: (() => {
         const name = String(snap.belovedGameName || "").trim();
         const icon = String(snap.belovedGameIcon || "").trim();
@@ -4212,7 +4212,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
 
         return `
           <div class="beloved-card">
-            <div class="beloved-card__title">挚爱游戏</div>
+            <div class="beloved-card__title">挚爱佳作</div>
             <div class="beloved-card__icon">${icon || "🎮"}</div>
             <div class="beloved-card__name">${escapeHtml(name)}</div>
             ${hStr ? `
@@ -4221,8 +4221,8 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
                 <span class="beloved-card__hours-unit">小时</span>
               </div>
             ` : ""}
-            ${pct ? `<div class="beloved-card__pct">占生涯游戏时长的 <strong>${escapeHtml(pct)}</strong></div>` : ""}
-            ${samePct ? `<div class="beloved-card__same">${escapeHtml(samePct)} 玩家和我的"挚爱游戏"一致</div>` : ""}
+            ${pct ? `<div class="beloved-card__pct">占生涯游玩时长的 <strong>${escapeHtml(pct)}</strong></div>` : ""}
+            ${samePct ? `<div class="beloved-card__same">${escapeHtml(samePct)} 玩家和我的"挚爱佳作"一致</div>` : ""}
             <div class="beloved-card__note">数据由预约下载、冒险时长、内容浏览等综合行为产生</div>
           </div>
         `;
@@ -4427,77 +4427,6 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
       visible: true,
     },
     // 社区点赞
-    {
-      label: "社区点赞",
-      value: (() => {
-        const fmtWan = (n) => {
-          if (n <= 0) return "0";
-          if (n < 10000) return fmt(n);
-          const w = n / 10000;
-          if (w >= 999.95) return "999.9万+";
-          if (w >= 1 && w % 1 < 0.05) return Math.floor(w) + "万";
-          return w.toFixed(1) + "万";
-        };
-        const likesGiven = Number(snap.communityLikesGiven || 0);
-        const likesReceived = Number(snap.communityLikesReceived || 0);
-        const likePctRank = String(snap.communityLikePctRank || "").trim();
-        const topContent = Array.isArray(snap.communityTopLikedContent)
-          ? snap.communityTopLikedContent.filter(x => String(x.title || "").trim() && Number(x.likes) > 0)
-          : [];
-
-        if (likesGiven <= 0 && likesReceived <= 0) return "";
-
-        const pctNum = parseFloat(likePctRank);
-        let quote = "";
-        if (likesGiven <= 0) {
-          quote = "还没有留下点赞记录。第一次表达喜欢，或许就在下一次滑动之间。";
-        } else if (pctNum <= 33) {
-          quote = "你不轻易表达，但每一次点赞都很认真。每个\u201C赞\u201D，都是一句无声的认同。";
-        } else if (pctNum <= 66) {
-          quote = "你乐于为好内容鼓掌。那些被你点亮的作品，也记住了你的支持。";
-        } else {
-          quote = "你从不吝啬赞美。无数作品因你的点赞而更加闪耀。";
-        }
-
-        const cutTitle = (s) => { const t = String(s || "").trim(); return t.length > 10 ? t.slice(0, 10) + "..." : t; };
-
-        const topHtml = topContent.length > 0 ? `
-          <div class="likecard__top-title">获赞最多的内容 Top5</div>
-          <div class="likecard__top-list">
-            ${topContent.slice(0, 5).map((x, i) => `
-              <div class="likecard__top-item">
-                <span class="likecard__top-rank">${i + 1}</span>
-                <span class="likecard__top-text">${escapeHtml(cutTitle(x.title))}</span>
-                <span class="likecard__top-likes">👍${fmtWan(Number(x.likes))}</span>
-              </div>
-            `).join("")}
-          </div>
-        ` : "";
-
-        return `
-          <div class="likecard">
-            <div class="likecard__header">社区点赞</div>
-            <div class="likecard__stats-row">
-              <div class="likecard__stat">
-                <span class="likecard__stat-num">${fmtWan(likesGiven)}</span>
-                <span class="likecard__stat-label">点赞</span>
-              </div>
-              <div class="likecard__stat">
-                <span class="likecard__stat-num">${fmtWan(likesReceived)}</span>
-                <span class="likecard__stat-label">获赞</span>
-              </div>
-            </div>
-            ${likePctRank ? `<div class="likecard__pct">点赞量超过了 <strong>${escapeHtml(likePctRank)}</strong> 的玩家</div>` : ""}
-            <div class="likecard__quote">${quote}</div>
-            ${topHtml}
-          </div>
-        `;
-      })(),
-      desc: "",
-      rewardId: "snap_community_likes",
-      visible: true,
-    },
-
     // 社区发布内容
     {
       label: "社区发布内容",
@@ -4586,6 +4515,77 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
       })(),
       desc: "",
       rewardId: "snap_community_pub",
+      visible: true,
+    },
+
+    {
+      label: "社区点赞",
+      value: (() => {
+        const fmtWan = (n) => {
+          if (n <= 0) return "0";
+          if (n < 10000) return fmt(n);
+          const w = n / 10000;
+          if (w >= 999.95) return "999.9万+";
+          if (w >= 1 && w % 1 < 0.05) return Math.floor(w) + "万";
+          return w.toFixed(1) + "万";
+        };
+        const likesGiven = Number(snap.communityLikesGiven || 0);
+        const likesReceived = Number(snap.communityLikesReceived || 0);
+        const likePctRank = String(snap.communityLikePctRank || "").trim();
+        const topContent = Array.isArray(snap.communityTopLikedContent)
+          ? snap.communityTopLikedContent.filter(x => String(x.title || "").trim() && Number(x.likes) > 0)
+          : [];
+
+        if (likesGiven <= 0 && likesReceived <= 0) return "";
+
+        const pctNum = parseFloat(likePctRank);
+        let quote = "";
+        if (likesGiven <= 0) {
+          quote = "还没有留下点赞记录。第一次表达喜欢，或许就在下一次滑动之间。";
+        } else if (pctNum <= 33) {
+          quote = "你不轻易表达，但每一次点赞都很认真。每个\u201C赞\u201D，都是一句无声的认同。";
+        } else if (pctNum <= 66) {
+          quote = "你乐于为好内容鼓掌。那些被你点亮的作品，也记住了你的支持。";
+        } else {
+          quote = "你从不吝啬赞美。无数作品因你的点赞而更加闪耀。";
+        }
+
+        const cutTitle = (s) => { const t = String(s || "").trim(); return t.length > 10 ? t.slice(0, 10) + "..." : t; };
+
+        const topHtml = topContent.length > 0 ? `
+          <div class="likecard__top-title">获赞最多的内容 Top5</div>
+          <div class="likecard__top-list">
+            ${topContent.slice(0, 5).map((x, i) => `
+              <div class="likecard__top-item">
+                <span class="likecard__top-rank">${i + 1}</span>
+                <span class="likecard__top-text">${escapeHtml(cutTitle(x.title))}</span>
+                <span class="likecard__top-likes">👍${fmtWan(Number(x.likes))}</span>
+              </div>
+            `).join("")}
+          </div>
+        ` : "";
+
+        return `
+          <div class="likecard">
+            <div class="likecard__header">社区点赞</div>
+            <div class="likecard__stats-row">
+              <div class="likecard__stat">
+                <span class="likecard__stat-num">${fmtWan(likesGiven)}</span>
+                <span class="likecard__stat-label">点赞</span>
+              </div>
+              <div class="likecard__stat">
+                <span class="likecard__stat-num">${fmtWan(likesReceived)}</span>
+                <span class="likecard__stat-label">获赞</span>
+              </div>
+            </div>
+            ${likePctRank ? `<div class="likecard__pct">点赞量超过了 <strong>${escapeHtml(likePctRank)}</strong> 的玩家</div>` : ""}
+            <div class="likecard__quote">${quote}</div>
+            ${topHtml}
+          </div>
+        `;
+      })(),
+      desc: "",
+      rewardId: "snap_community_likes",
       visible: true,
     },
 
@@ -4783,7 +4783,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
 
     // 游戏创作（合并原开发者三张卡）
     {
-      label: "游戏创作",
+      label: "作品创作",
       value: (() => {
         const games = (Array.isArray(snap.devGames) ? snap.devGames : [])
           .filter(g => String(g.name || "").trim())
@@ -4797,8 +4797,8 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
 
         const hasMore = totalGames > 9;
         const listHtml = totalGames > 0 ? `
-          <div class="devcard__section-title">参与了游戏创作</div>
-          <div class="devcard__total">一共创作了 <strong>${fmt(totalGames)}</strong> 款游戏</div>
+          <div class="devcard__section-title">参与了作品创作</div>
+          <div class="devcard__total">一共创作了 <strong>${fmt(totalGames)}</strong> 款作品</div>
           <div class="devcard__game-grid">
             ${games.slice(0, 9).map(g => `
               <div class="devcard__game-cell">
@@ -4813,7 +4813,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         const gjHtml = gjCount > 0 ? `
           <div class="devcard__sub">
             <div class="devcard__sub-title">聚光灯GameJam</div>
-            <div class="devcard__sub-num">有 <strong>${fmt(gjCount)}</strong> 款游戏创作于「聚光灯GameJam」</div>
+            <div class="devcard__sub-num">有 <strong>${fmt(gjCount)}</strong> 款作品创作于「聚光灯GameJam」</div>
             <div class="devcard__sub-quote">在有限时间里完成创作，你选择了挑战与热爱。</div>
           </div>
         ` : "";
@@ -4821,7 +4821,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         const tmHtml = tmCount > 0 ? `
           <div class="devcard__sub">
             <div class="devcard__sub-title">TapTap制造</div>
-            <div class="devcard__sub-num">有 <strong>${fmt(tmCount)}</strong> 款游戏是使用「TapTap制造」创作</div>
+            <div class="devcard__sub-num">有 <strong>${fmt(tmCount)}</strong> 款作品是使用「TapTap制造」创作</div>
             <div class="devcard__sub-quote">从想法到作品，你让创意真正落了地。</div>
           </div>
         ` : "";
@@ -4850,7 +4850,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
     snap_community_pub:"还没有发布记录。也许你在等待一个真正想分享的瞬间。",
     snap_night_community: "十年里，你很少在深夜停留。热爱之外，你也照顾好了自己。",
     snap_friend_msgs: "好友等你来交",
-    snap_dev_create:  "创作的种子还未发芽。也许有一天，你的名字会出现在某款游戏的制作名单里。",
+    snap_dev_create:  "创作的种子还未发芽。也许有一天，你的名字会出现在某款作品的制作名单里。",
   };
 
   let snapshotCards = snapshotCardsAll.map((c) => {
@@ -4886,7 +4886,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         if (games <= 0) {
           return `
             <div class="steamcard steamcard--empty">
-              <div class="steamcard__empty-text">你的 Steam 旅程还未开始。<br>第一款游戏，也许正在等你启动。</div>
+              <div class="steamcard__empty-text">你的 Steam 旅程还未开始。<br>第一款佳作，也许正在等你启动。</div>
             </div>
           `;
         }
@@ -4901,7 +4901,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
           <div class="steamcard">
             ${favGame ? `
               <div class="steamcard__fav">
-                <div class="steamcard__fav-label">挚爱游戏</div>
+                <div class="steamcard__fav-label">挚爱佳作</div>
                 <div class="steamcard__fav-row">
                   ${favIcon ? `<img class="steamcard__fav-icon" src="${favIcon}" alt="" />` : ""}
                   <span class="steamcard__fav-name">${escapeHtml(favGame)}</span>
@@ -4915,11 +4915,11 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
               </div>
               <div class="steamcard__stat">
                 <span class="steamcard__stat-num">${capVal(games, 9999)}</span>
-                <span class="steamcard__stat-label">游戏数量</span>
+                <span class="steamcard__stat-label">佳作数量</span>
               </div>
               <div class="steamcard__stat">
                 <span class="steamcard__stat-num">${capVal(hours, 9999)}</span>
-                <span class="steamcard__stat-label">游戏时长（小时）</span>
+                <span class="steamcard__stat-label">游玩时长（小时）</span>
               </div>
             </div>
           </div>
@@ -4930,7 +4930,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
       visible: true,
     },
     {
-      label: "绑定游戏角色",
+      label: "绑定角色",
       value: (() => {
         const cards = Array.isArray(s.boundRoleCards) ? s.boundRoleCards.filter(c => c && String(c.name || "").trim()) : [];
         if (!cards.length) return "";
@@ -5251,7 +5251,7 @@ function shareCardHtml(s, recap, { variant }) {
     Number(recap.reviewsCount || 0) > 0 && { dim: "reviews", label: "评价数", value: fmtKpi(recap.reviewsCount, 999) },
     Number(recap.communityPublished || 0) > 0 && { dim: "published", label: "社区发布数", value: fmtKpi(recap.communityPublished, 9999) },
     Number(recap.communityLikesReceived || 0) > 0 && { dim: "likes", label: "获赞数", value: fmtWanKpi(recap.communityLikesReceived) },
-    devGames.length > 0 && { dim: "dev", label: "创作游戏", value: String(devGames.length) },
+    devGames.length > 0 && { dim: "dev", label: "我的作品", value: String(devGames.length) },
     (Number(recap.friendsCount || 0) + Number(recap.followersCount || 0)) > 0 && { dim: "social", label: "好友与粉丝", value: fmtKpi(Number(recap.friendsCount || 0) + Number(recap.followersCount || 0), 9999) },
     Number(recap.nightSurfDays || 0) > 0 && { dim: "night", label: "深夜冲浪", value: fmtKpi(recap.nightSurfDays, 999) },
   ].filter(Boolean);
@@ -5929,7 +5929,7 @@ function openBindRolesModal() {
   const body = `
     <div class="small" style="line-height:1.55">
       <div class="hint">
-        <b>绑定更多游戏角色</b>：这里会打开游戏数据绑定界面。
+        <b>绑定更多角色</b>：这里会打开数据绑定界面。
       </div>
       <div class="divider"></div>
       <div class="muted small">每绑定 1 个角色可领取：${grantPillsHtml(per)}</div>
@@ -5941,7 +5941,7 @@ function openBindRolesModal() {
     <button class="btn btn--brand" id="btnBindOneRole">绑定 1 个角色（模拟）</button>
     <button class="btn" id="btnCancelBindRole">取消</button>
   `;
-  openModal({ title: "绑定游戏角色", bodyHtml: body, footerHtml: footer });
+  openModal({ title: "绑定角色", bodyHtml: body, footerHtml: footer });
   $("#btnCancelBindRole")?.addEventListener("click", closeModal);
   const sampleRoles = [
     { name: "轮椅指挥官", game: "明日方舟", job: "", level: 0, stats: [{ label: "登录天数", value: "65天" }, { label: "传说级人物", value: "10" }, { label: "传说级装备", value: "49" }], bg: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)", avatar: "https://img.tapimg.net/market/images/e2b7259807d30e498a3008cbed6be542.png" },
@@ -6674,7 +6674,7 @@ function debugModalHtml() {
       <div class="divider"></div>
 
       <div>
-        <div><b>绑定steam/游戏角色</b></div>
+        <div><b>绑定steam/角色</b></div>
         <div class="muted small">用于快速调试 Steam/角色绑定卡片的展示与领奖逻辑。</div>
         <div class="row" style="margin-top:8px">
           <label class="pill" style="cursor:pointer">
