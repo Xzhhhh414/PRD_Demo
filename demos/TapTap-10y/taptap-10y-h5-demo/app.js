@@ -47,17 +47,19 @@ const PRESETS = {
         "《Miao屋》DLC·春日篇",
         "《饥荒：联机版》",
       ],
-      badgesTotal: 86,
-      badgesBlackGoldTotal: 4,
-      badgeRare1Icon: "🖤",
-      badgeRare1Name: "黑金·十年同行",
-      badgeRare1Owners: 1280,
-      badgeRare2Icon: "🏆",
-      badgeRare2Name: "年度 Top 1 评测",
-      badgeRare2Owners: 8600,
-      badgeRare3Icon: "⭐",
-      badgeRare3Name: "聚光灯精选",
-      badgeRare3Owners: 12800,
+      platformBadgesTotal: 86,
+      platformBadges: [
+        { icon: "🖤", name: "黑金·十年同行", owners: 82, category: "成就" },
+        { icon: "🏆", name: "年度 Top 1 评测", owners: 560, category: "成就" },
+        { icon: "⭐", name: "聚光灯精选", owners: 3200, category: "活动" },
+        { icon: "🎯", name: "百发百中", owners: 8600, category: "成就" },
+        { icon: "🎪", name: "2024嘉年华参与者", owners: 12800, category: "活动" },
+        { icon: "💎", name: "钻石评测", owners: 15000, category: "成就" },
+        { icon: "🔥", name: "连续签到30天", owners: 42000, category: "活动" },
+        { icon: "📝", name: "首次评价", owners: 86000, category: "成就" },
+        { icon: "🤝", name: "社区之友", owners: 120000, category: "活动" },
+        { icon: "👋", name: "新手报到", owners: 350000, category: "活动" },
+      ],
 
       // 玩游戏
       gamesPlayedTotal: 368,
@@ -183,23 +185,32 @@ const PRESETS = {
       reviewsCount: 38,
       reviewLikesTotal: 560,
       reviewCommentsTotal: 1280,
-      reviewsLikedCount: 26,
+      reviewAllLowStar: false,
+      reviewGameIcons: [
+        { name: "《戴森球计划》", icon: "🌐", likes: 128 },
+        { name: "《哈迪斯》", icon: "💀", likes: 96 },
+        { name: "《去月球》", icon: "🌙", likes: 72 },
+        { name: "《极乐迪斯科》", icon: "🕵️", likes: 54 },
+        { name: "《心动小镇》", icon: "🏘️", likes: 38 },
+        { name: "《空洞骑士：丝之歌》", icon: "🦋", likes: 21 },
+        { name: "《明日方舟》", icon: "🏗️", likes: 15 },
+      ],
       zuitiCount: 8,
-      zuitiRecent1Game: "《戴森球计划》",
-      zuitiRecent1Score: 9.3,
-      zuitiRecent2Game: "《去月球》",
-      zuitiRecent2Score: 9.6,
-      zuitiRecent3Game: "《哈迪斯》",
-      zuitiRecent3Score: 9.2,
-      reviewLikedTop1Game: "《戴森球计划》",
-      reviewLikedTop1Likes: 128,
-      reviewLikedTop2Game: "《哈迪斯》",
-      reviewLikedTop2Likes: 96,
-      reviewLikedTop3Game: "《去月球》",
-      reviewLikedTop3Likes: 72,
-      topLikedReviewTitle: "《戴森球计划》：这才是太空的浪漫",
-      topLikedReviewLikes: 128,
       taptapCriticYears: [2018, 2019, 2020, 2021, 2022],
+      totalReviewsOnPlatform: 12000000,
+      communityPublished: 156,
+      communityCommentsReceived: 1280,
+      communityPubPctRank: "72.3%",
+      communityTopForums: [
+        { game: "《派对之星》", count: 42 },
+        { game: "《戴森球计划》", count: 36 },
+        { game: "《哈迪斯》", count: 28 },
+      ],
+      communityTopEmojis: [
+        { emoji: "😂", count: 3260 },
+        { emoji: "👍", count: 1840 },
+        { emoji: "❤️", count: 960 },
+      ],
       postsCount: 56,
       repliesCount: 420,
       forumInteractPlayers: 168,
@@ -209,6 +220,16 @@ const PRESETS = {
       topActiveForum2Posts: 12,
       topActiveForum3Game: "《哈迪斯》",
       topActiveForum3Posts: 9,
+      communityLikesGiven: 8600,
+      communityLikesReceived: 12400,
+      communityLikePctRank: "78.5%",
+      communityTopLikedContent: [
+        { title: "这才是太空的浪漫，戴森球真香", likes: 246 },
+        { title: "哈迪斯全成就攻略分享", likes: 128 },
+        { title: "去月球通关后我哭了三天", likes: 96 },
+        { title: "空洞骑士丝之歌隐藏结局触发条件", likes: 72 },
+        { title: "心动小镇装修灵感合集", likes: 58 },
+      ],
       likedPostsCount: 860,
       receivedLikesCount: 1240,
       favoritedPostsCount: 120,
@@ -239,92 +260,34 @@ const PRESETS = {
       friendsCount: 268,
       followingCount: 186,
       followersCount: 420,
-      friendMessagesCount: 2680,
-      friendTop1Name: "阿星",
-      friendTop1TapId: "taptap_axing",
-      friendTop1MsgCount: 860,
-      friendTop2Name: "咕咕",
-      friendTop2TapId: "taptap_gugu",
-      friendTop2MsgCount: 620,
-      friendTop3Name: "小盐",
-      friendTop3TapId: "taptap_xiaoyan",
-      friendTop3MsgCount: 410,
+      closestFriends: [
+        { name: "阿星", msgs: 860, lastText: "今晚一起打派对之星吗？", lastTime: "2026年1月28日 22:13" },
+        { name: "咕咕", msgs: 620, lastText: "昨天那个boss好难打啊", lastTime: "2026年1月25日 19:47" },
+        { name: "小盐", msgs: 410, lastText: "新出的DLC你买了没？", lastTime: "2026年1月20日 14:02" },
+        { name: "夜行者", msgs: 256, lastText: "周末开黑不", lastTime: "2026年1月15日 23:31" },
+        { name: "蓝莓酱", msgs: 180, lastText: "这个游戏画风好好看", lastTime: "2026年1月10日 10:18" },
+      ],
       nightTopAction: "回帖 / 点赞",
-      nightCommunityCount: 46,
-      nightCommunityRecent1Game: "《派对之星》",
-      nightCommunityRecent1Action: "回帖",
-      nightCommunityRecent1Time: "2026年2月2日 01:12",
-      nightCommunityRecent2Game: "《戴森球计划》",
-      nightCommunityRecent2Action: "点赞",
-      nightCommunityRecent2Time: "2026年1月29日 02:06",
-      nightCommunityRecent3Game: "《哈迪斯》",
-      nightCommunityRecent3Action: "收藏",
-      nightCommunityRecent3Time: "2026年1月18日 00:47",
+      nightSurfDays: 46,
+      nightSurfLogs: [
+        { time: "2026年2月2日4点58分", game: "《派对之星》", action: "在《派对之星》发帖子" },
+        { time: "2026年1月29日3点42分", game: "《戴森球计划》", action: "在《戴森球计划》点赞帖子" },
+        { time: "2026年1月18日2点17分", game: "《哈迪斯》", action: "给《哈迪斯》写评价" },
+        { time: "2025年12月31日1点06分", game: "《去月球》", action: "在《去月球》发评论" },
+        { time: "2025年11月15日0点33分", game: "《明日方舟》", action: "在《明日方舟》点赞评价" },
+      ],
 
-      // 开发者
-      devGamesCount: 3,
-      devCert1Name: "《派对之星》策划",
-      devCert2Name: "《沙洛克》策划/程序",
-      devCert3Name: "《Miao屋》制作人",
-      plannerCertCount: 2,
-      programmerCertCount: 1,
-      artCertCount: 0,
-      gamejamCount: 5,
-      gamejamWorks: 3,
-      spotlightGamejamFirstPublishDate: "2020年9月19日",
-      spotlightGamejam1Name: "《派对之星》",
-      spotlightGamejam1Score: 9.2,
-      spotlightGamejam1Award: "最佳人气奖",
-      spotlightGamejam1Certified: true,
-      spotlightGamejam1Tagged: true,
-      spotlightGamejam2Name: "《沙洛克》",
-      spotlightGamejam2Score: 9.0,
-      spotlightGamejam2Award: "最佳创意奖",
-      spotlightGamejam2Certified: true,
-      spotlightGamejam2Tagged: true,
-      spotlightGamejam3Name: "《Miao屋》",
-      spotlightGamejam3Score: 8.9,
-      spotlightGamejam3Award: "",
-      spotlightGamejam3Certified: true,
-      spotlightGamejam3Tagged: true,
-      spotlightGamejam4Name: "《豆战异世界》",
-      spotlightGamejam4Score: 9.4,
-      spotlightGamejam4Award: "",
-      spotlightGamejam4Certified: true,
-      spotlightGamejam4Tagged: true,
-      spotlightGamejam5Name: "《去月球》",
-      spotlightGamejam5Score: 9.6,
-      spotlightGamejam5Award: "评审推荐奖",
-      spotlightGamejam5Certified: false,
-      spotlightGamejam5Tagged: true,
-      levelsCount: 28,
-      levelsPlays: 18600,
-      levelsFavs: 3200,
-      creatorWorks: 12,
-      creatorUses: 8600,
-      creatorLikes: 4200,
-      tapmakerFirstPublishDate: "2019年7月12日",
-      tapmaker1Name: "《TapTap制造：派对小屋》",
-      tapmaker1Likes: 1280,
-      tapmaker1Certified: true,
-      tapmaker1Tagged: true,
-      tapmaker2Name: "《TapTap制造：沙洛克外传》",
-      tapmaker2Likes: 960,
-      tapmaker2Certified: true,
-      tapmaker2Tagged: true,
-      tapmaker3Name: "《TapTap制造：Miao屋》",
-      tapmaker3Likes: 720,
-      tapmaker3Certified: true,
-      tapmaker3Tagged: true,
-      tapmaker4Name: "《TapTap制造：豆战异世界》",
-      tapmaker4Likes: 540,
-      tapmaker4Certified: false,
-      tapmaker4Tagged: true,
-      tapmaker5Name: "《TapTap制造：去月球同人》",
-      tapmaker5Likes: 420,
-      tapmaker5Certified: true,
-      tapmaker5Tagged: false,
-      firstHelpfulDateMonth: "2019年7月",
+      // 开发者 — 游戏创作
+      devGames: [
+        { icon: "https://img.tapimg.net/market/images/e2b7259807d30e498a3008cbed6be542.png", name: "派对之星", followers: 12800 },
+        { icon: "https://img.tapimg.net/market/images/e2b7259807d30e498a3008cbed6be542.png", name: "沙洛克", followers: 8600 },
+        { icon: "https://img.tapimg.net/market/images/e2b7259807d30e498a3008cbed6be542.png", name: "Miao屋", followers: 5200 },
+        { icon: "https://img.tapimg.net/market/images/e2b7259807d30e498a3008cbed6be542.png", name: "豆战异世界", followers: 3100 },
+        { icon: "https://img.tapimg.net/market/images/e2b7259807d30e498a3008cbed6be542.png", name: "去月球同人", followers: 1800 },
+        { icon: "https://img.tapimg.net/market/images/e2b7259807d30e498a3008cbed6be542.png", name: "派对之星2", followers: 980 },
+      ],
+      gamejamGamesCount: 3,
+      tapmakerGamesCount: 2,
 
       // 游戏预约
       reserveCount: 1280,
@@ -541,8 +504,15 @@ function loadState() {
     userPreset: DEFAULT_PRESET_KEY,
     boundData: false,
     boundSteam: false,
+    steamFavGame: "ELDEN RING",
+    steamFavGameIcon: "https://img.tapimg.net/market/images/e2b7259807d30e498a3008cbed6be542.png",
+    steamAccountValue: 12680.5,
+    steamGamesCount: 286,
+    steamPlayHours: 4236,
     boundRolesCount: 0,
     claimedRoleRewardsCount: 0,
+    boundRoleCards: [],
+    allRolesBound: false,
     enteredAt: 0,
     careerSnapshotPreset: DEFAULT_PRESET_KEY,
     careerSnapshot: null,
@@ -752,29 +722,17 @@ function calcSnapshotGrants(recap) {
     snap_beloved: fixed(15),
     snap_beloved_top10: fixed(10),
     snap_taplist: fixed(10),
-    snap_niche: fixed(10),
-    snap_night_game: fixed(10),
 
     // 社区
-    snap_reviews: fixed(20),
-    snap_reviews_count: fixed(10),
-    snap_review_likes_total: fixed(10),
-    snap_top_review: fixed(10),
-    snap_zuiti: fixed(10),
-    snap_critic: fixed(10),
-    snap_forum_stats: fixed(10),
-    snap_top_post: fixed(10),
+    snap_review_voice: fixed(20),
+    snap_community_likes: fixed(10),
+    snap_community_pub: fixed(10),
     snap_friend_msgs: fixed(10),
     snap_night_community: fixed(10),
     snap_badges: fixed(10),
 
-    // 开发者
-    snap_dev_games: fixed(20),
-    snap_certs: fixed(20),
-    snap_gamejam: fixed(10),
-    snap_levels: fixed(10),
-    snap_creator: fixed(10),
-    snap_first_seen: fixed(10),
+    // 开发者（合并）
+    snap_dev_create: fixed(20),
   };
 }
 
@@ -807,7 +765,7 @@ function addCoupons(s, delta) {
 
 const SNAP_REWARD_ALIASES = {
   // merged snapshot cards
-  snap_reviews: ["snap_reviews_count", "snap_review_likes_total"],
+  snap_review_voice: ["snap_reviews_count", "snap_review_likes_total", "snap_top_review", "snap_zuiti"],
 };
 
 function snapshotClaimGrant(s, rewardId) {
@@ -2100,6 +2058,27 @@ function identityTitleForRecap(recap) {
   return "";
 }
 
+function calcShareKeyword(recap) {
+  const devGames = (Array.isArray(recap?.devGames) ? recap.devGames : []).filter(g => String(g.name || "").trim());
+  const togetherDays = calcDaysSince(parseCnDateToTs(recap?.regDate));
+
+  const dims = [
+    { score: Math.min((togetherDays || 0) / 3000, 1), keyword: "初代旅人", dim: "days" },
+    { score: Math.min(Number(recap?.gamesPlayedTotal || 0) / 500, 1), keyword: "游戏收藏家", dim: "games" },
+    { score: Math.min(Number(recap?.playTimeHours || 0) / 5000, 1), keyword: "时间旅人", dim: "hours" },
+    { score: Math.min((Number(recap?.reviewsCount || 0) * 3 + Number(recap?.reviewLikesTotal || 0)) / 2000, 1), keyword: "社区之声", dim: "reviews" },
+    { score: Math.min(Number(recap?.communityPublished || 0) / 200, 1), keyword: "内容达人", dim: "published" },
+    { score: Math.min(devGames.length / 5, 1), keyword: "造梦者", dim: "dev" },
+    { score: Math.min((Number(recap?.friendsCount || 0) + Number(recap?.followersCount || 0)) / 600, 1), keyword: "人气之星", dim: "social" },
+    { score: Math.min(Number(recap?.nightSurfDays || 0) / 80, 1), keyword: "月光冒险家", dim: "night" },
+    { score: Math.min((Number(recap?.achievementsTotal || 0) + Number(recap?.platformBadgesTotal || 0)) / 500, 1), keyword: "成就猎人", dim: "achieve" },
+  ];
+
+  const fallback = { score: 0, keyword: "神秘旅人", dim: "" };
+  const best = dims.reduce((a, b) => (b.score > a.score ? b : a), fallback);
+  return best.score > 0 ? best : fallback;
+}
+
 function memorialInlineView(s, recap, { editOnly = false } = {}) {
   const prof = s.profile || { nickname: "玩家", id: "—", identity: "", bio: "" };
   const nickname = String(prof.nickname || "").trim() || "玩家";
@@ -2475,14 +2454,14 @@ function downloadSvgAsPng(svgString, filename = "taptap-10y-share.png", { scale 
 }
 
 function shareRecapTextForShare(recap) {
-  const reg = String(recap.regDate || "").trim();
-  const gamesTotal = Number(recap.gamesPlayedTotal || 0);
-  const hoursTotal = Number(recap.playTimeHours || 0);
+  const kw = calcShareKeyword(recap);
+  const beloved = String(recap.belovedGameName || "").trim();
   const parts = [];
-  if (reg) parts.push(`${reg} 加入`);
+  if (kw.keyword && kw.keyword !== "神秘旅人") parts.push(`我是「${kw.keyword}」`);
+  if (beloved) parts.push(`十年挚爱${beloved}`);
+  const gamesTotal = Number(recap.gamesPlayedTotal || 0);
   if (gamesTotal > 0) parts.push(`玩了 ${fmt(gamesTotal)} 款游戏`);
-  if (hoursTotal > 0) parts.push(`总时长 ${fmt(Math.floor(hoursTotal))} 小时`);
-  return `我的 TapTap 十年回顾：${parts.join("，") || "一些很酷的数据"}。#十年同行`;
+  return `我的 TapTap 十年回顾：${parts.join("，") || "来看看我的十年旅程"}。#十年同行`;
 }
 
 function memorialCardOnlyHtml(s, recap, { hideProfileFields = false } = {}) {
@@ -2725,12 +2704,10 @@ function openShareRecapModal({ onClose } = {}) {
   const pid = String(state.profile?.id || "").trim() || "—";
 
   const body = `
-    <div class="small" style="line-height:1.55">
-      <div class="row" style="align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px">
-        <div class="grow" style="min-width:0">
-          <div style="font-weight:950; font-size:13px; letter-spacing:.2px">${escapeHtml(nick)}</div>
-          <div class="muted small" style="margin-top:2px">ID ${escapeHtml(pid)}</div>
-        </div>
+    <div style="line-height:1.55">
+      <div style="margin-bottom:12px">
+        <div style="font-weight:950; font-size:14px; letter-spacing:.2px">${escapeHtml(nick)}</div>
+        <div class="muted small" style="margin-top:2px">ID ${escapeHtml(pid)}</div>
       </div>
       ${shareCardHtml(state, recap, { variant: "recap" })}
       <div class="divider"></div>
@@ -2746,7 +2723,7 @@ function openShareRecapModal({ onClose } = {}) {
     <button class="btn btn--brand" id="btnDownloadShareImg" type="button">下载图片</button>
   `;
 
-  openModal({ title: "我的TapTap十年回顾", bodyHtml: body, footerHtml: footer });
+  openModal({ title: "分享我的十年回顾", bodyHtml: body, footerHtml: footer });
 
   $("#btnShareTo")?.addEventListener("click", async () => {
     const text = shareRecapTextForShare(recap);
@@ -2756,7 +2733,7 @@ function openShareRecapModal({ onClose } = {}) {
         return;
       }
     } catch {
-      // ignore; fallback to copy
+      // fallback to copy
     }
     try {
       await navigator.clipboard.writeText(url);
@@ -2767,53 +2744,135 @@ function openShareRecapModal({ onClose } = {}) {
   });
 
   $("#btnDownloadShareImg")?.addEventListener("click", () => {
-    const W = 1080;
-    const H = 1920;
-    const qrSized = String(qr).replace("<svg ", `<svg x="390" y="1320" width="300" height="300" `);
-    const title = "我的TapTap十年回顾";
-    const subtitle = `${nick} · ID ${pid}`;
-    const regDate = String(recap.regDate || "").trim() || "—";
-    const gamesPlayed = Number(recap.gamesPlayedTotal || 0) > 999 ? "999+" : fmt(Number(recap.gamesPlayedTotal || 0));
-    const playHours = (() => { const h = Number(recap.playTimeHours || 0); if (h <= 0) return "—"; if (h > 6000) return "6000+"; if (h < 1) return Math.max(0.1, h).toFixed(1); return String(Math.floor(h)); })();
-    const firstGame = String(recap.firstGameName || "").trim() || "—";
-    const posterSvg = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-        <defs>
-          <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#F7F9FC"/>
-            <stop offset="1" stop-color="#FFFFFF"/>
-          </linearGradient>
-        </defs>
-        <rect width="${W}" height="${H}" fill="url(#bg)"/>
-        <circle cx="140" cy="160" r="260" fill="#E7FBF5" opacity="0.9"/>
-        <circle cx="920" cy="220" r="300" fill="#EEF5FF" opacity="0.9"/>
-
-        <text x="90" y="170" font-size="54" font-weight="800" fill="#0F172A">${escapeXml(title)}</text>
-        <text x="90" y="230" font-size="28" font-weight="700" fill="#334155">${escapeXml(subtitle)}</text>
-
-        <rect x="90" y="290" width="900" height="820" rx="36" fill="#FFFFFF" stroke="rgba(15,23,42,0.10)" stroke-width="2"/>
-        <text x="130" y="380" font-size="28" font-weight="800" fill="#0F172A">加入时间</text>
-        <text x="130" y="440" font-size="44" font-weight="900" fill="#0F172A">${escapeXml(regDate)}</text>
-
-        <text x="130" y="540" font-size="28" font-weight="800" fill="#0F172A">玩了游戏</text>
-        <text x="130" y="600" font-size="44" font-weight="900" fill="#0F172A">${escapeXml(gamesPlayed)} 款</text>
-
-        <text x="130" y="700" font-size="28" font-weight="800" fill="#0F172A">总游戏时长</text>
-        <text x="130" y="760" font-size="44" font-weight="900" fill="#0F172A">${escapeXml(playHours)} 小时</text>
-
-        <text x="130" y="860" font-size="28" font-weight="800" fill="#0F172A">第一款游戏</text>
-        <text x="130" y="920" font-size="40" font-weight="900" fill="#0F172A">${escapeXml(firstGame)}</text>
-
-        <rect x="90" y="1240" width="900" height="600" rx="36" fill="#FFFFFF" stroke="rgba(15,23,42,0.10)" stroke-width="2"/>
-        ${qrSized}
-        <text x="540" y="1670" text-anchor="middle" font-size="26" font-weight="800" fill="#0F172A">扫码打开分享页</text>
-        <text x="540" y="1720" text-anchor="middle" font-size="22" font-weight="700" fill="#64748B">${escapeXml(url)}</text>
-
-        <text x="540" y="1860" text-anchor="middle" font-size="22" font-weight="800" fill="#00B894">TapTap 十周年 · 十年同行</text>
-      </svg>
-    `.trim();
+    const posterSvg = buildSharePosterSvg(state, recap, nick, pid, url, qr);
     downloadSvgAsPng(posterSvg, "taptap-10y-share.png", { scale: 2 });
   });
+}
+
+function buildSharePosterSvg(s, recap, nick, pid, url, qr) {
+  const W = 1080, H = 1920;
+  const color = MEM_CARD_COLORS.find((c) => c.id === s.memorial?.colorId) || MEM_CARD_COLORS[0];
+  const kw = calcShareKeyword(recap);
+  const genre = String(recap.topGenreLabel || "").trim();
+  const belovedName = String(recap.belovedGameName || "").trim() || "—";
+  const belovedIcon = String(recap.belovedGameIcon || "").trim() || "🎮";
+  const belovedHours = Number(recap.belovedGameHours || 0);
+  const fmtBH = (() => { if (belovedHours <= 0) return ""; if (belovedHours > 6000) return "6000+"; if (belovedHours < 1) return Math.max(0.1, belovedHours).toFixed(1); return String(Math.floor(belovedHours)); })();
+  const togetherDays = calcDaysSince(parseCnDateToTs(recap.regDate));
+
+  const fmtK = (n, max) => Number(n) > max ? max + "+" : fmt(Number(n));
+  const fmtH = (h) => { const v = Number(h || 0); if (v <= 0) return "—"; if (v > 6000) return "6000+"; if (v < 1) return Math.max(0.1, v).toFixed(1); return String(Math.floor(v)); };
+  const fmtW = (n) => { const v = Number(n || 0); if (v <= 0) return "0"; if (v < 10000) return fmt(v); const w = v / 10000; if (w >= 999.95) return "999.9万+"; return (w >= 1 && w % 1 < 0.05) ? Math.floor(w) + "万" : w.toFixed(1) + "万"; };
+  const fmtD = (d) => (d == null || d <= 0) ? "—" : (d > 9999 ? "9999" : String(d));
+
+  const top10 = Array.isArray(recap.belovedTop10) ? recap.belovedTop10.filter(g => String(g.name || "").trim()) : [];
+  const topShow = top10.slice(0, 5);
+  const cutN = (n) => { const t = String(n || ""); return t.length <= 6 ? t : t.slice(0, 5) + "…"; };
+
+  const topIconsSvg = topShow.map((g, i) => {
+    const x = 90 + i * 190;
+    const icon = String(g.icon || "🎮").trim();
+    const name = cutN(g.name);
+    return `
+      <rect x="${x}" y="0" width="160" height="160" rx="28" fill="rgba(255,255,255,.85)" stroke="rgba(15,23,42,.08)" stroke-width="2"/>
+      <text x="${x + 80}" y="95" text-anchor="middle" font-size="56">${escapeXml(icon)}</text>
+      <text x="${x + 80}" y="190" text-anchor="middle" font-size="22" font-weight="700" fill="#334155">${escapeXml(name)}</text>
+    `;
+  }).join("");
+
+  const devGames = (Array.isArray(recap?.devGames) ? recap.devGames : []).filter(g => String(g.name || "").trim());
+  const allKpis = [
+    togetherDays > 0 && { dim: "days", label: "陪伴天数", value: fmtD(togetherDays) },
+    Number(recap.gamesPlayedTotal || 0) > 0 && { dim: "games", label: "游玩数量", value: fmtK(recap.gamesPlayedTotal, 999) },
+    Number(recap.playTimeHours || 0) > 0 && { dim: "hours", label: "冒险时长", value: fmtH(recap.playTimeHours) },
+    genre && { dim: "genre", label: "冒险偏好", value: genre },
+    Number(recap.achievementsTotal || 0) + Number(recap.platformBadgesTotal || 0) > 0 && { dim: "achieve", label: "成就与徽章", value: fmtK(Number(recap.achievementsTotal || 0) + Number(recap.platformBadgesTotal || 0), 9999) },
+    Number(recap.reviewsCount || 0) > 0 && { dim: "reviews", label: "评价数", value: fmtK(recap.reviewsCount, 999) },
+    Number(recap.communityPublished || 0) > 0 && { dim: "published", label: "社区发布", value: fmtK(recap.communityPublished, 9999) },
+    Number(recap.communityLikesReceived || 0) > 0 && { dim: "likes", label: "获赞数", value: fmtW(recap.communityLikesReceived) },
+    devGames.length > 0 && { dim: "dev", label: "创作游戏", value: String(devGames.length) },
+    (Number(recap.friendsCount || 0) + Number(recap.followersCount || 0)) > 0 && { dim: "social", label: "好友与粉丝", value: fmtK(Number(recap.friendsCount || 0) + Number(recap.followersCount || 0), 9999) },
+    Number(recap.nightSurfDays || 0) > 0 && { dim: "night", label: "深夜冲浪", value: fmtK(recap.nightSurfDays, 999) },
+  ].filter(Boolean);
+  const hlDim = kw.dim;
+  const hlIdx = allKpis.findIndex(k => k.dim === hlDim);
+  if (hlIdx > 0) { const [item] = allKpis.splice(hlIdx, 1); allKpis.unshift(item); }
+
+  const kpiCols = 4;
+  const kpiCellW = Math.floor(900 / kpiCols);
+  const kpisSvg = allKpis.map((k, i) => {
+    const col = i % kpiCols;
+    const row = Math.floor(i / kpiCols);
+    const cx = 130 + col * kpiCellW + kpiCellW / 2;
+    const cy = row * 110;
+    const isHl = i === 0 && hlDim;
+    const labelColor = isHl ? escapeXml(color.accent) : "rgba(15,23,42,.45)";
+    const valueColor = isHl ? escapeXml(color.accent) : "#0F172A";
+    const valueFz = isHl ? 48 : 38;
+    return `
+      ${isHl ? `<rect x="${cx - kpiCellW / 2 + 8}" y="${cy - 22}" width="${kpiCellW - 16}" height="90" rx="14" fill="${escapeXml(color.accent)}" opacity="0.08"/>` : ""}
+      <text x="${cx}" y="${cy}" text-anchor="middle" font-size="22" font-weight="600" fill="${labelColor}">${escapeXml(k.label)}</text>
+      <text x="${cx}" y="${cy + 48}" text-anchor="middle" font-size="${valueFz}" font-weight="900" fill="${valueColor}">${escapeXml(k.value)}</text>
+    `;
+  }).join("");
+
+  const qrSized = String(qr).replace("<svg ", `<svg x="390" y="0" width="300" height="300" `);
+
+  const heroY = 240;
+  const heroH = 360;
+  const topListY = heroY + heroH + 40;
+  const topListH = 210;
+  const kwY = topListY + topListH + 30;
+  const kpiY = kwY + 130;
+  const kpiRows = Math.ceil(allKpis.length / kpiCols);
+  const kpiH = kpiRows * 110 + 20;
+  const qrY = kpiY + kpiH + 50;
+
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="${escapeXml(color.panel)}"/>
+          <stop offset="1" stop-color="#FFFFFF"/>
+        </linearGradient>
+      </defs>
+      <rect width="${W}" height="${H}" fill="url(#bg)"/>
+      <circle cx="160" cy="180" r="280" fill="${escapeXml(color.accent)}" opacity="0.08"/>
+      <circle cx="920" cy="240" r="320" fill="${escapeXml(color.accent)}" opacity="0.06"/>
+
+      <text x="90" y="120" font-size="32" font-weight="700" fill="#334155">${escapeXml(nick)}</text>
+      <text x="90" y="165" font-size="24" font-weight="600" fill="#64748B">ID ${escapeXml(pid)}</text>
+      <text x="990" y="120" text-anchor="end" font-size="48" font-weight="900" fill="#0F172A">TapTap 十周年回顾</text>
+      <rect x="900" y="135" width="90" height="32" rx="10" fill="${escapeXml(color.accent)}"/>
+      <text x="945" y="158" text-anchor="middle" font-size="18" font-weight="800" fill="#FFFFFF">TapTap</text>
+
+      <rect x="90" y="${heroY}" width="900" height="${heroH}" rx="36" fill="rgba(255,255,255,.85)" stroke="rgba(15,23,42,.08)" stroke-width="2"/>
+      <text x="540" y="${heroY + 120}" text-anchor="middle" font-size="100">${escapeXml(belovedIcon)}</text>
+      <text x="540" y="${heroY + 200}" text-anchor="middle" font-size="32" font-weight="800" fill="#0F172A">我的十年挚爱「${escapeXml(belovedName)}」</text>
+      ${fmtBH ? `
+        <rect x="420" y="${heroY + 230}" width="240" height="60" rx="30" fill="${escapeXml(color.accent)}"/>
+        <text x="540" y="${heroY + 270}" text-anchor="middle" font-size="32" font-weight="900" fill="#FFFFFF">${escapeXml(fmtBH)} 小时</text>
+      ` : ""}
+
+      ${topShow.length > 0 ? `
+        <text x="90" y="${topListY}" font-size="28" font-weight="800" fill="#0F172A">我的十年挚爱Top榜</text>
+        <g transform="translate(0 ${topListY + 20})">${topIconsSvg}</g>
+      ` : ""}
+
+      <text x="90" y="${kwY}" font-size="24" font-weight="600" fill="rgba(15,23,42,.45)">十年关键词</text>
+      <text x="90" y="${kwY + 60}" font-size="56" font-weight="950" fill="#0F172A">${escapeXml(kw.keyword)}</text>
+
+      <rect x="90" y="${kpiY}" width="900" height="${kpiH + 30}" rx="28" fill="rgba(255,255,255,.7)" stroke="rgba(15,23,42,.05)" stroke-width="2"/>
+      <g transform="translate(0 ${kpiY + 40})">${kpisSvg}</g>
+
+      <rect x="90" y="${qrY}" width="900" height="420" rx="36" fill="rgba(255,255,255,.85)" stroke="rgba(15,23,42,.06)" stroke-width="2"/>
+      <g transform="translate(0 ${qrY + 30})">${qrSized}</g>
+      <text x="540" y="${qrY + 370}" text-anchor="middle" font-size="26" font-weight="800" fill="#0F172A">扫码查看完整十年回顾</text>
+      <text x="540" y="${qrY + 405}" text-anchor="middle" font-size="20" font-weight="600" fill="#64748B">${escapeXml(url)}</text>
+
+      <text x="540" y="${H - 40}" text-anchor="middle" font-size="22" font-weight="800" fill="${escapeXml(color.accent)}">TapTap 十周年 · 十年同行</text>
+    </svg>
+  `.trim();
 }
 
 function shareYearbookPoster() {
@@ -4276,672 +4335,502 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
       rewardId: "snap_taplist",
       visible: true,
     },
+    // 游戏评价 & 嘴替发言（合并卡）
     {
-      label: "深夜还在玩",
+      label: "游戏评价 & 嘴替发言",
       value: (() => {
-        const count = Number(snap.nightPlayCount || 0);
-        const rows = [
-          { k: "1", t: (snap.nightRecent1Game || "").trim(), m: (snap.nightRecent1Start || "").trim() },
-          { k: "2", t: (snap.nightRecent2Game || "").trim(), m: (snap.nightRecent2Start || "").trim() },
-          { k: "3", t: (snap.nightRecent3Game || "").trim(), m: (snap.nightRecent3Start || "").trim() },
-        ].filter((r) => r.t && r.m);
-        const rowHtml = rows
-          .map((r) => `<div class="kv"><span class="k">${r.k}</span><span class="t">${r.t}</span><span class="m">${r.m}</span></div>`)
-          .join("");
-        return `
-          <div class="vlist">
-            ${count > 0 ? `<div class="vsum">有 ${fmt(count)} 个深夜在玩游戏</div>` : ""}
-            ${rowHtml}
-          </div>
-        `;
-      })(),
-      desc: "",
-      rewardId: "snap_night_game",
-      visible: !!((snap.nightRecent1Game || "").trim() || (snap.nightRecent2Game || "").trim() || (snap.nightRecent3Game || "").trim()),
-    },
-
-    // 游戏评价
-    {
-      label: "评价",
-      value: (() => {
+        const cap = (n) => Number(n) > 999 ? "999+" : fmt(Number(n));
         const count = Number(snap.reviewsCount || 0);
         const likes = Number(snap.reviewLikesTotal || 0);
         const comments = Number(snap.reviewCommentsTotal || 0);
-        if (count <= 0 && likes <= 0 && comments <= 0) return "";
-        const primary = count > 0 ? `写过 ${fmt(count)} 条评价` : `评价获赞 ${fmt(likes)} 赞`;
-        const secondary = count > 0 && likes > 0 ? `评价获赞 ${fmt(likes)} 赞` : "";
-        const tertiary = comments > 0 ? `评价一共有 ${fmt(comments)} 条评论` : "";
-        return `
-          <div class="vlist">
-            <div class="vsum">${primary}</div>
-            ${secondary ? `<div>${secondary}</div>` : ""}
-            ${tertiary ? `<div>${tertiary}</div>` : ""}
-          </div>
-        `;
-      })(),
-      desc: "",
-      rewardId: "snap_reviews",
-      visible:
-        Number(snap.reviewsCount || 0) > 0 ||
-        Number(snap.reviewLikesTotal || 0) > 0 ||
-        Number(snap.reviewCommentsTotal || 0) > 0,
-    },
-    {
-      label: "评价被点赞",
-      value: (() => {
-        const likedCnt = Number(snap.reviewsLikedCount || 0);
-        const rows = [
-          { k: "1", t: (snap.reviewLikedTop1Game || "").trim(), n: Number(snap.reviewLikedTop1Likes || 0) },
-          { k: "2", t: (snap.reviewLikedTop2Game || "").trim(), n: Number(snap.reviewLikedTop2Likes || 0) },
-          { k: "3", t: (snap.reviewLikedTop3Game || "").trim(), n: Number(snap.reviewLikedTop3Likes || 0) },
-        ].filter((r) => r.t && r.n > 0);
+        const allLow = !!snap.reviewAllLowStar;
+        const gameIcons = Array.isArray(snap.reviewGameIcons) ? snap.reviewGameIcons.filter(g => String(g.name || "").trim()) : [];
+        const hasReview = count > 0;
 
-        // legacy fallback (older single item)
-        if (!rows.length) {
-          const legacyTitle = (snap.topLikedReviewTitle || "").trim();
-          const legacyLikes = Number(snap.topLikedReviewLikes || 0);
-          if (legacyTitle && legacyLikes > 0) rows.push({ k: "1", t: legacyTitle, n: legacyLikes });
+        const zuitiCnt = Number(snap.zuitiReviewsCount || snap.zuitiCount || 0);
+        const criticYears = Array.isArray(snap.taptapCriticYears) ? snap.taptapCriticYears.filter(y => Number(y) > 0).sort((a, b) => a - b) : [];
+        const hasZuiti = zuitiCnt > 0 || criticYears.length > 0;
+
+        const platformTotal = Number(snap.totalReviewsOnPlatform || 0);
+
+        if (!hasReview && !hasZuiti) return "";
+
+        // --- 游戏评价 ---
+        let reviewSection = "";
+        if (hasReview && allLow) {
+          reviewSection = `
+            <div class="revcard__section">
+              <div class="revcard__header">游戏评价</div>
+              <div class="revcard__stats">
+                发布过 <strong>${cap(count)}</strong> 条评价
+              </div>
+              <div class="revcard__fallback">每一条评价，都是TapTap里独属于你的声音，记录着你的感受。</div>
+            </div>
+          `;
+        } else if (hasReview) {
+          const iconShow = gameIcons.slice(0, 10);
+          const iconMore = gameIcons.length > 10;
+          const iconsHtml = iconShow.length > 0 ? `
+            <div class="revcard__icons">
+              ${iconShow.map(g => { const gl = Number(g.likes || 0); return `<span class="revcard__icon-item"><span class="revcard__icon">${String(g.icon || "🎮").trim()}</span>${gl > 0 ? `<span class="revcard__icon-likes">👍${cap(gl)}</span>` : ""}</span>`; }).join("")}
+              ${iconMore ? `<span class="revcard__icon revcard__icon--more">...</span>` : ""}
+            </div>
+          ` : "";
+          reviewSection = `
+            <div class="revcard__section">
+              <div class="revcard__header">游戏评价</div>
+              <div class="revcard__stats-row">
+                <div class="revcard__stat">
+                  <span class="revcard__stat-num">${cap(count)}</span>
+                  <span class="revcard__stat-label">评价</span>
+                </div>
+                <div class="revcard__stat">
+                  <span class="revcard__stat-num">${cap(likes)}</span>
+                  <span class="revcard__stat-label">获赞</span>
+                </div>
+                <div class="revcard__stat">
+                  <span class="revcard__stat-num">${cap(comments)}</span>
+                  <span class="revcard__stat-label">评论</span>
+                </div>
+              </div>
+              ${iconsHtml}
+            </div>
+          `;
         }
 
-        const summaryParts = [];
-        if (likedCnt > 0) summaryParts.push(`有 ${fmt(likedCnt)} 条评价被点赞了`);
-        const summary = summaryParts.join("，");
-
-        const topHtml = rows
-          .map((r) => `<div class="kv"><span class="k">${r.k}</span><span class="t">${r.t}</span><span class="m">${fmt(r.n)} 赞</span></div>`)
-          .join("");
-
-        if (!summary && !topHtml) return "";
-        return `
-          <div class="vlist">
-            ${summary ? `<div class="vsum">${summary}</div>` : ""}
-            ${topHtml ? `<div class="sub">评价被点赞 Top3</div>${topHtml}` : ""}
-          </div>
-        `;
-      })(),
-      desc: "",
-      rewardId: "snap_top_review",
-      visible:
-        Number(snap.reviewsLikedCount || 0) > 0 ||
-        Number(snap.reviewLikedTop1Likes || 0) > 0 ||
-        Number(snap.topLikedReviewLikes || 0) > 0,
-    },
-    {
-      label: "嘴替发言",
-      value: (() => {
-        const scoreText = (n) => {
-          const v = Number(n);
-          if (!Number.isFinite(v) || v <= 0) return "";
-          return (Math.round(v * 10) / 10).toFixed(1);
-        };
-        const cnt = Number(snap.zuitiReviewsCount || snap.zuitiCount || 0);
-        const rows = [
-          { k: "1", t: (snap.zuitiRecent1Game || "").trim(), s: Number(snap.zuitiRecent1Score || 0) },
-          { k: "2", t: (snap.zuitiRecent2Game || "").trim(), s: Number(snap.zuitiRecent2Score || 0) },
-          { k: "3", t: (snap.zuitiRecent3Game || "").trim(), s: Number(snap.zuitiRecent3Score || 0) },
-        ].filter((r) => r.t);
-
-        const rowHtml = rows
-          .map((r) => {
-            const score = scoreText(r.s);
-            return `<div class="kv"><span class="k">${r.k}</span><span class="t">${r.t}</span><span class="m">${score ? `${score} 分` : ""}</span></div>`;
-          })
-          .join("");
-
-        if (cnt <= 0 && !rowHtml) return "";
-        return `
-          <div class="vlist">
-            ${cnt > 0 ? `<div class="vsum">嘴替发言的评价数量 ${fmt(cnt)} 条</div>` : ""}
-            ${rowHtml ? `<div class="sub">最近的 3 条嘴替发言</div>${rowHtml}` : ""}
-          </div>
-        `;
-      })(),
-      desc: "",
-      rewardId: "snap_zuiti",
-      visible:
-        Number(snap.zuitiReviewsCount || snap.zuitiCount || 0) > 0 ||
-        !!(String(snap.zuitiRecent1Game || "").trim() || String(snap.zuitiRecent2Game || "").trim() || String(snap.zuitiRecent3Game || "").trim()),
-    },
-    {
-      label: "小众宝藏",
-      value: (() => {
-        const scoreText = (n) => {
-          const v = Number(n);
-          if (!Number.isFinite(v) || v <= 0) return "";
-          return (Math.round(v * 10) / 10).toFixed(1);
-        };
-        const rows = [
-          {
-            k: "1",
-            g: (snap.fiveStarNiche1Game || "").trim(),
-            c: Number(snap.fiveStarNiche1ReviewsCount || 0),
-            s: Number(snap.fiveStarNiche1Score || 0),
-          },
-          {
-            k: "2",
-            g: (snap.fiveStarNiche2Game || "").trim(),
-            c: Number(snap.fiveStarNiche2ReviewsCount || 0),
-            s: Number(snap.fiveStarNiche2Score || 0),
-          },
-          {
-            k: "3",
-            g: (snap.fiveStarNiche3Game || "").trim(),
-            c: Number(snap.fiveStarNiche3ReviewsCount || 0),
-            s: Number(snap.fiveStarNiche3Score || 0),
-          },
-        ]
-          .filter((x) => x.g && x.c > 0 && x.c < 50 && Number(x.s || 0) > 8.5)
-          .slice(0, 3);
-
-        // legacy fallback (older single item)
-        if (!rows.length) {
-          const legacyGame = (snap.nicheGame || "").trim();
-          const legacyCnt = Number(snap.nicheGameReviewsCount || 0);
-          const legacyScore = Number(snap.nicheGameScore || 0);
-          if (legacyGame && legacyCnt > 0 && legacyCnt < 50 && legacyScore > 8.5) {
-            rows.push({ k: "1", g: legacyGame, c: legacyCnt, s: legacyScore });
-          }
+        // --- 嘴替发言 ---
+        let zuitiSection = "";
+        if (hasZuiti) {
+          const criticIconsHtml = criticYears.length > 0 ? `
+            <div class="revcard__critic-years">
+              ${criticYears.map(y => `<span class="revcard__critic-badge">🏅 ${y}</span>`).join("")}
+            </div>
+          ` : "";
+          zuitiSection = `
+            <div class="revcard__section">
+              <div class="revcard__header">嘴替发言</div>
+              ${zuitiCnt > 0 ? `<div class="revcard__zuiti-summary">有 <strong>${cap(zuitiCnt)}</strong> 条评价被大家喜欢，成了嘴替发言</div>` : ""}
+              ${criticYears.length > 0 ? `<div class="revcard__critic-label">获得 ${criticYears.length} 个玩赏家认证</div>` : ""}
+              ${criticIconsHtml}
+            </div>
+          `;
         }
 
-        if (!rows.length) return "";
-        const topHtml = rows
-          .map((x) => {
-            const score = scoreText(x.s);
-            const meta = `${score ? `${score} 分 · ` : ""}${fmt(x.c)} 条评价`;
-            return `<div class="kv"><span class="k">${x.k}</span><span class="t">${x.g}</span><span class="m">${meta}</span></div>`;
-          })
-          .join("");
-        return `
-          <div class="vlist">
-            <div class="vsum">你给过五星好评的小众宝藏</div>
-            ${topHtml ? `<div class="sub">全站评价数少于 50 的游戏（最多 3 个）</div>${topHtml}` : ""}
-          </div>
-        `;
+        const footerHtml = platformTotal > 0
+          ? `<div class="revcard__footer">TapTap至今收录了 ${fmt(platformTotal)} 条评价。你的声音，至关重要。</div>`
+          : `<div class="revcard__footer">你的声音，至关重要。</div>`;
+
+        return `<div class="revcard">${reviewSection}${zuitiSection}${footerHtml}</div>`;
       })(),
       desc: "",
-      rewardId: "snap_niche",
-      visible:
-        (Number(snap.fiveStarNiche1ReviewsCount || 0) > 0 &&
-          Number(snap.fiveStarNiche1ReviewsCount || 0) < 50 &&
-          Number(snap.fiveStarNiche1Score || 0) > 8.5) ||
-        (Number(snap.fiveStarNiche2ReviewsCount || 0) > 0 &&
-          Number(snap.fiveStarNiche2ReviewsCount || 0) < 50 &&
-          Number(snap.fiveStarNiche2Score || 0) > 8.5) ||
-        (Number(snap.fiveStarNiche3ReviewsCount || 0) > 0 &&
-          Number(snap.fiveStarNiche3ReviewsCount || 0) < 50 &&
-          Number(snap.fiveStarNiche3Score || 0) > 8.5) ||
-        (Number(snap.nicheGameReviewsCount || 0) > 0 &&
-          Number(snap.nicheGameReviewsCount || 0) < 50 &&
-          Number(snap.nicheGameScore || 0) > 8.5),
+      rewardId: "snap_review_voice",
+      visible: true,
     },
+    // 社区点赞
     {
-      label: "TapTap玩赏家",
+      label: "社区点赞",
       value: (() => {
-        const raw = snap.taptapCriticYears;
-        const years = (
-          Array.isArray(raw)
-            ? raw
-            : String(raw || "")
-              .split(/[、,，/\s]+/g)
-        )
-          .map((x) => String(x || "").trim())
-          .map((x) => x.replace(/[^\d]/g, "")) // keep year digits
-          .filter(Boolean)
-          .map((x) => Number(x))
-          .filter((n) => Number.isFinite(n) && n > 1900 && n < 3000)
-          .sort((a, b) => a - b);
-
-        // unique
-        const uniq = [];
-        const seen = new Set();
-        years.forEach((y) => {
-          const k = String(y);
-          if (seen.has(k)) return;
-          seen.add(k);
-          uniq.push(y);
-        });
-
-        const count = uniq.length;
-        if (!count) return "";
-        const rowHtml = uniq
-          .map((y, i) => `<div class="kv"><span class="k">${i + 1}</span><span class="t">${y} TapTap玩赏家</span><span class="m"></span></div>`)
-          .join("");
-        return `
-          <div class="vlist">
-            <div class="vsum">获得了 ${fmt(count)} 个年份的玩赏家认证</div>
-            ${rowHtml ? `${rowHtml}` : ""}
-          </div>
-        `;
-      })(),
-      desc: "",
-      rewardId: "snap_critic",
-      visible: Array.isArray(snap.taptapCriticYears)
-        ? snap.taptapCriticYears.length > 0
-        : !!String(snap.taptapCriticYears || "").trim(),
-    },
-
-    // 社区：论坛与社区
-    {
-      label: "发帖和回帖",
-      value: (() => {
-        const posts = Number(snap.postsCount || 0);
-        const replies = Number(snap.repliesCount || 0);
-        const players = Number(snap.forumInteractPlayers || 0);
-        const parts = [];
-        if (posts > 0) parts.push(`总共发了 ${fmt(posts)} 个帖子`);
-        if (replies > 0) parts.push(`评论区发了 ${fmt(replies)} 条`);
-        if (players > 0) parts.push(`和 ${fmt(players)} 位玩家互动`);
-        const summary = parts.join("，");
-
-        const rows = [
-          { k: "1", t: (snap.topActiveForum1Game || "").trim(), n: Number(snap.topActiveForum1Posts || 0) },
-          { k: "2", t: (snap.topActiveForum2Game || "").trim(), n: Number(snap.topActiveForum2Posts || 0) },
-          { k: "3", t: (snap.topActiveForum3Game || "").trim(), n: Number(snap.topActiveForum3Posts || 0) },
-        ].filter((r) => r.t && r.n > 0);
-        const topHtml = rows
-          .map((r) => `<div class="kv"><span class="k">${r.k}</span><span class="t">${r.t}</span><span class="m">${fmt(r.n)} 帖</span></div>`)
-          .join("");
-
-        if (!summary && !topHtml) return "";
-        return `
-          <div class="vlist">
-            ${summary ? `<div class="vsum">${summary}</div>` : ""}
-            ${topHtml ? `<div class="sub">最活跃的游戏论坛 Top3（发帖量最高）</div>${topHtml}` : ""}
-          </div>
-        `;
-      })(),
-      desc: "",
-      rewardId: "snap_forum_stats",
-      visible:
-        Number(snap.postsCount || 0) > 0 ||
-        Number(snap.repliesCount || 0) > 0 ||
-        Number(snap.forumInteractPlayers || 0) > 0 ||
-        Number(snap.topActiveForum1Posts || 0) > 0 ||
-        Number(snap.topActiveForum2Posts || 0) > 0 ||
-        Number(snap.topActiveForum3Posts || 0) > 0,
-    },
-    {
-      label: "点赞与收藏",
-      value: (() => {
-        const liked = Number(snap.likedPostsCount || 0);
-        const gotLikes = Number(snap.receivedLikesCount || 0);
-        const faved = Number(snap.favoritedPostsCount || 0);
-        const gotFavs = Number(snap.receivedFavoritesCount || 0);
-
-        const acted = liked + faved;
-        const got = gotLikes + gotFavs;
-        const summary = acted > 0 || got > 0 ? `点赞/收藏了 ${fmt(acted)} 次，发的内容被其他玩家点赞/收藏 ${fmt(got)} 次` : "";
-
-        const cut8 = (s) => {
-          const arr = Array.from(String(s || "").trim());
-          if (arr.length <= 8) return arr.join("");
-          return `${arr.slice(0, 8).join("")}...`;
+        const fmtWan = (n) => {
+          if (n <= 0) return "0";
+          if (n < 10000) return fmt(n);
+          const w = n / 10000;
+          if (w >= 999.95) return "999.9万+";
+          if (w >= 1 && w % 1 < 0.05) return Math.floor(w) + "万";
+          return w.toFixed(1) + "万";
         };
+        const likesGiven = Number(snap.communityLikesGiven || 0);
+        const likesReceived = Number(snap.communityLikesReceived || 0);
+        const likePctRank = String(snap.communityLikePctRank || "").trim();
+        const topContent = Array.isArray(snap.communityTopLikedContent)
+          ? snap.communityTopLikedContent.filter(x => String(x.title || "").trim() && Number(x.likes) > 0)
+          : [];
 
-        const rows = [
-          {
-            k: "1",
-            t: (snap.topEngagedPost1Title || "").trim(),
-            g: (snap.topEngagedPost1Game || "").trim(),
-            l: Number(snap.topEngagedPost1Likes || 0),
-            f: Number(snap.topEngagedPost1Favs || 0),
-            u: String(snap.topEngagedPost1Uri || "").trim(),
-          },
-          {
-            k: "2",
-            t: (snap.topEngagedPost2Title || "").trim(),
-            g: (snap.topEngagedPost2Game || "").trim(),
-            l: Number(snap.topEngagedPost2Likes || 0),
-            f: Number(snap.topEngagedPost2Favs || 0),
-            u: String(snap.topEngagedPost2Uri || "").trim(),
-          },
-          {
-            k: "3",
-            t: (snap.topEngagedPost3Title || "").trim(),
-            g: (snap.topEngagedPost3Game || "").trim(),
-            l: Number(snap.topEngagedPost3Likes || 0),
-            f: Number(snap.topEngagedPost3Favs || 0),
-            u: String(snap.topEngagedPost3Uri || "").trim(),
-          },
-        ].filter((r) => r.t && (r.l > 0 || r.f > 0));
+        if (likesGiven <= 0 && likesReceived <= 0) return "";
 
-        // legacy fallback
-        if (!rows.length) {
-          const legacyTitle = (snap.topLikedPostTitle || "").trim();
-          const legacyLikes = Number(snap.topLikedPostLikes || 0);
-          if (legacyTitle && legacyLikes > 0) rows.push({ k: "1", t: legacyTitle, g: "", l: legacyLikes, f: 0, u: "" });
+        const pctNum = parseFloat(likePctRank);
+        let quote = "";
+        if (likesGiven <= 0) {
+          quote = "还没有留下点赞记录。第一次表达喜欢，或许就在下一次滑动之间。";
+        } else if (pctNum <= 33) {
+          quote = "你不轻易表达，但每一次点赞都很认真。每个\u201C赞\u201D，都是一句无声的认同。";
+        } else if (pctNum <= 66) {
+          quote = "你乐于为好内容鼓掌。那些被你点亮的作品，也记住了你的支持。";
+        } else {
+          quote = "你从不吝啬赞美。无数作品因你的点赞而更加闪耀。";
         }
 
-        const topHtml = rows
-          .map((r) => {
-            const shortTitle = cut8(r.t);
-            const meta = fmt((r.l || 0) + (r.f || 0));
-            const titleAttr = String(r.t || "").replaceAll('"', "&quot;");
-            const tHtml = r.u
-              ? `<button type="button" class="link-inline t" data-deeplink="${r.u}" title="${titleAttr}">${shortTitle}</button>`
-              : `<span class="t" title="${titleAttr}">${shortTitle}</span>`;
-            return `<div class="kv"><span class="k">${r.k}</span>${tHtml}<span class="m">${meta} 次</span></div>`;
-          })
-          .join("");
+        const cutTitle = (s) => { const t = String(s || "").trim(); return t.length > 10 ? t.slice(0, 10) + "..." : t; };
 
-        if (!summary && !topHtml) return "";
+        const topHtml = topContent.length > 0 ? `
+          <div class="likecard__top-title">获赞最多的内容 Top5</div>
+          <div class="likecard__top-list">
+            ${topContent.slice(0, 5).map((x, i) => `
+              <div class="likecard__top-item">
+                <span class="likecard__top-rank">${i + 1}</span>
+                <span class="likecard__top-text">${escapeHtml(cutTitle(x.title))}</span>
+                <span class="likecard__top-likes">👍${fmtWan(Number(x.likes))}</span>
+              </div>
+            `).join("")}
+          </div>
+        ` : "";
+
         return `
-          <div class="vlist">
-            ${summary ? `<div class="vsum">${summary}</div>` : ""}
-            ${topHtml ? `<div class="sub">被点赞或收藏最多的 Top3 帖子</div>${topHtml}` : ""}
+          <div class="likecard">
+            <div class="likecard__header">社区点赞</div>
+            <div class="likecard__stats-row">
+              <div class="likecard__stat">
+                <span class="likecard__stat-num">${fmtWan(likesGiven)}</span>
+                <span class="likecard__stat-label">点赞</span>
+              </div>
+              <div class="likecard__stat">
+                <span class="likecard__stat-num">${fmtWan(likesReceived)}</span>
+                <span class="likecard__stat-label">获赞</span>
+              </div>
+            </div>
+            ${likePctRank ? `<div class="likecard__pct">点赞量超过了 <strong>${escapeHtml(likePctRank)}</strong> 的玩家</div>` : ""}
+            <div class="likecard__quote">${quote}</div>
+            ${topHtml}
           </div>
         `;
       })(),
       desc: "",
-      rewardId: "snap_top_post",
-      visible:
-        Number(snap.likedPostsCount || 0) > 0 ||
-        Number(snap.receivedLikesCount || 0) > 0 ||
-        Number(snap.favoritedPostsCount || 0) > 0 ||
-        Number(snap.receivedFavoritesCount || 0) > 0 ||
-        Number(snap.topEngagedPost1Likes || 0) > 0 ||
-        Number(snap.topEngagedPost1Favs || 0) > 0 ||
-        Number(snap.topLikedPostLikes || 0) > 0,
+      rewardId: "snap_community_likes",
+      visible: true,
     },
-    {
-      label: "深夜社区活跃",
-      value: (() => {
-        const cnt = Number(snap.nightCommunityCount || 0);
-        const rows = [
-          {
-            k: "1",
-            g: (snap.nightCommunityRecent1Game || "").trim(),
-            a: (snap.nightCommunityRecent1Action || "").trim(),
-            t: (snap.nightCommunityRecent1Time || "").trim(),
-          },
-          {
-            k: "2",
-            g: (snap.nightCommunityRecent2Game || "").trim(),
-            a: (snap.nightCommunityRecent2Action || "").trim(),
-            t: (snap.nightCommunityRecent2Time || "").trim(),
-          },
-          {
-            k: "3",
-            g: (snap.nightCommunityRecent3Game || "").trim(),
-            a: (snap.nightCommunityRecent3Action || "").trim(),
-            t: (snap.nightCommunityRecent3Time || "").trim(),
-          },
-        ].filter((x) => x.g && x.a && x.t);
-        const topHtml = rows
-          .map((x) => `<div class="kv"><span class="k">${x.k}</span><span class="t">${x.g}｜${x.a}</span><span class="m">${x.t}</span></div>`)
-          .join("");
 
-        const summary = cnt > 0 ? `有 ${fmt(cnt)} 个深夜在论坛活跃` : "";
-        if (!summary && !topHtml) return "";
+    // 社区发布内容
+    {
+      label: "社区发布内容",
+      value: (() => {
+        const cap9999 = (n) => Number(n) > 9999 ? "9999+" : fmt(Number(n));
+        const fmtWan = (n) => {
+          if (n <= 0) return "0";
+          if (n < 10000) return fmt(n);
+          const w = n / 10000;
+          if (w >= 999.95) return "999.9万+";
+          if (w >= 1 && w % 1 < 0.05) return Math.floor(w) + "万";
+          return w.toFixed(1) + "万";
+        };
+        const published = Number(snap.communityPublished || 0);
+        const commentsReceived = Number(snap.communityCommentsReceived || 0);
+        const pubPctRank = String(snap.communityPubPctRank || "").trim();
+        const topForums = Array.isArray(snap.communityTopForums)
+          ? snap.communityTopForums.filter(x => String(x.game || "").trim() && Number(x.count) > 0)
+          : [];
+        const topEmojis = Array.isArray(snap.communityTopEmojis)
+          ? snap.communityTopEmojis.filter(x => String(x.emoji || "").trim() && Number(x.count) > 0)
+          : [];
+
+        if (published <= 0 && commentsReceived <= 0) return "";
+
+        const pctNum = parseFloat(pubPctRank);
+        let quote = "";
+        if (published <= 0) {
+          quote = "还没有发布记录。也许你在酝酿一次真正想说的话。";
+        } else if (pctNum <= 33) {
+          quote = "你偶尔发声。每一次发布，都是慎重的表达。";
+        } else if (pctNum <= 66) {
+          quote = "你持续分享自己的体验与想法。社区里，已经留下你的足迹。";
+        } else {
+          quote = "你是活跃的表达者。许多讨论，因为你而展开。";
+        }
+
+        const cutGame = (s) => { const t = String(s || "").trim(); return t.length > 10 ? t.slice(0, 10) + "..." : t; };
+
+        const forumHtml = topForums.length > 0 ? `
+          <div class="pubcard__forums-title">发布内容的论坛 Top3</div>
+          <div class="pubcard__forums-list">
+            ${topForums.slice(0, 3).map((x, i) => `
+              <div class="pubcard__forum-item">
+                <span class="pubcard__forum-rank">${i + 1}</span>
+                <span class="pubcard__forum-name">${escapeHtml(cutGame(x.game))}</span>
+                <span class="pubcard__forum-count">${cap9999(x.count)} 条</span>
+              </div>
+            `).join("")}
+          </div>
+        ` : "";
+
+        const emojiHtml = topEmojis.length > 0 ? `
+          <div class="pubcard__emoji-section">
+            <div class="pubcard__emoji-title">最爱的表情</div>
+            <div class="pubcard__emoji-list">
+              ${topEmojis.slice(0, 3).map(x => `
+                <div class="pubcard__emoji-item">
+                  <span class="pubcard__emoji-face">${x.emoji}</span>
+                  <span class="pubcard__emoji-count">${fmtWan(Number(x.count))}</span>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        ` : "";
+
         return `
-          <div class="vlist">
-            ${summary ? `<div class="vsum">${summary}</div>` : ""}
-            ${topHtml ? `<div class="sub">最近 3 次的活跃情况</div>${topHtml}` : ""}
+          <div class="pubcard">
+            <div class="pubcard__header">社区发布内容</div>
+            <div class="pubcard__stats-row">
+              <div class="pubcard__stat">
+                <span class="pubcard__stat-num">${cap9999(published)}</span>
+                <span class="pubcard__stat-label">发布</span>
+              </div>
+              <div class="pubcard__stat">
+                <span class="pubcard__stat-num">${cap9999(commentsReceived)}</span>
+                <span class="pubcard__stat-label">收到评论</span>
+              </div>
+            </div>
+            ${pubPctRank ? `<div class="pubcard__pct">发布内容数超过了 <strong>${escapeHtml(pubPctRank)}</strong> 的玩家</div>` : ""}
+            <div class="pubcard__quote">${quote}</div>
+            ${forumHtml}
+            ${emojiHtml}
+          </div>
+        `;
+      })(),
+      desc: "",
+      rewardId: "snap_community_pub",
+      visible: true,
+    },
+
+    // 深夜社区冲浪
+    {
+      label: "深夜社区冲浪",
+      value: (() => {
+        const days = Number(snap.nightSurfDays || 0);
+        const logs = Array.isArray(snap.nightSurfLogs)
+          ? snap.nightSurfLogs.filter(x => String(x.time || "").trim() && String(x.game || "").trim() && String(x.action || "").trim())
+          : [];
+        if (days <= 0 && logs.length === 0) return "";
+
+        const logsHtml = logs.length > 0 ? `
+          <div class="nightsurf__logs-title">时间最晚的冲浪记录</div>
+          <div class="nightsurf__logs">
+            ${logs.slice(0, 5).map(x => `
+              <div class="nightsurf__log">${escapeHtml(x.time)}，${escapeHtml(x.action)}</div>
+            `).join("")}
+          </div>
+        ` : "";
+
+        return `
+          <div class="nightsurf-card">
+            <div class="nightsurf__header">深夜社区冲浪</div>
+            ${days > 0 ? `<div class="nightsurf__days">深夜在社区冲浪了 <strong>${fmt(days)}</strong> 天</div>` : ""}
+            ${logsHtml}
           </div>
         `;
       })(),
       desc: "",
       rewardId: "snap_night_community",
-      visible:
-        Number(snap.nightCommunityCount || 0) > 0 ||
-        !!(
-          String(snap.nightCommunityRecent1Game || "").trim() ||
-          String(snap.nightCommunityRecent2Game || "").trim() ||
-          String(snap.nightCommunityRecent3Game || "").trim()
-        ) ||
-        !!(snap.nightTopAction || "").trim(), // legacy
+      visible: true,
     },
+    // 平台成就（原徽章卡重做）
     {
-      label: "好友",
+      label: "平台成就",
       value: (() => {
-        const friends = Number(snap.friendsCount || 0);
-        const following = Number(snap.followingCount || 0);
-        const followers = Number(snap.followersCount || 0);
-        const msgs = Number(snap.friendMessagesCount || 0);
-
-        const top = [
-          {
-            k: "1",
-            n: String(snap.friendTop1Name || "").trim(),
-            id: String(snap.friendTop1TapId || "").trim(),
-            c: Number(snap.friendTop1MsgCount || 0),
-          },
-          {
-            k: "2",
-            n: String(snap.friendTop2Name || "").trim(),
-            id: String(snap.friendTop2TapId || "").trim(),
-            c: Number(snap.friendTop2MsgCount || 0),
-          },
-          {
-            k: "3",
-            n: String(snap.friendTop3Name || "").trim(),
-            id: String(snap.friendTop3TapId || "").trim(),
-            c: Number(snap.friendTop3MsgCount || 0),
-          },
-        ].filter((x) => x.n && x.id && x.c > 0);
-
-        if (friends <= 0 && following <= 0 && followers <= 0 && msgs <= 0 && !top.length) return "";
-        const line1 = `好友 ${fmt(friends)} / 关注 ${fmt(following)} / 粉丝 ${fmt(followers)}`;
-        const line2 = msgs > 0 ? `发了 ${fmt(msgs)} 条好友消息` : "";
-        const topHtml = top
-          .map((x) => `<div class="kv"><span class="k">${x.k}</span><span class="t">${x.n}（${x.id}）</span><span class="m">${fmt(x.c)} 条</span></div>`)
-          .join("");
-        return `
-          <div class="vlist">
-            <div class="vsum">${line1}</div>
-            ${line2 ? `<div>${line2}</div>` : ""}
-            ${topHtml ? `<div class="sub">最亲密的好友 Top3（发消息最多的）</div>${topHtml}` : ""}
-          </div>
-        `;
-      })(),
-      desc: "",
-      rewardId: "snap_friend_msgs",
-      visible:
-        Number(snap.friendsCount || 0) > 0 ||
-        Number(snap.followingCount || 0) > 0 ||
-        Number(snap.followersCount || 0) > 0 ||
-        Number(snap.friendMessagesCount || 0) > 0 ||
-        Number(snap.friendTop1MsgCount || 0) > 0 ||
-        !!String(snap.friendTop1Name || "").trim(),
-    },
-
-    // 开发者
-    {
-      label: "创作了多少款游戏",
-      value: (() => {
-        const cnt = Number(snap.devGamesCount || 0);
-        const rows = [
-          { k: "1", t: String(snap.devCert1Name || "").trim() },
-          { k: "2", t: String(snap.devCert2Name || "").trim() },
-          { k: "3", t: String(snap.devCert3Name || "").trim() },
-        ].filter((r) => r.t);
-        const topHtml = rows
-          .map((r) => `<div class="kv"><span class="k">${r.k}</span><span class="t">${r.t}</span><span class="m"></span></div>`)
-          .join("");
-        if (cnt <= 0 && !topHtml) return "";
-        return `
-          <div class="vlist">
-            ${cnt > 0 ? `<div class="vsum">创作了 ${fmt(cnt)} 款游戏</div>` : ""}
-            ${topHtml ? `<div class="sub">最近的 3 个认证</div>${topHtml}` : ""}
-          </div>
-        `;
-      })(),
-      desc: "",
-      rewardId: "snap_dev_games",
-      visible:
-        Number(snap.devGamesCount || 0) > 0 ||
-        !!String(snap.devCert1Name || "").trim() ||
-        !!String(snap.devCert2Name || "").trim() ||
-        !!String(snap.devCert3Name || "").trim(),
-    },
-    {
-      label: "聚光灯GameJam",
-      value: (() => {
-        const scoreText = (n) => {
-          const v = Number(n);
-          if (!Number.isFinite(v) || v <= 0) return "";
-          return (Math.round(v * 10) / 10).toFixed(1);
+        const fmtOwners = (n) => {
+          if (n <= 0) return "0";
+          if (n < 10000) return fmt(n);
+          const w = n / 10000;
+          if (w >= 999.95) return "999.9万+";
+          if (w >= 1 && w % 1 < 0.05) return Math.floor(w) + "万";
+          return w.toFixed(1) + "万";
         };
-        const first = String(snap.spotlightGamejamFirstPublishDate || "").trim();
-        const items = [1, 2, 3, 4, 5].map((i) => ({
-          name: String(snap[`spotlightGamejam${i}Name`] || "").trim(),
-          score: Number(snap[`spotlightGamejam${i}Score`] || 0),
-          award: String(snap[`spotlightGamejam${i}Award`] || "").trim(),
-          certified: !!snap[`spotlightGamejam${i}Certified`],
-          tagged: !!snap[`spotlightGamejam${i}Tagged`],
-        }));
-        const eligible = items.filter((x) => x.name && x.certified && x.tagged);
-        const count = eligible.length;
+        const cap999 = (n) => Number(n) > 999 ? "999+" : fmt(Number(n));
+        const total = Number(snap.platformBadgesTotal || 0);
+        const badges = Array.isArray(snap.platformBadges)
+          ? snap.platformBadges.filter(b => String(b.name || "").trim())
+          : [];
+        const rarestTop3 = badges.slice(0, 3);
 
-        const top = eligible
-          .slice()
-          .sort((a, b) => {
-            const aa = a.award ? 1 : 0;
-            const bb = b.award ? 1 : 0;
-            if (bb !== aa) return bb - aa; // award first
-            const as = Number.isFinite(a.score) ? a.score : 0;
-            const bs = Number.isFinite(b.score) ? b.score : 0;
-            return bs - as; // then by score desc
-          })
-          .slice(0, 3)
-          .map((x, idx) => ({ k: String(idx + 1), ...x }));
+        if (total <= 0 && badges.length === 0) return "";
 
-        const topHtml = top
-          .map((x) => {
-            const meta = `${scoreText(x.score) ? `${scoreText(x.score)} 分` : ""}${x.award ? ` · ${x.award}` : ""}`;
-            return `<div class="kv"><span class="k">${x.k}</span><span class="t">${x.name}</span><span class="m">${meta}</span></div>`;
-          })
-          .join("");
-
-        // legacy fallback (older fields)
-        if (!count && (Number(snap.gamejamCount || 0) > 0 || Number(snap.gamejamWorks || 0) > 0)) {
-          const legacy = [];
-          if (Number(snap.gamejamCount || 0) > 0) legacy.push(`参与 ${fmt(snap.gamejamCount || 0)} 次`);
-          if (Number(snap.gamejamWorks || 0) > 0) legacy.push(`${fmt(snap.gamejamWorks || 0)} 个作品`);
-          return legacy.length ? `<div class="vlist"><div class="vsum">${legacy.join("，")}</div></div>` : "";
+        const rarestBadge = rarestTop3.length > 0 ? rarestTop3[0] : null;
+        let quote = "";
+        if (rarestBadge) {
+          const owners = Number(rarestBadge.owners || 0);
+          const cat = String(rarestBadge.category || "").trim();
+          if (cat === "活动") {
+            if (owners <= 100) quote = "你的热爱，是独属于你的宝藏。";
+            else if (owners <= 10000) quote = "与大家一起奔赴热爱，你一直在路上。";
+            else quote = "无数热爱汇聚成浪潮，而你正身在其中。";
+          } else {
+            if (owners <= 100) quote = "少有人至之境，你早已抵达。";
+            else if (owners <= 10000) quote = "你的实力，堪称万里挑一。";
+            else quote = "在高手如云的征途上，你依然耀眼。";
+          }
         }
 
-        if (!count && !first && !topHtml) return "";
-        return `
-          <div class="vlist">
-            ${count > 0 ? `<div class="vsum">创作了 ${fmt(count)} 款聚光灯 GameJam 游戏</div>` : ""}
-            ${first ? `<div>第一次发布：${first}</div>` : ""}
-            ${topHtml ? `<div class="sub">Top3（先看获奖，再看评分）</div>${topHtml}` : ""}
+        const displayBadges = badges.slice(0, 10);
+
+        const badgesHtml = displayBadges.length > 0 ? `
+          <div class="achcard__badges">
+            ${displayBadges.map(b => {
+              const ico = String(b.icon || "🏅").trim();
+              const name = escapeHtml(String(b.name || "").trim());
+              return `
+                <div class="achcard__badge">
+                  <span class="achcard__badge-icon">${ico}</span>
+                  <span class="achcard__badge-name">${name}</span>
+                </div>
+              `;
+            }).join("")}
           </div>
-        `;
-      })(),
-      desc: "",
-      rewardId: "snap_gamejam",
-      visible:
-        !!String(snap.spotlightGamejamFirstPublishDate || "").trim() ||
-        !!String(snap.spotlightGamejam1Name || "").trim() ||
-        !!String(snap.spotlightGamejam2Name || "").trim() ||
-        !!String(snap.spotlightGamejam3Name || "").trim() ||
-        !!String(snap.spotlightGamejam4Name || "").trim() ||
-        !!String(snap.spotlightGamejam5Name || "").trim() ||
-        Number(snap.gamejamCount || 0) > 0 ||
-        Number(snap.gamejamWorks || 0) > 0,
-    },
-    {
-      label: "TapTap 制造",
-      value: (() => {
-        const first = String(snap.tapmakerFirstPublishDate || "").trim();
-        const items = [1, 2, 3, 4, 5].map((i) => ({
-          name: String(snap[`tapmaker${i}Name`] || "").trim(),
-          likes: Number(snap[`tapmaker${i}Likes`] || 0),
-          certified: !!snap[`tapmaker${i}Certified`],
-          tagged: !!snap[`tapmaker${i}Tagged`],
-        }));
-        const eligible = items.filter((x) => x.name && x.certified && x.tagged);
-        const count = eligible.length;
-        const top = eligible
-          .slice()
-          .sort((a, b) => Number(b.likes || 0) - Number(a.likes || 0))
-          .slice(0, 3)
-          .map((x, idx) => ({ k: String(idx + 1), ...x }));
-        const topHtml = top
-          .map((x) => `<div class="kv"><span class="k">${x.k}</span><span class="t">${x.name}</span><span class="m">${fmt(x.likes || 0)} 赞</span></div>`)
-          .join("");
+        ` : "";
 
-        // legacy fallback
-        if (!count && Number(snap.creatorWorks || 0) > 0) {
-          const line = `创作了 ${fmt(snap.creatorWorks || 0)} 款 TapTap 制造游戏`;
-          const d = first ? `第一次发布：${first}` : "";
-          return `
-            <div class="vlist">
-              <div class="vsum">${line}</div>
-              ${d ? `<div>${d}</div>` : ""}
-            </div>
-          `;
-        }
-
-        if (!count && !first && !topHtml) return "";
-        return `
-          <div class="vlist">
-            ${count > 0 ? `<div class="vsum">创作了 ${fmt(count)} 款 TapTap 制造游戏</div>` : ""}
-            ${first ? `<div>第一次发布：${first}</div>` : ""}
-            ${topHtml ? `<div class="sub">点赞数 Top3</div>${topHtml}` : ""}
+        const top3Html = rarestTop3.length > 0 ? `
+          <div class="achcard__rare-title">最稀有的徽章</div>
+          <div class="achcard__rare-list">
+            ${rarestTop3.map((b, i) => {
+              const ico = String(b.icon || "🏅").trim();
+              const name = escapeHtml(String(b.name || "").trim());
+              const own = fmtOwners(Number(b.owners || 0));
+              return `
+                <div class="achcard__rare-item">
+                  <span class="achcard__rare-rank">${i + 1}</span>
+                  <span class="achcard__rare-icon">${ico}</span>
+                  <div class="achcard__rare-info">
+                    <span class="achcard__rare-name">${name}</span>
+                    <span class="achcard__rare-owners">${own} 人获取</span>
+                  </div>
+                </div>
+              `;
+            }).join("")}
           </div>
-        `;
-      })(),
-      desc: "",
-      rewardId: "snap_creator",
-      visible:
-        !!String(snap.tapmakerFirstPublishDate || "").trim() ||
-        !!String(snap.tapmaker1Name || "").trim() ||
-        !!String(snap.tapmaker2Name || "").trim() ||
-        !!String(snap.tapmaker3Name || "").trim() ||
-        !!String(snap.tapmaker4Name || "").trim() ||
-        !!String(snap.tapmaker5Name || "").trim() ||
-        Number(snap.creatorWorks || 0) > 0,
-    },
-    // 徽章
-    {
-      label: "徽章",
-      value: (() => {
-        const total = Number(snap.badgesTotal || 0);
-        const gold = Number(snap.badgesBlackGoldTotal || 0);
-        const rows = [
-          {
-            k: "1",
-            icon: String(snap.badgeRare1Icon || "").trim(),
-            name: String(snap.badgeRare1Name || "").trim(),
-            owners: Number(snap.badgeRare1Owners || 0),
-          },
-          {
-            k: "2",
-            icon: String(snap.badgeRare2Icon || "").trim(),
-            name: String(snap.badgeRare2Name || "").trim(),
-            owners: Number(snap.badgeRare2Owners || 0),
-          },
-          {
-            k: "3",
-            icon: String(snap.badgeRare3Icon || "").trim(),
-            name: String(snap.badgeRare3Name || "").trim(),
-            owners: Number(snap.badgeRare3Owners || 0),
-          },
-        ].filter((x) => x.name && x.owners > 0);
-        const topHtml = rows
-          .map((x) => {
-            const ico = x.icon ? `<span class="badge-ico" aria-hidden="true">${x.icon}</span>` : "";
-            return `<div class="kv"><span class="k">${x.k}</span><span class="t">${ico}${x.name}</span><span class="m">拥有 ${fmt(x.owners)} 人</span></div>`;
-          })
-          .join("");
+        ` : "";
 
-        if (total <= 0 && gold <= 0 && !topHtml) return "";
         return `
-          <div class="vlist">
-            ${(total > 0 || gold > 0) ? `<div class="vsum">总共拥有 ${fmt(total)} 个徽章，黑金徽章 ${fmt(gold)} 个</div>` : ""}
-            ${topHtml ? `<div class="sub">Top3 稀有的徽章</div>${topHtml}` : ""}
+          <div class="achcard">
+            <div class="achcard__total">累计获取徽章 <strong>${cap999(total)}</strong></div>
+            ${quote ? `<div class="achcard__quote">${quote}</div>` : ""}
+            ${top3Html}
+            ${badgesHtml}
           </div>
         `;
       })(),
       desc: "",
       rewardId: "snap_badges",
-      visible:
-        Number(snap.badgesTotal || 0) > 0 ||
-        Number(snap.badgesBlackGoldTotal || 0) > 0 ||
-        Number(snap.badgeRare1Owners || 0) > 0,
+      visible: true,
+    },
+    // 社交关系
+    {
+      label: "社交关系",
+      value: (() => {
+        const fmtWan = (n) => {
+          if (n <= 0) return "0";
+          if (n < 10000) return fmt(n);
+          const w = n / 10000;
+          if (w >= 999.95) return "999.9万+";
+          if (w >= 1 && w % 1 < 0.05) return Math.floor(w) + "万";
+          return w.toFixed(1) + "万";
+        };
+        const friends = Number(snap.friendsCount || 0);
+        const following = Number(snap.followingCount || 0);
+        const followers = Number(snap.followersCount || 0);
+        const topFriends = Array.isArray(snap.closestFriends)
+          ? snap.closestFriends.filter(x => String(x.name || "").trim() && Number(x.msgs) > 0)
+          : [];
+
+        if (friends <= 0 && following <= 0 && followers <= 0) return "";
+
+        const topHtml = topFriends.length > 0 ? `
+          <div class="socialcard__top-title">最亲密的好友 Top5</div>
+          <div class="socialcard__top-list">
+            ${topFriends.slice(0, 5).map((x, i) => {
+              const lt = String(x.lastText || "").trim();
+              const ltime = String(x.lastTime || "").trim();
+              const msgLine = lt ? `
+                <div class="socialcard__top-lastmsg">
+                  <span class="socialcard__top-lastmsg-text">${escapeHtml(lt)}</span>
+                  ${ltime ? `<span class="socialcard__top-lastmsg-time">${escapeHtml(ltime)}</span>` : ""}
+                </div>
+              ` : "";
+              return `
+              <div class="socialcard__top-item">
+                <span class="socialcard__top-rank">${i + 1}</span>
+                <div class="socialcard__top-info">
+                  <div class="socialcard__top-row">
+                    <span class="socialcard__top-name">${escapeHtml(String(x.name).trim())}</span>
+                    <span class="socialcard__top-msgs">${fmtWan(Number(x.msgs))} 条消息</span>
+                  </div>
+                  ${msgLine}
+                </div>
+              </div>`;
+            }).join("")}
+          </div>
+        ` : "";
+
+        return `
+          <div class="socialcard">
+            <div class="socialcard__stats">
+              <div class="socialcard__stat">
+                <span class="socialcard__stat-num">${fmtWan(friends)}</span>
+                <span class="socialcard__stat-label">好友</span>
+              </div>
+              <div class="socialcard__stat">
+                <span class="socialcard__stat-num">${fmtWan(following)}</span>
+                <span class="socialcard__stat-label">关注</span>
+              </div>
+              <div class="socialcard__stat">
+                <span class="socialcard__stat-num">${fmtWan(followers)}</span>
+                <span class="socialcard__stat-label">粉丝</span>
+              </div>
+            </div>
+            ${topHtml}
+          </div>
+        `;
+      })(),
+      desc: "",
+      rewardId: "snap_friend_msgs",
+      visible: true,
+    },
+
+    // 游戏创作（合并原开发者三张卡）
+    {
+      label: "游戏创作",
+      value: (() => {
+        const games = (Array.isArray(snap.devGames) ? snap.devGames : [])
+          .filter(g => String(g.name || "").trim())
+          .slice()
+          .sort((a, b) => Number(b.followers || 0) - Number(a.followers || 0));
+        const totalGames = games.length;
+        const gjCount = Number(snap.gamejamGamesCount || 0);
+        const tmCount = Number(snap.tapmakerGamesCount || 0);
+
+        if (totalGames <= 0 && gjCount <= 0 && tmCount <= 0) return "";
+
+        const hasMore = totalGames > 9;
+        const listHtml = totalGames > 0 ? `
+          <div class="devcard__section-title">参与了游戏创作</div>
+          <div class="devcard__total">一共创作了 <strong>${fmt(totalGames)}</strong> 款游戏</div>
+          <div class="devcard__game-grid">
+            ${games.slice(0, 9).map(g => `
+              <div class="devcard__game-cell">
+                <img class="devcard__game-icon" src="${g.icon || ""}" alt="" />
+                <span class="devcard__game-name">${escapeHtml(String(g.name).trim())}</span>
+              </div>
+            `).join("")}
+            ${hasMore ? `<div class="devcard__game-cell devcard__game-cell--more">...</div>` : ""}
+          </div>
+        ` : "";
+
+        const gjHtml = gjCount > 0 ? `
+          <div class="devcard__sub">
+            <div class="devcard__sub-title">聚光灯GameJam</div>
+            <div class="devcard__sub-num">有 <strong>${fmt(gjCount)}</strong> 款游戏创作于「聚光灯GameJam」</div>
+            <div class="devcard__sub-quote">在有限时间里完成创作，你选择了挑战与热爱。</div>
+          </div>
+        ` : "";
+
+        const tmHtml = tmCount > 0 ? `
+          <div class="devcard__sub">
+            <div class="devcard__sub-title">TapTap制造</div>
+            <div class="devcard__sub-num">有 <strong>${fmt(tmCount)}</strong> 款游戏是使用「TapTap制造」创作</div>
+            <div class="devcard__sub-quote">从想法到作品，你让创意真正落了地。</div>
+          </div>
+        ` : "";
+
+        return `<div class="devcard">${listHtml}${gjHtml}${tmHtml}</div>`;
+      })(),
+      desc: "",
+      rewardId: "snap_dev_create",
+      visible: true,
     },
   ];
   // 无数据卡片的温暖提示（15 字以内）
@@ -4949,26 +4838,19 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
     snap_reg_active:  "旅程才刚开始<br>欢迎来到TapTap",
     snap_reserve:     "新作等你来预约",
     snap_spend:       "好物等你来挑",
-    snap_badges:      "徽章等你来集",
+    snap_badges:      "暂时还没有获得TapTap平台成就。世界在等待你的名字。",
     snap_top3games:   "精彩旅程待开启",
     snap_yearbook:    "年历等你来填满",
     snap_profile:     "偏好与成就等你来解锁",
     snap_beloved:     "还没有遇见你的挚爱？来逛逛TapTap吧~也许心动就在下一个瞬间~",
     snap_beloved_top10:"榜单空空如也，看来你就是最神秘玩家。",
     snap_taplist:     "独家与推荐的世界等你探索",
-    snap_night_game:  "好梦不打扰",
-    snap_reviews:     "你的声音很珍贵",
-    snap_top_review:  "期待你的好评",
-    snap_zuiti:       "等你来发声",
-    snap_niche:       "宝藏等你发掘",
-    snap_critic:      "期待你的品鉴",
-    snap_forum_stats: "社区等你来聊",
-    snap_top_post:    "好内容等你发现",
-    snap_night_community: "早点休息也挺好",
+    snap_review_voice:"你还没有留下过评价。试试看吧，你小小的分享，也能为大家指引方向。",
+    snap_community_likes:"这一页还留着空白。属于你的掌声，或许就在下一次发声之后。",
+    snap_community_pub:"还没有发布记录。也许你在等待一个真正想分享的瞬间。",
+    snap_night_community: "十年里，你很少在深夜停留。热爱之外，你也照顾好了自己。",
     snap_friend_msgs: "好友等你来交",
-    snap_dev_games:   "期待你的创作",
-    snap_gamejam:     "创意等你绽放",
-    snap_creator:     "期待你的灵感",
+    snap_dev_create:  "创作的种子还未发芽。也许有一天，你的名字会出现在某款游戏的制作名单里。",
   };
 
   let snapshotCards = snapshotCardsAll.map((c) => {
@@ -4992,15 +4874,117 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
   const bindCards = [
     {
       label: "绑定 Steam 账号",
-      value: s.boundSteam ? "" : "",
-      desc: s.boundSteam ? "你的steam卡片好帅呀，快去领取奖励吧！" : "绑定后可在个人主页展示",
+      value: (() => {
+        if (!s.boundSteam) return "";
+        const capVal = (n, max) => n > max ? max + "+" : String(n);
+        const favGame = String(s.steamFavGame || "").trim();
+        const favIcon = String(s.steamFavGameIcon || "").trim();
+        const value = Number(s.steamAccountValue || 0);
+        const games = Number(s.steamGamesCount || 0);
+        const hours = Number(s.steamPlayHours || 0);
+
+        if (games <= 0) {
+          return `
+            <div class="steamcard steamcard--empty">
+              <div class="steamcard__empty-text">你的 Steam 旅程还未开始。<br>第一款游戏，也许正在等你启动。</div>
+            </div>
+          `;
+        }
+
+        const fmtValue = (v) => {
+          if (v > 999999) return "999999+";
+          if (v >= 1 && v % 1 !== 0) return v.toFixed(1);
+          return fmt(Math.floor(v));
+        };
+
+        return `
+          <div class="steamcard">
+            ${favGame ? `
+              <div class="steamcard__fav">
+                <div class="steamcard__fav-label">挚爱游戏</div>
+                <div class="steamcard__fav-row">
+                  ${favIcon ? `<img class="steamcard__fav-icon" src="${favIcon}" alt="" />` : ""}
+                  <span class="steamcard__fav-name">${escapeHtml(favGame)}</span>
+                </div>
+              </div>
+            ` : ""}
+            <div class="steamcard__stats">
+              <div class="steamcard__stat">
+                <span class="steamcard__stat-num">${fmtValue(value)}</span>
+                <span class="steamcard__stat-label">账号价值（元）</span>
+              </div>
+              <div class="steamcard__stat">
+                <span class="steamcard__stat-num">${capVal(games, 9999)}</span>
+                <span class="steamcard__stat-label">游戏数量</span>
+              </div>
+              <div class="steamcard__stat">
+                <span class="steamcard__stat-num">${capVal(hours, 9999)}</span>
+                <span class="steamcard__stat-label">游戏时长（小时）</span>
+              </div>
+            </div>
+          </div>
+        `;
+      })(),
+      desc: s.boundSteam ? "" : "绑定Steam账号可领取积分奖励。<br>快来绑定吧！",
       rewardId: "bind_steam",
       visible: true,
     },
     {
       label: "绑定游戏角色",
-      value: (s.boundRolesCount || 0) > 0 ? `已绑定 ${fmt(s.boundRolesCount || 0)} 个` : "",
-      desc: "每个绑定角色都能领取奖励，多多绑定吧！",
+      value: (() => {
+        const cards = Array.isArray(s.boundRoleCards) ? s.boundRoleCards.filter(c => c && String(c.name || "").trim()) : [];
+        if (!cards.length) return "";
+
+        const allBound = !!s.allRolesBound;
+        const slideHtml = cards.map((c, i) => {
+          const statsHtml = (c.stats || []).map(st =>
+            `<div class="rolecard__stat"><span class="rolecard__stat-num">${escapeHtml(String(st.value))}</span><span class="rolecard__stat-label">${escapeHtml(String(st.label))}</span></div>`
+          ).join("");
+          return `
+            <div class="rolecard__slide ${i === 0 ? "rolecard__slide--active" : ""}" data-role-idx="${i}" style="background:${c.bg || "#e2e8f0"}">
+              <div class="rolecard__top">
+                <img class="rolecard__avatar" src="${c.avatar || ""}" alt="" />
+                <div class="rolecard__info">
+                  <div class="rolecard__name">${escapeHtml(String(c.name))}</div>
+                  <div class="rolecard__game">${escapeHtml(String(c.game || ""))}</div>
+                </div>
+              </div>
+              ${c.job || c.level ? `<div class="rolecard__meta">${c.job ? escapeHtml(c.job) : ""}${c.job && c.level ? "　" : ""}${c.level ? "Lv." + c.level : ""}</div>` : ""}
+              <div class="rolecard__stats">${statsHtml}</div>
+            </div>
+          `;
+        }).join("");
+
+        const lastPageHtml = !allBound ? "" : `
+          <div class="rolecard__slide rolecard__slide--hint" data-role-idx="${cards.length}">
+            <div class="rolecard__hint-text">更多绑定战绩<br>请前往个人主页查看</div>
+          </div>
+        `;
+
+        const totalSlides = cards.length + (allBound ? 0 : 0) + (allBound ? 1 : 0);
+        const dotsHtml = (cards.length + (allBound ? 1 : 0)) > 1
+          ? `<div class="rolecard__dots">${cards.map((_, i) => `<span class="rolecard__dot ${i === 0 ? "rolecard__dot--active" : ""}" data-rdot="${i}"></span>`).join("")}${allBound ? `<span class="rolecard__dot" data-rdot="${cards.length}"></span>` : ""}</div>`
+          : "";
+
+        return `
+          <div class="rolecard-carousel" data-role-total="${cards.length + (allBound ? 1 : 0)}">
+            <div class="rolecard__track">
+              ${slideHtml}
+              ${lastPageHtml}
+            </div>
+            ${dotsHtml}
+            ${cards.length > 1 || allBound ? `
+              <button class="rolecard__arrow rolecard__arrow--left" data-role-dir="-1">‹</button>
+              <button class="rolecard__arrow rolecard__arrow--right" data-role-dir="1">›</button>
+            ` : ""}
+          </div>
+        `;
+      })(),
+      desc: (() => {
+        const cards = Array.isArray(s.boundRoleCards) ? s.boundRoleCards.filter(c => c && String(c.name || "").trim()) : [];
+        if (cards.length > 0) return "";
+        return "每个绑定角色都能领取奖励，多多绑定吧！";
+      })(),
       rewardId: "bind_roles",
       visible: true,
     },
@@ -5177,9 +5161,10 @@ function rewardBlockHtml(rewardId, s, recap, isEmpty = false) {
           </div>
         </div>
       `;
+    const allBound = !!s.allRolesBound;
     const btns = pending > 0
       ? `<button class="btn btn--brand" data-claim="${r.id}">领取</button>`
-      : `<button class="btn btn--brand" data-bind="${r.id}">去绑定</button>`;
+      : allBound ? "" : `<button class="btn btn--brand" data-bind="${r.id}">去绑定</button>`;
 
     return `
       <div class="mini-card__reward">
@@ -5187,9 +5172,7 @@ function rewardBlockHtml(rewardId, s, recap, isEmpty = false) {
           <div class="grow">
             ${leftHtml}
           </div>
-          <div class="mini-card__reward-actions mini-card__reward-actions--stack">
-            ${btns}
-          </div>
+          ${btns ? `<div class="mini-card__reward-actions mini-card__reward-actions--stack">${btns}</div>` : ""}
         </div>
       </div>
     `;
@@ -5233,161 +5216,88 @@ function miniCardHtml(card, idx, s, recap) {
 }
 
 function shareCardHtml(s, recap, { variant }) {
-  const title = variant === "recap" ? "十周年回顾分享卡" : "十周年分享卡";
-  const oneTag = (str) => {
-    const raw = String(str || "").trim();
-    if (!raw) return "";
-    return raw.split("／")[0].split("/")[0].split("·")[0].split("|")[0].trim();
-  };
-  const maxYear = (v) => {
-    const ys = Array.isArray(v)
-      ? v
-      : String(v || "")
-        .split(/[、,，/\s]+/g)
-        .map((x) => String(x || "").trim())
-        .map((x) => x.replace(/[^\d]/g, ""))
-        .filter(Boolean)
-        .map((x) => Number(x))
-        .filter((n) => Number.isFinite(n));
-    if (!ys.length) return null;
-    return Math.max(...ys);
-  };
-  const joinNonEmpty = (arr, sep = " · ") => arr.filter(Boolean).join(sep);
-  const regDate = String(recap.regDate || "").trim();
+  const color = MEM_CARD_COLORS.find((c) => c.id === s.memorial?.colorId) || MEM_CARD_COLORS[0];
+
+  const belovedName = String(recap.belovedGameName || "").trim();
+  const belovedIcon = String(recap.belovedGameIcon || "").trim() || "🎮";
+  const belovedHours = Number(recap.belovedGameHours || 0);
+  const fmtBelovedH = (() => {
+    if (belovedHours <= 0) return "";
+    if (belovedHours > 6000) return "6000+";
+    if (belovedHours < 1) return Math.max(0.1, belovedHours).toFixed(1);
+    return String(Math.floor(belovedHours));
+  })();
+
+  const top10 = Array.isArray(recap.belovedTop10) ? recap.belovedTop10.filter(g => String(g.name || "").trim()) : [];
+  const topShow = top10.slice(0, 5);
+  const cutName = (n) => { const s = String(n || "").trim(); return s.length <= 6 ? escapeHtml(s) : escapeHtml(s.slice(0, 5)) + "…"; };
+
+  const kw = calcShareKeyword(recap);
+  const genre = String(recap.topGenreLabel || "").trim();
+
   const togetherDays = calcDaysSince(parseCnDateToTs(recap.regDate));
-  const criticYear = maxYear(recap.taptapCriticYears);
-  const favoriteGenre = String(recap.topGenreLabel || "").trim() || oneTag(recap.topGenre1 || recap.favoriteGenre);
-  const zuiti = Number(recap.zuitiReviewsCount || recap.zuitiCount || 0);
+  const fmtKpi = (n, max) => Number(n) > max ? max + "+" : fmt(Number(n));
+  const fmtHoursKpi = (h) => { const v = Number(h || 0); if (v <= 0) return "—"; if (v > 6000) return "6000+"; if (v < 1) return Math.max(0.1, v).toFixed(1); return String(Math.floor(v)); };
+  const fmtWanKpi = (n) => { const v = Number(n || 0); if (v <= 0) return "0"; if (v < 10000) return fmt(v); const w = v / 10000; if (w >= 999.95) return "999.9万+"; return (w >= 1 && w % 1 < 0.05) ? Math.floor(w) + "万" : w.toFixed(1) + "万"; };
+  const fmtDays = (d) => { if (d == null || d <= 0) return "—"; return d > 9999 ? "9999" : String(d); };
 
-  const iconChar = (name) => {
-    const raw = String(name || "").trim();
-    if (!raw) return "";
-    const m = raw.match(/《([^》]+)》/);
-    const inside = (m ? m[1] : raw).trim();
-    const cleaned = inside.replace(/^TapTap制造[:：]/, "").split(/[:：]/).pop().trim();
-    return Array.from(cleaned)[0] || "";
-  };
-  const iconHtml = (name, { award = false } = {}) => {
-    const ch = iconChar(name);
-    if (!ch) return "";
-    return `<span class="game-ico" aria-hidden="true">${ch}${award ? `<span class="game-ico__badge" aria-hidden="true">🏆</span>` : ""}</span>`;
-  };
-
-  const creatorIcons = [
-    String(recap.devCert1Name || "").trim(),
-    String(recap.devCert2Name || "").trim(),
-    String(recap.devCert3Name || "").trim(),
-  ]
-    .filter(Boolean)
-    .slice(0, 3)
-    .map((t) => iconHtml(t))
-    .join("");
-
-  const gamejamAll = [1, 2, 3, 4, 5]
-    .map((i) => ({
-      name: String(recap[`spotlightGamejam${i}Name`] || "").trim(),
-      score: Number(recap[`spotlightGamejam${i}Score`] || 0),
-      award: String(recap[`spotlightGamejam${i}Award`] || "").trim(),
-      certified: !!recap[`spotlightGamejam${i}Certified`],
-      tagged: !!recap[`spotlightGamejam${i}Tagged`],
-    }))
-    .filter((x) => x.name && x.certified && x.tagged)
-    .sort((a, b) => {
-      const aa = a.award ? 1 : 0;
-      const bb = b.award ? 1 : 0;
-      if (bb !== aa) return bb - aa;
-      const as = Number.isFinite(a.score) ? a.score : 0;
-      const bs = Number.isFinite(b.score) ? b.score : 0;
-      return bs - as;
-    })
-    ;
-  const gamejamTop = gamejamAll.slice(0, 3);
-  const gamejamIcons = gamejamTop.map((x) => iconHtml(x.name, { award: !!x.award })).join("");
-
-  const tapmakerAll = [1, 2, 3, 4, 5]
-    .map((i) => ({
-      name: String(recap[`tapmaker${i}Name`] || "").trim(),
-      likes: Number(recap[`tapmaker${i}Likes`] || 0),
-      certified: !!recap[`tapmaker${i}Certified`],
-      tagged: !!recap[`tapmaker${i}Tagged`],
-    }))
-    .filter((x) => x.name && x.certified && x.tagged)
-    .sort((a, b) => Number(b.likes || 0) - Number(a.likes || 0));
-  const tapmakerTop = tapmakerAll.slice(0, 3);
-  const tapmakerIcons = tapmakerTop.map((x) => iconHtml(x.name)).join("");
+  const devGames = (Array.isArray(recap?.devGames) ? recap.devGames : []).filter(g => String(g.name || "").trim());
+  const allKpis = [
+    togetherDays > 0 && { dim: "days", label: "TapTap陪伴天数", value: fmtDays(togetherDays) },
+    Number(recap.gamesPlayedTotal || 0) > 0 && { dim: "games", label: "游玩数量", value: fmtKpi(recap.gamesPlayedTotal, 999) },
+    Number(recap.playTimeHours || 0) > 0 && { dim: "hours", label: "冒险时长", value: fmtHoursKpi(recap.playTimeHours) },
+    genre && { dim: "genre", label: "冒险偏好", value: escapeHtml(genre) },
+    Number(recap.achievementsTotal || 0) + Number(recap.platformBadgesTotal || 0) > 0 && { dim: "achieve", label: "成就与徽章", value: fmtKpi(Number(recap.achievementsTotal || 0) + Number(recap.platformBadgesTotal || 0), 9999) },
+    Number(recap.reviewsCount || 0) > 0 && { dim: "reviews", label: "评价数", value: fmtKpi(recap.reviewsCount, 999) },
+    Number(recap.communityPublished || 0) > 0 && { dim: "published", label: "社区发布数", value: fmtKpi(recap.communityPublished, 9999) },
+    Number(recap.communityLikesReceived || 0) > 0 && { dim: "likes", label: "获赞数", value: fmtWanKpi(recap.communityLikesReceived) },
+    devGames.length > 0 && { dim: "dev", label: "创作游戏", value: String(devGames.length) },
+    (Number(recap.friendsCount || 0) + Number(recap.followersCount || 0)) > 0 && { dim: "social", label: "好友与粉丝", value: fmtKpi(Number(recap.friendsCount || 0) + Number(recap.followersCount || 0), 9999) },
+    Number(recap.nightSurfDays || 0) > 0 && { dim: "night", label: "深夜冲浪", value: fmtKpi(recap.nightSurfDays, 999) },
+  ].filter(Boolean);
+  const hlDim = kw.dim;
+  const hlIdx = allKpis.findIndex(k => k.dim === hlDim);
+  if (hlIdx > 0) { const [item] = allKpis.splice(hlIdx, 1); allKpis.unshift(item); }
 
   return `
-    <div class="share-card" id="shareCard">
-      <div class="row">
-        <div class="grow">
-          <div class="share-card__title">${title}</div>
-          <div class="muted small" style="margin-top:4px">TapTap · 生涯回顾 · 十年同行</div>
-        </div>
-        <span class="tag mono">#10y</span>
+    <div class="sc2" id="shareCard" style="--sc2-bg:${color.bg}; --sc2-accent:${color.accent}; --sc2-panel:${color.panel};">
+      <div class="sc2__header">
+        <div class="sc2__title">TapTap 十周年回顾</div>
+        <span class="sc2__badge">TapTap</span>
       </div>
-      <div class="share-card__grid">
-        <div class="kpi">
-          <div class="kpi__v">${regDate || "—"}</div>
-          <div class="kpi__k">什么时候来到 TapTap</div>
+
+      <div class="sc2__hero">
+        <div class="sc2__hero-icon">${belovedIcon}</div>
+        <div class="sc2__hero-label">我的十年挚爱「${escapeHtml(belovedName || "—")}」</div>
+        ${fmtBelovedH ? `<div class="sc2__hero-hours"><span class="sc2__hero-hours-num">${fmtBelovedH}</span><span class="sc2__hero-hours-unit">小时</span></div>` : ""}
+      </div>
+
+      ${topShow.length > 0 ? `
+        <div class="sc2__top">
+          <div class="sc2__top-title">我的十年挚爱Top榜</div>
+          <div class="sc2__top-list">
+            ${topShow.map(g => `
+              <div class="sc2__top-item">
+                <span class="sc2__top-icon">${String(g.icon || "🎮").trim()}</span>
+                <span class="sc2__top-name">${cutName(g.name)}</span>
+              </div>
+            `).join("")}
+          </div>
         </div>
-        <div class="kpi">
-          <div class="kpi__v">${togetherDays != null ? `${fmt(togetherDays)} 天` : "—"}</div>
-          <div class="kpi__k">已互相陪伴</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__v">${Number(recap.gamesPlayedTotal || 0) > 999 ? "999+" : fmt(Number(recap.gamesPlayedTotal || 0))} 款</div>
-          <div class="kpi__k">玩了多少游戏</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__v">${(() => { const h = Number(recap.playTimeHours || 0); if (h <= 0) return "—"; if (h > 6000) return "6000+"; if (h < 1) return Math.max(0.1, h).toFixed(1); return String(Math.floor(h)); })()} 小时</div>
-          <div class="kpi__k">总游戏时长</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__v">${String(recap.firstGameName || "").trim() || "—"}</div>
-          <div class="kpi__k">第一款游戏</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__v">${favoriteGenre || "—"}</div>
-          <div class="kpi__k">最喜欢什么类型</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__v">${joinNonEmpty([
-            `黑金 ${fmt(Number(recap.badgesBlackGoldTotal || 0))}`,
-            `白金 ${fmt(Number(recap.platinumAchievementsTotal || 0))}`,
-          ], " / ") || "—"}</div>
-          <div class="kpi__k">徽章 / 成就</div>
-        </div>
-        <div class="kpi">
-          <div class="kpi__v">${joinNonEmpty([
-            `评价 ${fmt(Number(recap.reviewsCount || 0))}`,
-            `嘴替 ${fmt(zuiti)}`,
-          ], " / ") || "—"}</div>
-          <div class="kpi__k">最近一年玩赏家 ${criticYear ? `${criticYear}` : "—"}</div>
+      ` : ""}
+
+      <div class="sc2__keywords">
+        <div class="sc2__kw">
+          <div class="sc2__kw-label">十年关键词</div>
+          <div class="sc2__kw-value">${escapeHtml(kw.keyword)}</div>
         </div>
       </div>
-      <div class="divider"></div>
-      <div class="share-sections">
-        <div class="share-sec">
-          <div class="row" style="align-items:baseline; justify-content:space-between; gap:10px">
-            <div class="share-sec__k">创作游戏</div>
-            <div class="share-sec__m">${Number(recap.devGamesCount || 0) > 0 ? `${fmt(Number(recap.devGamesCount || 0))} 款` : ""}</div>
-          </div>
-          <div class="game-icons">${creatorIcons || `<span class="muted small">—</span>`}</div>
-        </div>
-        <div class="share-sec">
-          <div class="row" style="align-items:baseline; justify-content:space-between; gap:10px">
-            <div class="share-sec__k">聚光灯 GameJam</div>
-            <div class="share-sec__m">${gamejamAll.length ? `Top3` : ""}</div>
-          </div>
-          <div class="game-icons">${gamejamIcons || `<span class="muted small">—</span>`}</div>
-        </div>
-        <div class="share-sec">
-          <div class="row" style="align-items:baseline; justify-content:space-between; gap:10px">
-            <div class="share-sec__k">TapMaker</div>
-            <div class="share-sec__m">${tapmakerAll.length ? `Top3` : ""}</div>
-          </div>
-          <div class="game-icons">${tapmakerIcons || `<span class="muted small">—</span>`}</div>
-        </div>
+
+      <div class="sc2__kpis">
+        ${allKpis.map((k, i) => {
+          const hl = i === 0 && hlDim;
+          return `<div class="sc2__kpi${hl ? " sc2__kpi--highlight" : ""}"><div class="sc2__kpi-label">${k.label}</div><div class="sc2__kpi-value">${k.value}</div></div>`;
+        }).join("")}
       </div>
     </div>
   `;
@@ -5421,6 +5331,35 @@ function wireRecapInline() {
 
   wireCarousel("recapCarouselSnap", "recapDotsSnap");
   wireCarousel("recapCarouselBind", "recapDotsBind");
+
+  // Role card carousel inside bind_roles
+  $$(".rolecard-carousel").forEach(carousel => {
+    const track = carousel.querySelector(".rolecard__track");
+    if (!track) return;
+    const total = Number(carousel.dataset.roleTotal || 0);
+    let cur = 0;
+    const go = (idx) => {
+      cur = ((idx % total) + total) % total;
+      track.querySelectorAll(".rolecard__slide").forEach((s, i) => {
+        s.classList.toggle("rolecard__slide--active", i === cur);
+      });
+      carousel.querySelectorAll(".rolecard__dot").forEach((d, i) => {
+        d.classList.toggle("rolecard__dot--active", i === cur);
+      });
+    };
+    carousel.querySelectorAll(".rolecard__arrow").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        go(cur + Number(btn.dataset.roleDir || 1));
+      });
+    });
+    carousel.querySelectorAll(".rolecard__dot").forEach(dot => {
+      dot.addEventListener("click", (e) => {
+        e.stopPropagation();
+        go(Number(dot.dataset.rdot || 0));
+      });
+    });
+  });
 
   // 年度数据柱状图点击交互
   $$(".ychart-col").forEach((col) => {
@@ -5969,6 +5908,13 @@ function openBindSteamModal() {
   $("#btnCancelSteam")?.addEventListener("click", closeModal);
   $("#btnConfirmSteam")?.addEventListener("click", () => {
     state.boundSteam = true;
+    if (!state.steamGamesCount) {
+      state.steamFavGame = "ELDEN RING";
+      state.steamFavGameIcon = "https://img.tapimg.net/market/images/e2b7259807d30e498a3008cbed6be542.png";
+      state.steamAccountValue = 12680.5;
+      state.steamGamesCount = 286;
+      state.steamPlayHours = 4236;
+    }
     saveState();
     closeModal();
     if (lastBindClickCtx?.trackId) requestCarouselInit(lastBindClickCtx.trackId, lastBindClickCtx.currentIdx);
@@ -5997,9 +5943,16 @@ function openBindRolesModal() {
   `;
   openModal({ title: "绑定游戏角色", bodyHtml: body, footerHtml: footer });
   $("#btnCancelBindRole")?.addEventListener("click", closeModal);
+  const sampleRoles = [
+    { name: "轮椅指挥官", game: "明日方舟", job: "", level: 0, stats: [{ label: "登录天数", value: "65天" }, { label: "传说级人物", value: "10" }, { label: "传说级装备", value: "49" }], bg: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)", avatar: "https://img.tapimg.net/market/images/e2b7259807d30e498a3008cbed6be542.png" },
+    { name: "深海猎手", game: "明日方舟", job: "", level: 0, stats: [{ label: "登录天数", value: "128天" }, { label: "传说级人物", value: "23" }, { label: "传说级装备", value: "76" }], bg: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)", avatar: "https://img.tapimg.net/market/images/e2b7259807d30e498a3008cbed6be542.png" },
+  ];
   $("#btnBindOneRole")?.addEventListener("click", () => {
     state.boundRolesCount = Math.max(0, Number(state.boundRolesCount || 0)) + 1;
-    state.boundData = state.boundRolesCount > 0; // keep legacy flag for recap enrichment/demo switch
+    state.boundData = state.boundRolesCount > 0;
+    if (!Array.isArray(state.boundRoleCards)) state.boundRoleCards = [];
+    const idx = state.boundRoleCards.length;
+    state.boundRoleCards.push(sampleRoles[idx % sampleRoles.length]);
     saveState();
     closeModal();
     if (lastBindClickCtx?.trackId) requestCarouselInit(lastBindClickCtx.trackId, lastBindClickCtx.currentIdx);
@@ -6831,8 +6784,7 @@ function openDebug() {
       regDate: new Date().toLocaleDateString("zh-CN", { year: "numeric", month: "numeric", day: "numeric" }).replace(/\//g, "年").replace(/年(\d+)$/, "年$1日").replace(/(\d+)日$/, "月$1日"),
       downloadsCount: 0,
       spendTotal: 0,
-      badgesTotal: 0,
-      badgesBlackGoldTotal: 0,
+      platformBadgesTotal: 0, platformBadges: [],
       gamesPlayedTotal: 0,
       playTimeHours: 0,
       firstGameName: "",
@@ -6851,25 +6803,25 @@ function openDebug() {
       exclusivePlayed: 0, exclusiveTotal: 0, exclusiveGames: [],
       editorPickPlayed: 0, editorPickTotal: 0, editorPickGames: [],
       nightPlayCount: 0,
-      reviewsCount: 0,
-      reviewLikesTotal: 0,
-      reviewCommentsTotal: 0,
-      reviewsLikedCount: 0,
-      zuitiReviewsCount: 0,
-      taptapCriticYears: [],
+      reviewsCount: 0, reviewLikesTotal: 0, reviewCommentsTotal: 0,
+      reviewAllLowStar: false, reviewGameIcons: [],
+      zuitiReviewsCount: 0, taptapCriticYears: [],
+      totalReviewsOnPlatform: 0,
+      communityLikesGiven: 0, communityLikesReceived: 0, communityLikePctRank: "", communityTopLikedContent: [],
+      communityPublished: 0, communityCommentsReceived: 0, communityPubPctRank: "",
+      communityTopForums: [], communityTopEmojis: [],
       postsCount: 0,
       repliesCount: 0,
       likedPostsCount: 0,
       receivedLikesCount: 0,
-      nightCommunityCount: 0,
+      nightSurfDays: 0, nightSurfLogs: [],
       friendsCount: 0,
       followingCount: 0,
       followersCount: 0,
-      friendMessagesCount: 0,
-      devGamesCount: 0,
-      spotlightGamejamFirstPublishDate: "",
-      tapmakerFirstPublishDate: "",
-      creatorWorks: 0
+      closestFriends: [],
+      devGames: [],
+      gamejamGamesCount: 0,
+      tapmakerGamesCount: 0
     };
     txt.value = JSON.stringify(emptyRecap, null, 2);
     toast("已切换为新注册玩家数据（未应用）");

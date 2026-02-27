@@ -3535,7 +3535,7 @@ html.is-firstrecap .firstrecap-body::before{
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 8px;
+  padding: 3px 8px;
   min-width: 0;
   border-radius: 8px;
   background: rgba(255,255,255,.5);
@@ -3665,4 +3665,1239 @@ html.is-firstrecap .firstrecap-body::before{
   margin-top: 2px;
   padding-top: 6px;
   border-top: 1px solid rgba(15,23,42,.04);
+}
+
+/* ── 游戏评价 & 嘴替发言 卡片 ── */
+.mini-card[data-reward-id="snap_review_voice"]{
+  height: auto;
+  min-height: 200px;
+  background: linear-gradient(165deg, rgba(254,243,199,.92) 0%, rgba(254,226,226,.88) 100%);
+}
+.revcard{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 4px;
+}
+.revcard__section{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.revcard__section + .revcard__section{
+  padding-top: 10px;
+  border-top: 1px solid rgba(15,23,42,.06);
+}
+.revcard__header{
+  font-size: 14px;
+  font-weight: 950;
+  color: #0F172A;
+}
+.revcard__stats{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(15,23,42,.55);
+  line-height: 1.5;
+}
+.revcard__stats strong{
+  font-weight: 900;
+  color: #0F172A;
+}
+.revcard__stats-row{
+  display: flex;
+  gap: 16px;
+}
+.revcard__stat{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.revcard__stat-num{
+  font-size: 24px;
+  font-weight: 950;
+  color: #0F172A;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+.revcard__stat-label{
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(15,23,42,.4);
+}
+.revcard__icons{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+.revcard__icon-item{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.revcard__icon{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
+  line-height: 1;
+  background: rgba(255,255,255,.6);
+  border: 1px solid rgba(255,255,255,.8);
+  border-radius: 8px;
+}
+.revcard__icon-likes{
+  font-size: 9px;
+  font-weight: 800;
+  color: rgba(15,23,42,.4);
+  line-height: 1;
+}
+.revcard__icon--more{
+  font-size: 14px;
+  font-weight: 900;
+  color: rgba(15,23,42,.35);
+}
+.revcard__fallback{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(15,23,42,.5);
+  line-height: 1.6;
+}
+.revcard__zuiti-summary{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(15,23,42,.55);
+  line-height: 1.5;
+}
+.revcard__zuiti-summary strong{
+  font-weight: 900;
+  color: #0F172A;
+}
+.revcard__critic-label{
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(15,23,42,.5);
+}
+.revcard__critic-years{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+.revcard__critic-badge{
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #92400E;
+  background: rgba(251,191,36,.18);
+  border: 1px solid rgba(251,191,36,.3);
+  border-radius: 12px;
+}
+.revcard__footer{
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(15,23,42,.35);
+  line-height: 1.5;
+  padding-top: 6px;
+  border-top: 1px solid rgba(15,23,42,.04);
+}
+
+/* ── 社区点赞卡片 ── */
+.mini-card[data-reward-id="snap_community_likes"]{
+  height: auto;
+  min-height: 200px;
+  background: linear-gradient(165deg, rgba(254,240,138,.88) 0%, rgba(254,215,170,.90) 100%);
+}
+.likecard{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+.likecard__header{
+  font-size: 14px;
+  font-weight: 950;
+  color: #0F172A;
+}
+.likecard__stats-row{
+  display: flex;
+  gap: 20px;
+}
+.likecard__stat{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.likecard__stat-num{
+  font-size: 26px;
+  font-weight: 950;
+  color: #0F172A;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+.likecard__stat-label{
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(15,23,42,.4);
+}
+.likecard__pct{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(15,23,42,.55);
+  line-height: 1.5;
+}
+.likecard__pct strong{
+  font-weight: 900;
+  color: var(--brand, #00B894);
+}
+.likecard__quote{
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(15,23,42,.5);
+  line-height: 1.6;
+}
+.likecard__top-title{
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(15,23,42,.5);
+  margin-top: 4px;
+}
+.likecard__top-list{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.likecard__top-item{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.likecard__top-rank{
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 900;
+  color: #fff;
+  background: rgba(15,23,42,.4);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.likecard__top-item:nth-child(1) .likecard__top-rank{ background: #F59E0B; }
+.likecard__top-item:nth-child(2) .likecard__top-rank{ background: #94A3B8; }
+.likecard__top-item:nth-child(3) .likecard__top-rank{ background: #D97706; }
+.likecard__top-text{
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.likecard__top-likes{
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(15,23,42,.45);
+  flex-shrink: 0;
+}
+
+/* ── 社区发布内容卡片 ── */
+.mini-card[data-reward-id="snap_community_pub"]{
+  height: auto;
+  min-height: 200px;
+  background: linear-gradient(165deg, rgba(219,234,254,.92) 0%, rgba(224,231,255,.90) 100%);
+}
+.pubcard{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+.pubcard__header{
+  font-size: 14px;
+  font-weight: 950;
+  color: #0F172A;
+}
+.pubcard__stats-row{
+  display: flex;
+  gap: 20px;
+}
+.pubcard__stat{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.pubcard__stat-num{
+  font-size: 26px;
+  font-weight: 950;
+  color: #0F172A;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+.pubcard__stat-label{
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(15,23,42,.4);
+}
+.pubcard__pct{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(15,23,42,.55);
+  line-height: 1.5;
+}
+.pubcard__pct strong{
+  font-weight: 900;
+  color: var(--brand, #00B894);
+}
+.pubcard__quote{
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(15,23,42,.5);
+  line-height: 1.6;
+}
+.pubcard__forums-title{
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(15,23,42,.5);
+  margin-top: 4px;
+}
+.pubcard__forums-list{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pubcard__forum-item{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pubcard__forum-rank{
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 900;
+  color: #fff;
+  background: rgba(15,23,42,.4);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.pubcard__forum-item:nth-child(1) .pubcard__forum-rank{ background: #F59E0B; }
+.pubcard__forum-item:nth-child(2) .pubcard__forum-rank{ background: #94A3B8; }
+.pubcard__forum-item:nth-child(3) .pubcard__forum-rank{ background: #D97706; }
+.pubcard__forum-name{
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pubcard__forum-count{
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(15,23,42,.45);
+  flex-shrink: 0;
+}
+.pubcard__emoji-section{
+  padding-top: 8px;
+  border-top: 1px solid rgba(15,23,42,.06);
+}
+.pubcard__emoji-title{
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(15,23,42,.5);
+  margin-bottom: 6px;
+}
+.pubcard__emoji-list{
+  display: flex;
+  gap: 16px;
+}
+.pubcard__emoji-item{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.pubcard__emoji-face{
+  font-size: 32px;
+  line-height: 1;
+}
+.pubcard__emoji-count{
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(15,23,42,.45);
+}
+
+/* ── 深夜社区冲浪卡片 ── */
+.mini-card[data-reward-id="snap_night_community"]{
+  height: auto;
+  min-height: 200px;
+  background: linear-gradient(165deg, rgba(30,41,59,.92) 0%, rgba(51,65,85,.90) 100%);
+}
+.mini-card[data-reward-id="snap_night_community"],
+.mini-card[data-reward-id="snap_night_community"] .mini-card__empty-hint{
+  color: rgba(255,255,255,.85);
+}
+.nightsurf-card{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+.nightsurf__header{
+  font-size: 14px;
+  font-weight: 950;
+  color: #fff;
+}
+.nightsurf__days{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255,255,255,.65);
+  line-height: 1.5;
+}
+.nightsurf__days strong{
+  font-size: 22px;
+  font-weight: 950;
+  color: #fff;
+}
+.nightsurf__logs-title{
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(255,255,255,.5);
+  margin-top: 4px;
+}
+.nightsurf__logs{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.nightsurf__log{
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,.7);
+  line-height: 1.6;
+  padding: 4px 8px;
+  background: rgba(255,255,255,.06);
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,.08);
+}
+.nightsurf__note{
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255,255,255,.25);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+/* ── 平台成就卡片 ── */
+.mini-card[data-reward-id="snap_badges"]{
+  height: auto;
+  min-height: 200px;
+  background: linear-gradient(165deg, rgba(254,240,138,.90) 0%, rgba(251,191,36,.18) 100%);
+}
+.achcard{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+.achcard__header{
+  font-size: 14px;
+  font-weight: 950;
+  color: #0F172A;
+}
+.achcard__total{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(15,23,42,.55);
+  line-height: 1.5;
+}
+.achcard__total strong{
+  font-size: 22px;
+  font-weight: 950;
+  color: #0F172A;
+}
+.achcard__quote{
+  font-size: 12px;
+  font-weight: 800;
+  color: #92400E;
+  line-height: 1.6;
+}
+.achcard__rare-title{
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(15,23,42,.5);
+  margin-top: 4px;
+}
+.achcard__rare-list{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.achcard__rare-item{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.achcard__rare-rank{
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 900;
+  color: #fff;
+  background: rgba(15,23,42,.4);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.achcard__rare-item:nth-child(1) .achcard__rare-rank{ background: #F59E0B; }
+.achcard__rare-item:nth-child(2) .achcard__rare-rank{ background: #94A3B8; }
+.achcard__rare-item:nth-child(3) .achcard__rare-rank{ background: #D97706; }
+.achcard__rare-icon{
+  font-size: 22px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.achcard__rare-info{
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.achcard__rare-name{
+  font-size: 13px;
+  font-weight: 800;
+  color: #0F172A;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.achcard__rare-owners{
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(15,23,42,.4);
+}
+.achcard__badges{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(15,23,42,.06);
+}
+.achcard__badge{
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(255,255,255,.7);
+  border-radius: 8px;
+}
+.achcard__badge-icon{
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.achcard__badge-info{
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+.achcard__badge-name{
+  font-size: 11px;
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.achcard__badge-owners{
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(15,23,42,.4);
+  line-height: 1.2;
+}
+
+/* ── 社交关系卡片 ── */
+.mini-card[data-reward-id="snap_friend_msgs"]{
+  height: auto;
+  min-height: 200px;
+  background: linear-gradient(165deg, rgba(167,139,250,.28) 0%, rgba(109,40,217,.08) 100%);
+}
+.socialcard{
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 4px;
+}
+.socialcard__stats{
+  display: flex;
+  justify-content: space-around;
+  gap: 8px;
+  padding: 18px 8px;
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(255,255,255,.7);
+  border-radius: 14px;
+}
+.socialcard__stat{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+.socialcard__stat-num{
+  font-size: 26px;
+  font-weight: 950;
+  color: #0F172A;
+  line-height: 1.1;
+}
+.socialcard__stat-label{
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(15,23,42,.45);
+}
+.socialcard__top-title{
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(15,23,42,.55);
+}
+.socialcard__top-list{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.socialcard__top-item{
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(255,255,255,.7);
+  border-radius: 10px;
+}
+.socialcard__top-item:nth-child(1) .socialcard__top-rank{ background: #F59E0B; }
+.socialcard__top-item:nth-child(2) .socialcard__top-rank{ background: #94A3B8; }
+.socialcard__top-item:nth-child(3) .socialcard__top-rank{ background: #D97706; }
+.socialcard__top-rank{
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+  color: #fff;
+  background: rgba(15,23,42,.3);
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.socialcard__top-info{
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+.socialcard__top-row{
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.socialcard__top-name{
+  font-size: 13px;
+  font-weight: 800;
+  color: #0F172A;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.socialcard__top-msgs{
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(15,23,42,.45);
+  flex-shrink: 0;
+}
+.socialcard__top-lastmsg{
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+.socialcard__top-lastmsg-text{
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(15,23,42,.5);
+  line-height: 1.4;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.socialcard__top-lastmsg-time{
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(15,23,42,.3);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ── 游戏创作卡片 ── */
+.mini-card[data-reward-id="snap_dev_create"]{
+  height: auto;
+  min-height: 200px;
+  background: linear-gradient(165deg, rgba(56,189,248,.20) 0%, rgba(14,165,233,.08) 100%);
+}
+.devcard{
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 4px;
+}
+.devcard__section-title{
+  font-size: 14px;
+  font-weight: 950;
+  color: #0F172A;
+}
+.devcard__total{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(15,23,42,.55);
+  line-height: 1.5;
+}
+.devcard__total strong{
+  font-size: 22px;
+  font-weight: 950;
+  color: #0F172A;
+}
+.devcard__game-grid{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.devcard__game-cell{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(255,255,255,.7);
+  border-radius: 10px;
+  min-width: 0;
+}
+.devcard__game-icon{
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: rgba(15,23,42,.06);
+}
+.devcard__game-name{
+  font-size: 11px;
+  font-weight: 700;
+  color: #0F172A;
+  text-align: center;
+  line-height: 1.3;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.devcard__game-cell--more{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 900;
+  color: rgba(15,23,42,.3);
+}
+.devcard__sub{
+  padding: 10px 12px;
+  background: rgba(255,255,255,.50);
+  border: 1px solid rgba(255,255,255,.7);
+  border-radius: 12px;
+}
+.devcard__sub-title{
+  font-size: 13px;
+  font-weight: 900;
+  color: #0F172A;
+  margin-bottom: 4px;
+}
+.devcard__sub-num{
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(15,23,42,.6);
+  line-height: 1.5;
+}
+.devcard__sub-num strong{
+  font-size: 18px;
+  font-weight: 950;
+  color: #0F172A;
+}
+.devcard__sub-quote{
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(14,165,233,.8);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+/* ── Steam 卡片 ── */
+.mini-card[data-reward-id="bind_steam"],
+.mini-card.mini-card--bind[data-reward-id="bind_steam"]{
+  height: auto !important;
+  min-height: 220px;
+}
+.mini-card[data-reward-id="bind_steam"] .mini-card__d{
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(15,23,42,.55);
+  line-height: 1.6;
+  margin-top: 16px;
+  text-align: center;
+}
+.steamcard{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 4px;
+}
+.steamcard--empty .steamcard__empty-text{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(15,23,42,.5);
+  line-height: 1.7;
+  text-align: center;
+  padding: 20px 0;
+}
+.steamcard__fav{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.steamcard__fav-label{
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(15,23,42,.45);
+}
+.steamcard__fav-row{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.steamcard__fav-icon{
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: rgba(15,23,42,.06);
+}
+.steamcard__fav-name{
+  font-size: 15px;
+  font-weight: 900;
+  color: #0F172A;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.steamcard__stats{
+  display: flex;
+  justify-content: space-around;
+  gap: 6px;
+  padding: 14px 6px;
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(255,255,255,.7);
+  border-radius: 14px;
+}
+.steamcard__stat{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+.steamcard__stat-num{
+  font-size: 20px;
+  font-weight: 950;
+  color: #0F172A;
+  line-height: 1.1;
+}
+.steamcard__stat-label{
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(15,23,42,.4);
+  text-align: center;
+}
+
+/* ── 角色卡片轮播 ── */
+.mini-card[data-reward-id="bind_roles"],
+.mini-card.mini-card--bind[data-reward-id="bind_roles"]{
+  height: auto !important;
+  min-height: 220px;
+}
+.mini-card[data-reward-id="bind_roles"] .mini-card__d{
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(15,23,42,.55);
+  line-height: 1.6;
+  margin-top: 16px;
+  text-align: center;
+}
+.rolecard-carousel{
+  position: relative;
+  width: 100%;
+  padding: 0 20px;
+}
+.rolecard__track{
+  position: relative;
+  width: 100%;
+}
+.rolecard__slide{
+  display: none;
+  border-radius: 12px;
+  padding: 14px;
+  color: #fff;
+  min-height: 130px;
+}
+.rolecard__slide--active{
+  display: block;
+}
+.rolecard__slide--hint{
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-height: 130px;
+  background: rgba(15,23,42,.06) !important;
+  color: rgba(15,23,42,.45);
+}
+.rolecard__slide--hint.rolecard__slide--active{
+  display: flex;
+}
+.rolecard__hint-text{
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.6;
+}
+.rolecard__top{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.rolecard__avatar{
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: rgba(255,255,255,.2);
+  border: 2px solid rgba(255,255,255,.4);
+}
+.rolecard__info{
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.rolecard__name{
+  font-size: 15px;
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rolecard__game{
+  font-size: 11px;
+  font-weight: 600;
+  opacity: .75;
+}
+.rolecard__meta{
+  font-size: 11px;
+  font-weight: 700;
+  opacity: .7;
+  margin-bottom: 8px;
+}
+.rolecard__stats{
+  display: flex;
+  gap: 16px;
+}
+.rolecard__stat{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.rolecard__stat-num{
+  font-size: 18px;
+  font-weight: 950;
+  line-height: 1.1;
+}
+.rolecard__stat-label{
+  font-size: 10px;
+  font-weight: 600;
+  opacity: .65;
+}
+.rolecard__dots{
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 8px;
+}
+.rolecard__dot{
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(15,23,42,.15);
+  cursor: pointer;
+  transition: background .2s;
+}
+.rolecard__dot--active{
+  background: rgba(15,23,42,.5);
+}
+.rolecard__arrow{
+  position: absolute;
+  top: 50%;
+  transform: translateY(-70%);
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: rgba(15,23,42,.08);
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 900;
+  color: rgba(15,23,42,.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  padding: 0;
+  line-height: 1;
+}
+.rolecard__arrow--left{ left: 0; }
+.rolecard__arrow--right{ right: 0; }
+.rolecard__arrow:hover{ background: rgba(15,23,42,.14); }
+
+/* ── Share Card v2 ── */
+.sc2{
+  border-radius: 20px;
+  background: var(--sc2-bg, linear-gradient(160deg,#E7FBF5,#F7F9FC));
+  padding: 20px 18px 18px;
+  position: relative;
+  overflow: hidden;
+}
+.sc2__header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.sc2__title{
+  font-size: 16px;
+  font-weight: 900;
+  color: #0F172A;
+  letter-spacing: .3px;
+}
+.sc2__badge{
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  background: var(--sc2-accent, #00B894);
+  padding: 3px 10px;
+  border-radius: 10px;
+  letter-spacing: .5px;
+  flex-shrink: 0;
+}
+
+.sc2__hero{
+  background: var(--sc2-panel, rgba(255,255,255,.85));
+  border-radius: 16px;
+  padding: 24px 16px 20px;
+  text-align: center;
+  position: relative;
+  border: 1px solid rgba(15,23,42,.06);
+  box-shadow: 0 4px 18px rgba(15,23,42,.06);
+}
+.sc2__hero-icon{
+  font-size: 64px;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+.sc2__hero-label{
+  font-size: 14px;
+  font-weight: 700;
+  color: #0F172A;
+  margin-bottom: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sc2__hero-hours{
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  background: var(--sc2-accent, #00B894);
+  color: #fff;
+  padding: 4px 14px;
+  border-radius: 20px;
+  margin-top: 4px;
+}
+.sc2__hero-hours-num{
+  font-size: 22px;
+  font-weight: 950;
+  line-height: 1.1;
+}
+.sc2__hero-hours-unit{
+  font-size: 11px;
+  font-weight: 700;
+  opacity: .85;
+}
+
+.sc2__top{
+  margin-top: 16px;
+}
+.sc2__top-title{
+  font-size: 13px;
+  font-weight: 800;
+  color: #0F172A;
+  margin-bottom: 10px;
+}
+.sc2__top-list{
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+.sc2__top-item{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 52px;
+  flex-shrink: 0;
+}
+.sc2__top-icon{
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--sc2-panel, rgba(255,255,255,.85));
+  border: 1px solid rgba(15,23,42,.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-shadow: 0 2px 6px rgba(15,23,42,.05);
+}
+.sc2__top-name{
+  font-size: 10px;
+  font-weight: 600;
+  color: #334155;
+  text-align: center;
+  max-width: 56px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sc2__keywords{
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+.sc2__kw{
+  flex: 1;
+  min-width: 0;
+}
+.sc2__kw-label{
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(15,23,42,.45);
+  margin-bottom: 4px;
+}
+.sc2__kw-value{
+  font-size: 24px;
+  font-weight: 950;
+  color: #0F172A;
+  line-height: 1.15;
+  letter-spacing: .5px;
+}
+.sc2__kpi--highlight{
+  position: relative;
+  background: color-mix(in srgb, var(--sc2-accent, #00B894) 10%, transparent);
+  border-radius: 10px;
+  padding: 6px 2px 4px;
+}
+.sc2__kpi--highlight .sc2__kpi-label{
+  color: var(--sc2-accent, #00B894);
+  font-weight: 700;
+}
+.sc2__kpi--highlight .sc2__kpi-value{
+  color: var(--sc2-accent, #00B894);
+  font-size: 20px;
+}
+
+.sc2__kpis{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px 4px;
+  margin-top: 18px;
+  background: var(--sc2-panel, rgba(255,255,255,.7));
+  border-radius: 14px;
+  padding: 12px 10px;
+  border: 1px solid rgba(15,23,42,.05);
+}
+.sc2__kpi{
+  text-align: center;
+  min-width: 0;
+}
+.sc2__kpi-label{
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(15,23,42,.42);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+.sc2__kpi-value{
+  font-size: 15px;
+  font-weight: 900;
+  color: #0F172A;
+  line-height: 1.2;
 }
