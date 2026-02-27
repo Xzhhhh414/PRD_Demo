@@ -5082,7 +5082,17 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         </div>
         <div class="home-hero__text">
           <div class="home-hero__title">🎉 回顾你与 TapTap 走过的十年时光</div>
-          <div class="home-hero__note">数据统计截止到 2026年4月17日</div>
+          <div class="home-hero__note">
+            数据统计截止到 2026年4月17日
+            <span class="home-hero__info-btn" onclick="this.closest('.home-hero__note').querySelector('.home-hero__info-popup').classList.toggle('is-visible')">!</span>
+            <div class="home-hero__info-popup">
+              <ul>
+                <li>累计消费包括买断制手游、买断制PC游戏、云玩等所有消费内容</li>
+                <li>类别偏好/挚爱游戏的数据由预约下载、冒险时长、内容浏览等综合行为产生</li>
+                <li>手机和PC平台的游玩时长也包含云游戏的时长</li>
+              </ul>
+            </div>
+          </div>
         </div>
         <button class="btn btn--brand recap-card__share" id="btnToggleShare" type="button">分享</button>
       </div>
