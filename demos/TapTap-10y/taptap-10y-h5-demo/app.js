@@ -4017,55 +4017,6 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         Number(snap.playTimeHours || 0) > 0 ||
         (Array.isArray(snap.yearlyData) && snap.yearlyData.length > 0),
     },
-    // 游戏时长年历
-    {
-      label: "游玩时长年历",
-      value: (() => {
-        const topGames = Array.isArray(snap.yearlyTopGames)
-          ? snap.yearlyTopGames.filter(d => Number(d.hours) > 0 && String(d.gameName || "").trim())
-          : [];
-
-        if (topGames.length === 0) {
-          return `
-            <div class="yearbook-card yearbook-card--empty">
-              <div class="yearbook-empty-main">你的年历空空如也。</div>
-              <div class="yearbook-empty-sub">快去开始吧，体验佳作世界的魅力！</div>
-            </div>
-          `;
-        }
-
-        const fmtYbHours = (h) => h > 600 ? "600+h" : Math.floor(h) + "h";
-        const cutName = (n) => {
-          const s = String(n || "").trim();
-          if (s.length <= 8) return escapeHtml(s);
-          return escapeHtml(s.slice(0, 7)) + "…";
-        };
-
-        const cells = topGames.map(d => {
-          const icon = String(d.gameIcon || "").trim() || "🎮";
-          return `<div class="yearbook-cell">
-            <div class="yearbook-cell__year">${d.year}</div>
-            <div class="yearbook-cell__icon">${icon}</div>
-            <div class="yearbook-cell__name">${cutName(d.gameName)}</div>
-            <div class="yearbook-cell__hours">${fmtYbHours(Number(d.hours))}</div>
-          </div>`;
-        }).join("");
-
-        return `
-          <div class="yearbook-card">
-            <div class="yearbook-header">
-              <div class="yearbook-title">每年挚爱</div>
-              <div class="yearbook-subtitle">ADVENTURE ARCHIVE</div>
-            </div>
-            <div class="yearbook-grid">${cells}</div>
-            <div class="yearbook-note">数据由预约下载、冒险时长、内容浏览等综合行为产生</div>
-          </div>
-        `;
-      })(),
-      desc: "",
-      rewardId: "snap_yearbook",
-      visible: true,
-    },
     // 类别偏好 + 游戏成就（合并卡）
     {
       label: "成就",
@@ -4259,6 +4210,75 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
       })(),
       desc: "",
       rewardId: "snap_beloved_top10",
+      visible: true,
+    },
+    // TapTap历年最佳游戏
+    {
+      label: "TapTap历年最佳",
+      value: (() => {
+        const bestGames = [
+          { year: 2016, items: [{ name: "部落冲突：皇室战争", icon: "🏰" }, { name: "口袋妖怪 GO", icon: "📱" }, { name: "王权", icon: "👑" }] },
+          { year: 2017, items: [{ name: "纪念碑谷 2", icon: "🔺" }, { name: "艾希", icon: "⚔️" }, { name: "王权：女王陛下", icon: "👑" }] },
+          { year: 2018, items: [{ name: "画中世界", icon: "🖼️" }] },
+          { year: 2019, items: [{ name: "明日方舟", icon: "🏗️" }] },
+          { year: 2020, items: [{ name: "原神", icon: "🌍" }] },
+          { year: 2021, items: [{ name: "泰拉瑞亚", icon: "⛏️" }] },
+          { year: 2022, items: [{ name: "笼中窥梦", icon: "🔲" }] },
+          { year: 2023, items: [{ name: "崩坏：星穹铁道", icon: "🚂" }] },
+          { year: 2024, items: [{ name: "绝区零", icon: "🎬" }] },
+          { year: 2025, items: [{ name: "燕云十六声", icon: "🏯" }] },
+        ];
+
+        const top10 = Array.isArray(snap.belovedTop10) ? snap.belovedTop10.filter(g => String(g.name || "").trim()) : [];
+        const normalize = (s) => String(s || "").trim().replace(/^《|》$/g, "");
+        const lovedSet = new Set(top10.map(g => normalize(g.name)));
+
+        const cutName = (n) => {
+          const s = String(n || "").trim();
+          return s.length <= 6 ? escapeHtml(s) : escapeHtml(s.slice(0, 5)) + "…";
+        };
+
+        const gameCell = (item) => {
+          const loved = lovedSet.has(item.name);
+          return `<div class="yearbook-cell__game${loved ? " yearbook-cell__game--loved" : ""}">
+            <span class="yearbook-cell__icon">${item.icon}</span>
+            <span class="yearbook-cell__name">${cutName(item.name)}</span>
+            ${loved ? `<span class="yearbook-cell__loved">我的挚爱</span>` : ""}
+          </div>`;
+        };
+
+        const multiYears = bestGames.filter(g => g.items.length > 1);
+        const singleYears = bestGames.filter(g => g.items.length === 1);
+
+        const multiHtml = multiYears.map(g => `
+          <div class="yearbook-row">
+            <div class="yearbook-row__year">${g.year}</div>
+            <div class="yearbook-row__games">
+              ${g.items.map(item => gameCell(item)).join("")}
+            </div>
+          </div>
+        `).join("");
+
+        const singleHtml = singleYears.map(g => `
+          <div class="yearbook-cell">
+            <div class="yearbook-cell__year">${g.year}</div>
+            ${gameCell(g.items[0])}
+          </div>
+        `).join("");
+
+        return `
+          <div class="yearbook-card">
+            <div class="yearbook-header">
+              <div class="yearbook-title">TapTap历年最佳</div>
+              <div class="yearbook-subtitle">BEST OF THE YEAR</div>
+            </div>
+            ${multiHtml}
+            <div class="yearbook-grid yearbook-grid--best">${singleHtml}</div>
+          </div>
+        `;
+      })(),
+      desc: "",
+      rewardId: "snap_yearbook",
       visible: true,
     },
     // Tap独家 & 编辑推荐游玩数量
@@ -4840,7 +4860,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
     snap_spend:       "好物等你来挑",
     snap_badges:      "暂时还没有获得TapTap平台成就。世界在等待你的名字。",
     snap_top3games:   "精彩旅程待开启",
-    snap_yearbook:    "年历等你来填满",
+    snap_yearbook:    "历年最佳等你来探索",
     snap_profile:     "偏好与成就等你来解锁",
     snap_beloved:     "还没有遇见你的挚爱？来逛逛TapTap吧~也许心动就在下一个瞬间~",
     snap_beloved_top10:"榜单空空如也，看来你就是最神秘玩家。",
