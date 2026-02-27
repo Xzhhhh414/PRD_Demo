@@ -210,6 +210,8 @@ const PRESETS = {
         { game: "《派对之星》", count: 42 },
         { game: "《戴森球计划》", count: 36 },
         { game: "《哈迪斯》", count: 28 },
+        { game: "《明日方舟》", count: 21 },
+        { game: "《心动小镇》", count: 15 },
       ],
       communityTopEmojis: [
         { emoji: "😂", count: 3260 },
@@ -266,20 +268,21 @@ const PRESETS = {
       followingCount: 186,
       followersCount: 420,
       closestFriends: [
-        { name: "阿星", msgs: 860, lastText: "今晚一起打派对之星吗？", lastTime: "2026年1月28日 22:13" },
-        { name: "咕咕", msgs: 620, lastText: "昨天那个boss好难打啊", lastTime: "2026年1月25日 19:47" },
-        { name: "小盐", msgs: 410, lastText: "新出的DLC你买了没？", lastTime: "2026年1月20日 14:02" },
-        { name: "夜行者", msgs: 256, lastText: "周末开黑不", lastTime: "2026年1月15日 23:31" },
-        { name: "蓝莓酱", msgs: 180, lastText: "这个游戏画风好好看", lastTime: "2026年1月10日 10:18" },
+        { name: "阿星", msgs: 860, firstFollowTime: "2020年3月12日" },
+        { name: "咕咕", msgs: 620, firstFollowTime: "2021年7月5日" },
+        { name: "小盐", msgs: 410, firstFollowTime: "2019年11月28日" },
+        { name: "夜行者", msgs: 256, firstFollowTime: "2022年1月3日" },
+        { name: "蓝莓酱", msgs: 180, firstFollowTime: "2023年8月19日" },
       ],
       nightTopAction: "回帖 / 点赞",
       nightSurfDays: 46,
+      firstNightSurf: { time: "2019年8月16日 1:23", action: "在《明日方舟》发了一条帖子", content: "凌晨抽到了心心念念的银灰，太开心了必须来发个帖纪念一下！！" },
       nightSurfLogs: [
-        { time: "2026年2月2日4点58分", game: "《派对之星》", action: "在《派对之星》发帖子" },
-        { time: "2026年1月29日3点42分", game: "《戴森球计划》", action: "在《戴森球计划》点赞帖子" },
-        { time: "2026年1月18日2点17分", game: "《哈迪斯》", action: "给《哈迪斯》写评价" },
-        { time: "2025年12月31日1点06分", game: "《去月球》", action: "在《去月球》发评论" },
-        { time: "2025年11月15日0点33分", game: "《明日方舟》", action: "在《明日方舟》点赞评价" },
+        { time: "2026年2月2日4点58分", game: "《派对之星》", action: "在《派对之星》发帖子", content: "有人凌晨还在线吗，组队打排位，三缺一速来" },
+        { time: "2026年1月29日3点42分", game: "《戴森球计划》", action: "在《戴森球计划》点赞帖子", content: "这个星际物流布局也太优雅了吧" },
+        { time: "2026年1月18日2点17分", game: "《哈迪斯》", action: "给《哈迪斯》写评价", content: "第一次通关，手都在抖。这游戏的剧情真的太好哭了，每一次对话都舍不得跳过" },
+        { time: "2025年12月31日1点06分", game: "《去月球》", action: "在《去月球》发评论", content: "跨年夜重温去月球，眼泪又没忍住" },
+        { time: "2025年11月15日0点33分", game: "《明日方舟》", action: "在《明日方舟》点赞评价", content: "写得太好了，每个角色的分析都很到位" },
       ],
 
       // 开发者 — 游戏创作
@@ -4091,7 +4094,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         const achSection = hasAch ? `
           <div class="profile-ach">
             <div class="profile-ach__summary">
-              在 <strong>${fmt(achGames)}</strong> 款佳作里留下了点亮成就的足迹
+              在 <strong>${fmt(achGames)}</strong> 款宝藏佳作里留下了点亮成就的足迹
             </div>
             <div class="profile-ach__stats">
               <div class="profile-ach__stat">
@@ -4138,7 +4141,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
     },
     // 挚爱游戏
     {
-      label: "挚爱佳作",
+      label: "我的生涯挚爱",
       value: (() => {
         const name = String(snap.belovedGameName || "").trim();
         const icon = String(snap.belovedGameIcon || "").trim();
@@ -4165,10 +4168,9 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
                 <span class="beloved-card__hours-num">${hStr}</span>
                 <span class="beloved-card__hours-unit">小时</span>
               </div>
-            ` : ""}
-            ${pct ? `<div class="beloved-card__pct">占生涯游玩时长的 <strong>${escapeHtml(pct)}</strong></div>` : ""}
-            ${samePct ? `<div class="beloved-card__same">${escapeHtml(samePct)} 玩家和我的"挚爱佳作"一致</div>` : ""}
-            <div class="beloved-card__note">数据由预约下载、冒险时长、内容浏览等综合行为产生</div>
+              ${pct ? `<div class="beloved-card__pct">占生涯游玩时长的 <strong>${escapeHtml(pct)}</strong></div>` : ""}
+            ` : `<div class="beloved-card__quote">时间没有记录，但心动不会忘记。</div>`}
+            ${samePct ? `<div class="beloved-card__same">${escapeHtml(samePct)} 玩家和我的"生涯挚爱"一致</div>` : ""}
           </div>
         `;
       })(),
@@ -4208,7 +4210,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
     },
     // TapTap历年最佳游戏
     {
-      label: "TapTap历年最佳",
+      label: "TapTap历年最佳游戏",
       value: (() => {
         const bestGames = [
           { year: 2016, items: [{ name: "部落冲突：皇室战争", icon: "🏰" }, { name: "口袋妖怪 GO", icon: "📱" }, { name: "王权", icon: "👑" }] },
@@ -4311,7 +4313,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
 
         const exSection = hasEx ? `
           <div class="taplist__section">
-            <div class="taplist__header">Tap独家游玩榜单</div>
+            <div class="taplist__header">「Tap独家」游玩数量</div>
             <div class="taplist__stats">
               玩过 <strong>${fmt(exPlayed)}</strong> 款，共 ${fmt(exTotal)} 款Tap独家，玩过了 <strong>${exPct}%</strong>
             </div>
@@ -4328,7 +4330,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
 
         const edSection = hasEd ? `
           <div class="taplist__section">
-            <div class="taplist__header">编辑推荐榜单</div>
+            <div class="taplist__header">「编辑推荐」游玩数量<</div>
             <div class="taplist__stats">
               玩过 <strong>${fmt(edPlayed)}</strong> 款，共 ${fmt(edTotal)} 款编辑推荐，玩过了 <strong>${edPct}%</strong>
             </div>
@@ -4481,9 +4483,9 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         const cutGame = (s) => { const t = String(s || "").trim(); return t.length > 10 ? t.slice(0, 10) + "..." : t; };
 
         const forumHtml = topForums.length > 0 ? `
-          <div class="pubcard__forums-title">发布内容的论坛 Top3</div>
+          <div class="pubcard__forums-title">发布内容的论坛 Top5</div>
           <div class="pubcard__forums-list">
-            ${topForums.slice(0, 3).map((x, i) => `
+            ${topForums.slice(0, 5).map((x, i) => `
               <div class="pubcard__forum-item">
                 <span class="pubcard__forum-rank">${i + 1}</span>
                 <span class="pubcard__forum-name">${escapeHtml(cutGame(x.game))}</span>
@@ -4611,21 +4613,40 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         const logs = Array.isArray(snap.nightSurfLogs)
           ? snap.nightSurfLogs.filter(x => String(x.time || "").trim() && String(x.game || "").trim() && String(x.action || "").trim())
           : [];
-        if (days <= 0 && logs.length === 0) return "";
+        const firstNight = snap.firstNightSurf || {};
+        const firstTime = String(firstNight.time || "").trim();
+        const firstAction = String(firstNight.action || "").trim();
+        if (days <= 0 && logs.length === 0 && !firstTime) return "";
+
+        const firstContent = String(firstNight.content || "").trim();
+
+        const firstHtml = firstTime ? `
+          <div class="nightsurf__first">
+            <div class="nightsurf__first-label">第一次深夜冲浪</div>
+            <div class="nightsurf__first-time">${escapeHtml(firstTime)}</div>
+            ${firstAction ? `<div class="nightsurf__first-action">${escapeHtml(firstAction)}</div>` : ""}
+            ${firstContent ? `<div class="nightsurf__first-content">${escapeHtml(firstContent)}</div>` : ""}
+          </div>
+        ` : "";
 
         const logsHtml = logs.length > 0 ? `
-          <div class="nightsurf__logs-title">时间最晚的冲浪记录</div>
+          <div class="nightsurf__logs-title">熬夜最晚的冲浪记录</div>
           <div class="nightsurf__logs">
-            ${logs.slice(0, 5).map(x => `
-              <div class="nightsurf__log">${escapeHtml(x.time)}，${escapeHtml(x.action)}</div>
-            `).join("")}
+            ${logs.slice(0, 5).map(x => {
+              const c = String(x.content || "").trim();
+              return `
+              <div class="nightsurf__log">
+                <div class="nightsurf__log-head">${escapeHtml(x.time)}，${escapeHtml(x.action)}</div>
+                ${c ? `<div class="nightsurf__log-content">${escapeHtml(c)}</div>` : ""}
+              </div>`;
+            }).join("")}
           </div>
         ` : "";
 
         return `
           <div class="nightsurf-card">
             <div class="nightsurf__header">深夜社区冲浪</div>
-            ${days > 0 ? `<div class="nightsurf__days">深夜在社区冲浪了 <strong>${fmt(days)}</strong> 天</div>` : ""}
+            ${firstHtml}
             ${logsHtml}
           </div>
         `;
@@ -4747,14 +4768,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
           <div class="socialcard__top-title">最亲密的好友 Top5</div>
           <div class="socialcard__top-list">
             ${topFriends.slice(0, 5).map((x, i) => {
-              const lt = String(x.lastText || "").trim();
-              const ltime = String(x.lastTime || "").trim();
-              const msgLine = lt ? `
-                <div class="socialcard__top-lastmsg">
-                  <span class="socialcard__top-lastmsg-text">${escapeHtml(lt)}</span>
-                  ${ltime ? `<span class="socialcard__top-lastmsg-time">${escapeHtml(ltime)}</span>` : ""}
-                </div>
-              ` : "";
+              const followTime = String(x.firstFollowTime || "").trim();
               return `
               <div class="socialcard__top-item">
                 <span class="socialcard__top-rank">${i + 1}</span>
@@ -4763,7 +4777,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
                     <span class="socialcard__top-name">${escapeHtml(String(x.name).trim())}</span>
                     <span class="socialcard__top-msgs">${fmtWan(Number(x.msgs))} 条消息</span>
                   </div>
-                  ${msgLine}
+                  ${followTime ? `<div class="socialcard__top-follow-time">相识于 ${escapeHtml(followTime)}</div>` : ""}
                 </div>
               </div>`;
             }).join("")}
@@ -4811,7 +4825,6 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
 
         const hasMore = totalGames > 9;
         const listHtml = totalGames > 0 ? `
-          <div class="devcard__section-title">参与了作品创作</div>
           <div class="devcard__total">一共创作了 <strong>${fmt(totalGames)}</strong> 款作品</div>
           <div class="devcard__game-grid">
             ${games.slice(0, 9).map(g => `
@@ -4826,7 +4839,6 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
 
         const gjHtml = gjCount > 0 ? `
           <div class="devcard__sub">
-            <div class="devcard__sub-title">聚光灯GameJam</div>
             <div class="devcard__sub-num">有 <strong>${fmt(gjCount)}</strong> 款作品创作于「聚光灯GameJam」</div>
             <div class="devcard__sub-quote">在有限时间里完成创作，你选择了挑战与热爱。</div>
           </div>
@@ -4834,7 +4846,6 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
 
         const tmHtml = tmCount > 0 ? `
           <div class="devcard__sub">
-            <div class="devcard__sub-title">TapTap制造</div>
             <div class="devcard__sub-num">有 <strong>${fmt(tmCount)}</strong> 款作品是使用「TapTap制造」创作</div>
             <div class="devcard__sub-quote">从想法到作品，你让创意真正落了地。</div>
           </div>
@@ -6829,7 +6840,7 @@ function openDebug() {
       repliesCount: 0,
       likedPostsCount: 0,
       receivedLikesCount: 0,
-      nightSurfDays: 0, nightSurfLogs: [],
+      nightSurfDays: 0, firstNightSurf: null, nightSurfLogs: [],
       friendsCount: 0,
       followingCount: 0,
       followersCount: 0,
