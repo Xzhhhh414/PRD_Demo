@@ -67,6 +67,11 @@ const PRESETS = {
       firstGameName: "《饥荒：联机版》",
       firstGameIcon: "🔥",
       platform: "android",
+      platformBreakdown: [
+        { platform: "手机", games: 285, hours: 1860, favName: "明日方舟", favIcon: "🏗️" },
+        { platform: "PC", games: 68, hours: 720, favName: "戴森球计划", favIcon: "🌐" },
+        { platform: "云游戏", games: 15, hours: 100, favName: "原神", favIcon: "🌍" },
+      ],
       yearlyData: [
         { year: 2018, games: 12, hours: 86 },
         { year: 2019, games: 45, hours: 320 },
@@ -3836,7 +3841,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         return `
           <div class="reserve-card">
             <div class="reserve-header">
-              <div class="reserve-title">你预约过的佳作</div>
+              <div class="reserve-title">你预约过的新作</div>
               <div class="reserve-hero">
                 <span class="reserve-count">${displayCount}</span>${showPlus ? `<span class="reserve-plus">+</span>` : ""}
                 <span class="reserve-unit">款</span>
@@ -3845,7 +3850,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
             <div class="reserve-grid">${gridHtml}</div>
             ${showLaunched ? `
               <div class="reserve-launched">
-                <div class="reserve-launched__text">你预约的佳作中，<br>有<strong>${fmt(launchedCount)}</strong>款已经上线啦！你的期待没有落空。</div>
+                <div class="reserve-launched__text">你预约的新作中，<br>有<strong>${fmt(launchedCount)}</strong>款已经上线啦！你的期待没有落空。</div>
                 <div class="reserve-launched__icons">${launchGridHtml}</div>
               </div>
             ` : ""}
@@ -3892,7 +3897,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         return `
           <div class="spend-card">
             <div class="spend-hero">
-              <span class="spend-label">购买作品</span><span class="spend-hero__num">${displayCount}</span><span class="spend-hero__unit">款</span>
+              <span class="spend-label">购买宝藏佳作</span><span class="spend-hero__num">${displayCount}</span><span class="spend-hero__unit">款</span>
             </div>
             <div class="spend-list">${listHtml}${moreHtml}</div>
             <div class="spend-footer">
@@ -3908,7 +3913,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
     },
       // 十年生涯游玩数据
     {
-      label: "十年生涯游玩数据",
+      label: "生涯游玩数据",
       value: (() => {
         const totalGames = Number(snap.gamesPlayedTotal || 0);
         const totalHours = Number(snap.playTimeHours || 0);
@@ -3933,16 +3938,16 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         if (hasGames) {
           gamesHtml = `
             <div class="playtime-section">
-              <div class="playtime-label">十年生涯玩了</div>
+              <div class="playtime-label">生涯游玩数量</div>
               <div class="playtime-hero">
-                <span class="playtime-hero__num">${fmtGameCount(totalGames)}</span><span class="playtime-hero__unit">款佳作</span>
+                <span class="playtime-hero__num">${fmtGameCount(totalGames)}</span><span class="playtime-hero__unit">款</span>
               </div>
-              ${firstName ? `<div class="playtime-first">${firstIcon ? `<span class="playtime-first__icon">${firstIcon}</span>` : ""}我的首次游玩旅程：${escapeHtml(firstName)}</div>` : ""}
+              ${firstName ? `<div class="playtime-first">${firstIcon ? `<span class="playtime-first__icon">${firstIcon}</span>` : ""}我的首次游玩之旅：${escapeHtml(firstName)}</div>` : ""}
             </div>`;
         } else {
           gamesHtml = `
             <div class="playtime-section playtime-section--empty">
-              <div class="playtime-label">十年生涯玩了</div>
+              <div class="playtime-label">生涯游玩时长</div>
               <div class="playtime-empty-main">还未开启冒险</div>
               <div class="playtime-empty-sub">有趣的世界正在等你，什么时候一起出发？</div>
             </div>`;
@@ -3952,7 +3957,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         if (hasTime) {
           timeHtml = `
             <div class="playtime-section">
-              <div class="playtime-label">十年生涯游玩时长</div>
+              <div class="playtime-label">生涯游玩时长</div>
               <div class="playtime-hero">
                 <span class="playtime-hero__num">${fmtHours(totalHours)}</span><span class="playtime-hero__unit">小时</span>
               </div>
@@ -3968,54 +3973,43 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
             </div>`;
         }
 
-        let chartHtml = "";
-        if (yearly.length > 0) {
-          const maxGames = Math.max(...yearly.map(d => Number(d.games) || 0), 1);
-          const maxHrs = Math.max(...yearly.map(d => Number(d.hours) || 0), 1);
-
-          const barsHtml = yearly.map((d, i) => {
-            const g = Number(d.games) || 0;
-            const h = Number(d.hours) || 0;
-            const gPct = Math.max(4, (g / maxGames) * 100);
-            const hPct = Math.max(4, (h / maxHrs) * 100);
-            return `<div class="ychart-col" data-ychart-idx="${i}">
-              <div class="ychart-bars">
-                <div class="ychart-bar ychart-bar--games" style="height:${gPct}%"></div>
-                <div class="ychart-bar ychart-bar--hours" style="height:${hPct}%"></div>
+        let platHtml = "";
+        const platData = Array.isArray(snap.platformBreakdown) ? snap.platformBreakdown.filter(p => (Number(p.games) > 0 || Number(p.hours) > 0)) : [];
+        if (platData.length > 0) {
+          const platIcons = { "手机": "📱", "PC": "💻", "云游戏": "☁️" };
+          const cutName = (n) => { const s = String(n || "").trim(); return s.length <= 8 ? escapeHtml(s) : escapeHtml(s.slice(0, 7)) + "…"; };
+          platHtml = `
+            <div class="playtime-plat">
+              <div class="playtime-plat__list">
+                ${platData.map(p => {
+                  const favName = String(p.favName || "").trim();
+                  const favIcon = String(p.favIcon || "").trim();
+                  return `<div class="playtime-plat__item" data-plat="${escapeHtml(p.platform)}">
+                    <div class="playtime-plat__head">
+                      <span class="playtime-plat__icon">${platIcons[p.platform] || "🎮"}</span>
+                      <span class="playtime-plat__name">${escapeHtml(p.platform)}</span>
+                    </div>
+                    <div class="playtime-plat__stats">
+                      <span class="playtime-plat__stat">${fmtGameCount(Number(p.games))}<small>款</small></span>
+                      <span class="playtime-plat__stat">${fmtHours(Number(p.hours))}<small>小时</small></span>
+                    </div>
+                    ${favName ? `<div class="playtime-plat__fav">${favIcon ? `<span class="playtime-plat__fav-icon">${favIcon}</span>` : ""}最爱：${cutName(favName)}</div>` : ""}
+                  </div>`;
+                }).join("")}
               </div>
-              <div class="ychart-year">${d.year}</div>
-              <div class="ychart-bubble ychart-bubble--hidden">
-                <div class="ychart-bubble__row">${fmtChartGames(g)} 款</div>
-                <div class="ychart-bubble__row">${fmtChartHours(h)} 小时</div>
-              </div>
-            </div>`;
-          }).join("");
-
-          chartHtml = `
-            <div class="playtime-chart">
-              <div class="ychart-header">
-                <span class="ychart-axis-label">数量/个</span>
-                <span class="ychart-axis-label">时长/小时</span>
-              </div>
-              <div class="ychart">${barsHtml}</div>
-              <div class="ychart-legend">
-                <span class="ychart-legend__item"><span class="ychart-legend__dot ychart-legend__dot--games"></span>佳作数量</span>
-                <span class="ychart-legend__item"><span class="ychart-legend__dot ychart-legend__dot--hours"></span>游玩时长</span>
-              </div>
-              <div class="playtime-note">数据由预约下载、冒险时长、内容浏览等综合行为产生</div>
             </div>`;
         }
 
-        if (!hasGames && !hasTime && yearly.length === 0) return "";
+        if (!hasGames && !hasTime && platData.length === 0) return "";
 
-        return `<div class="playtime-card">${gamesHtml}${timeHtml}${chartHtml}</div>`;
+        return `<div class="playtime-card">${gamesHtml}${timeHtml}${platHtml}</div>`;
       })(),
       desc: "",
       rewardId: "snap_top3games",
       visible:
         Number(snap.gamesPlayedTotal || 0) > 0 ||
         Number(snap.playTimeHours || 0) > 0 ||
-        (Array.isArray(snap.yearlyData) && snap.yearlyData.length > 0),
+        (Array.isArray(snap.platformBreakdown) && snap.platformBreakdown.length > 0),
     },
     // 类别偏好 + 游戏成就（合并卡）
     {
@@ -6810,6 +6804,7 @@ function openDebug() {
       firstGameName: "",
       firstGameIcon: "",
       platform: "",
+      platformBreakdown: [],
       yearlyData: [],
       radarAction: 0, radarStrategy: 0, radarRPG: 0, radarAdventure: 0, radarSim: 0, radarCasual: 0,
       topGenreLabel: "", topGenrePct: "", topGenreSitePct: "",

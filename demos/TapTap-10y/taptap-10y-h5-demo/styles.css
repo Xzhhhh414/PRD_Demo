@@ -3129,6 +3129,77 @@ html.is-firstrecap .firstrecap-body::before{
   line-height: 1.4;
 }
 
+.playtime-plat{
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(15,23,42,.06);
+}
+.playtime-plat__title{
+  font-size: 13px;
+  font-weight: 800;
+  color: #0F172A;
+  margin-bottom: 10px;
+}
+.playtime-plat__list{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.playtime-plat__item{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,.7);
+  border-radius: 12px;
+  border: 1px solid rgba(15,23,42,.05);
+}
+.playtime-plat__head{
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 68px;
+}
+.playtime-plat__icon{
+  font-size: 18px;
+  line-height: 1;
+}
+.playtime-plat__name{
+  font-size: 13px;
+  font-weight: 800;
+  color: #0F172A;
+}
+.playtime-plat__stats{
+  display: flex;
+  gap: 12px;
+}
+.playtime-plat__stat{
+  font-size: 15px;
+  font-weight: 900;
+  color: #0F172A;
+  line-height: 1.2;
+}
+.playtime-plat__stat small{
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(15,23,42,.45);
+  margin-left: 1px;
+}
+.playtime-plat__fav{
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(15,23,42,.55);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+  margin-left: auto;
+}
+.playtime-plat__fav-icon{
+  font-size: 14px;
+  line-height: 1;
+}
+
 /* ── 游戏时长年历卡片 ── */
 .mini-card[data-reward-id="snap_yearbook"]{
   height: auto;
