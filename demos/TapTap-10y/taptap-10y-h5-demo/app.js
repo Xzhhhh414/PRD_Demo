@@ -474,20 +474,24 @@ const MEM_STICKERS = [
 ];
 
 const MEM_AVATARS = [
-  { id: "ma_me", icon: "👤", label: "我的头像", isProfileAvatar: true },
-  { id: "ma_bunny", icon: "🐰", label: "兔帽" },
-  { id: "ma_cat", icon: "🐱", label: "猫猫" },
-  { id: "ma_robot", icon: "🤖", label: "机甲" },
-  { id: "ma_fox", icon: "🦊", label: "小狐" },
-  { id: "ma_panda", icon: "🐼", label: "熊猫" },
-  { id: "ma_penguin", icon: "🐧", label: "企鹅" },
+  { id: "ma_me", icon: "👤", label: "Tap头像", isProfileAvatar: true, img: "default.png" },
+  { id: "ma_bunny", icon: "🐰", label: "Tarara", img: "tarara01.png" },
+  { id: "ma_cat", icon: "🐱", label: "Tarara", img: "tarara02.png" },
+  { id: "ma_robot", icon: "🤖", label: "游戏名字", isGameRole: true },
+  { id: "ma_fox", icon: "🦊", label: "游戏名字", isGameRole: true },
+  { id: "ma_panda", icon: "🐼", label: "游戏名字", isGameRole: true },
+  { id: "ma_penguin", icon: "🐧", label: "游戏名字", isGameRole: true },
 ];
 
-/** 渲染角色头像内容：ma_me 显示白底方块 + "TapTap头像"文字，其他显示 emoji */
+/** 渲染角色头像内容 */
 function avatarDisplayHtml(avatar, nickname, { size = "normal" } = {}) {
-  if (avatar.isProfileAvatar) {
-    const cls = size === "small" ? "mem-avatar--profile mem-avatar--profile-sm" : "mem-avatar--profile";
-    return `<span class="${cls}" title="我的头像"><span class="mem-avatar--profile__text">TapTap<br>头像</span></span>`;
+  if (avatar.img) {
+    const cls = size === "small" ? "mem-avatar--img mem-avatar--img-sm" : "mem-avatar--img";
+    return `<img class="${cls}" src="${avatar.img}" alt="${escapeHtml(avatar.label)}" draggable="false" />`;
+  }
+  if (avatar.isGameRole) {
+    const cls = size === "small" ? "mem-avatar--role mem-avatar--role-sm" : "mem-avatar--role";
+    return `<span class="${cls}"><span class="mem-avatar--role__text">游戏角色</span></span>`;
   }
   return escapeHtml(avatar.icon);
 }
@@ -2078,7 +2082,6 @@ function calcShareKeyword(recap) {
     { score: Math.min(Number(recap?.communityPublished || 0) / 200, 1), keyword: "内容达人", dim: "published" },
     { score: Math.min(devGames.length / 5, 1), keyword: "造梦者", dim: "dev" },
     { score: Math.min((Number(recap?.friendsCount || 0) + Number(recap?.followersCount || 0)) / 600, 1), keyword: "人气之星", dim: "social" },
-    { score: Math.min(Number(recap?.nightSurfDays || 0) / 80, 1), keyword: "月光冒险家", dim: "night" },
     { score: Math.min((Number(recap?.achievementsTotal || 0) + Number(recap?.platformBadgesTotal || 0)) / 500, 1), keyword: "成就猎人", dim: "achieve" },
   ];
 
@@ -2174,21 +2177,28 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
     }),
   ).join("");
 
-  const avatarOpts = MEM_AVATARS.map((av) =>
-    optionBtn({
+  const avatarOpts = MEM_AVATARS.map((av) => {
+    let iconHtml;
+    if (av.img) {
+      iconHtml = `<img class="mem-opt__img-ico" src="${av.img}" alt="${escapeHtml(av.label)}" draggable="false" />`;
+    } else if (av.isGameRole) {
+      iconHtml = `<span class="mem-opt__role-ico">游戏<br>角色</span>`;
+    } else {
+      iconHtml = av.icon;
+    }
+    iconHtml += `<span class="mem-opt__avatar-label">${escapeHtml(av.label)}</span>`;
+    return optionBtn({
       id: av.id,
       kind: "avatar",
-      icon: av.isProfileAvatar
-        ? `<span class="mem-opt__profile-ico">TapTap<br>头像</span>`
-        : av.icon,
+      icon: iconHtml,
       active: (s.memorial?.avatarId || "") === av.id,
       used: (s.memorial?.avatarId || "") === av.id,
       locked: !isUnlockedKind("avatar", av.id),
       cost: costFor("avatar", av.id),
       ariaLabel: `角色：${av.label}`,
       compact: true,
-    }),
-  ).join("");
+    });
+  }).join("");
 
   const frameBtn = frameOwned
     ? `<button class="btn ${frameEquipped ? "" : "btn--brand"}" data-mem-equip="frame">${frameEquipped ? "已装备" : "装备"}</button>`
@@ -2283,7 +2293,7 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
         </div>
         <div class="mem-panel ${tab === "avatar" ? "" : "hidden"}" data-mem-panel="avatar">
           <div class="muted small" style="margin-top:2px">选择名片上展示的角色形象。</div>
-          <div class="mem-grid" style="margin-top:10px">${avatarOpts}</div>
+          <div class="mem-grid mem-grid--avatars" style="margin-top:10px">${avatarOpts}</div>
         </div>
       </div>
   `;
@@ -2675,11 +2685,12 @@ function openShareMemorialModal({ onClose } = {}) {
 
         ${stickers}
 
-        ${avatar.isProfileAvatar
-          ? `<rect x="${cardX + 68}" y="${cardY + 88}" width="104" height="104" rx="22" fill="#FFFFFF" stroke="rgba(15,23,42,0.10)" stroke-width="2"/>
-             <text x="${cardX + 120}" y="${cardY + 135}" font-size="22" font-weight="800" fill="rgba(15,23,42,0.45)" text-anchor="middle">TapTap</text>
-             <text x="${cardX + 120}" y="${cardY + 165}" font-size="22" font-weight="800" fill="rgba(15,23,42,0.45)" text-anchor="middle">头像</text>`
-          : `<text x="${cardX + 120}" y="${cardY + 170}" font-size="96">${escapeXml(avatar.icon)}</text>`
+        ${avatar.img
+          ? `<image href="${avatar.img}" x="${cardX + 46}" y="${cardY + 46}" width="148" height="148" clip-path="inset(0 round 22px)" preserveAspectRatio="xMidYMid slice"/>`
+          : avatar.isGameRole
+            ? `<rect x="${cardX + 68}" y="${cardY + 88}" width="104" height="104" rx="22" fill="#FFFFFF" stroke="rgba(15,23,42,0.10)" stroke-width="2"/>
+               <text x="${cardX + 120}" y="${cardY + 145}" font-size="22" font-weight="800" fill="rgba(15,23,42,0.45)" text-anchor="middle">游戏角色</text>`
+            : `<text x="${cardX + 120}" y="${cardY + 170}" font-size="96">${escapeXml(avatar.icon)}</text>`
         }
         <text x="${cardX + 120}" y="${cardY + 520}" font-size="28" font-weight="800" fill="#0F172A">昵称</text>
         <text x="${cardX + 120}" y="${cardY + 580}" font-size="44" font-weight="900" fill="#0F172A">${escapeXml(nick)}</text>
@@ -2798,9 +2809,8 @@ function buildSharePosterSvg(s, recap, nick, pid, url, qr) {
     Number(recap.reviewsCount || 0) > 0 && { dim: "reviews", label: "评价数", value: fmtK(recap.reviewsCount, 999) },
     Number(recap.communityPublished || 0) > 0 && { dim: "published", label: "社区发布", value: fmtK(recap.communityPublished, 9999) },
     Number(recap.communityLikesReceived || 0) > 0 && { dim: "likes", label: "获赞数", value: fmtW(recap.communityLikesReceived) },
-    devGames.length > 0 && { dim: "dev", label: "我的作品", value: String(devGames.length) },
     (Number(recap.friendsCount || 0) + Number(recap.followersCount || 0)) > 0 && { dim: "social", label: "好友与粉丝", value: fmtK(Number(recap.friendsCount || 0) + Number(recap.followersCount || 0), 9999) },
-    Number(recap.nightSurfDays || 0) > 0 && { dim: "night", label: "深夜冲浪", value: fmtK(recap.nightSurfDays, 999) },
+    devGames.length > 0 && { dim: "dev", label: "我的作品", value: String(devGames.length) },
   ].filter(Boolean);
   const hlDim = kw.dim;
   const hlIdx = allKpis.findIndex(k => k.dim === hlDim);
@@ -3118,6 +3128,14 @@ function openSaveImageModal() {
   canvas.width = CARD_W;
   canvas.height = CARD_H;
 
+  // 预加载头像图片
+  let _avatarImg = null;
+  if (avatar.img) {
+    _avatarImg = new Image();
+    _avatarImg.onload = () => drawCard();
+    _avatarImg.src = avatar.img;
+  }
+
   // ── 绘制名片到 canvas ──
   function drawCard() {
     ctx.clearRect(0, 0, CARD_W, CARD_H);
@@ -3148,9 +3166,15 @@ function openSaveImageModal() {
     // 角色（居中显示）
     if (showAvatar) {
       const avX = CARD_W / 2, avY = CARD_H / 2;
-      if (avatar.isProfileAvatar) {
+      if (avatar.img && _avatarImg && _avatarImg.complete && _avatarImg.naturalWidth > 0) {
+        const imgS = 120;
         ctx.save();
-        // 白底方块
+        roundRect(ctx, avX - imgS / 2, avY - imgS / 2, imgS, imgS, 20);
+        ctx.clip();
+        ctx.drawImage(_avatarImg, avX - imgS / 2, avY - imgS / 2, imgS, imgS);
+        ctx.restore();
+      } else if (avatar.isGameRole) {
+        ctx.save();
         const boxS = 100;
         const bx = avX - boxS / 2, by = avY - boxS / 2;
         ctx.fillStyle = "#FFFFFF";
@@ -3159,13 +3183,11 @@ function openSaveImageModal() {
         roundRect(ctx, bx, by, boxS, boxS, 20);
         ctx.fill();
         ctx.stroke();
-        // 文字
         ctx.fillStyle = "rgba(15,23,42,0.45)";
         ctx.font = "bold 20px system-ui, sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText("TapTap", avX, avY - 10);
-        ctx.fillText("头像", avX, avY + 16);
+        ctx.fillText("游戏角色", avX, avY);
         ctx.restore();
       } else {
         ctx.save();
@@ -5286,9 +5308,8 @@ function shareCardHtml(s, recap, { variant }) {
     Number(recap.reviewsCount || 0) > 0 && { dim: "reviews", label: "评价数", value: fmtKpi(recap.reviewsCount, 999) },
     Number(recap.communityPublished || 0) > 0 && { dim: "published", label: "社区发布数", value: fmtKpi(recap.communityPublished, 9999) },
     Number(recap.communityLikesReceived || 0) > 0 && { dim: "likes", label: "获赞数", value: fmtWanKpi(recap.communityLikesReceived) },
-    devGames.length > 0 && { dim: "dev", label: "我的作品", value: String(devGames.length) },
     (Number(recap.friendsCount || 0) + Number(recap.followersCount || 0)) > 0 && { dim: "social", label: "好友与粉丝", value: fmtKpi(Number(recap.friendsCount || 0) + Number(recap.followersCount || 0), 9999) },
-    Number(recap.nightSurfDays || 0) > 0 && { dim: "night", label: "深夜冲浪", value: fmtKpi(recap.nightSurfDays, 999) },
+    devGames.length > 0 && { dim: "dev", label: "我的作品", value: String(devGames.length) },
   ].filter(Boolean);
   const hlDim = kw.dim;
   const hlIdx = allKpis.findIndex(k => k.dim === hlDim);
