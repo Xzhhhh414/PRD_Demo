@@ -437,6 +437,9 @@ const MUTUAL_GAMES = [
   },
 ];
 
+// 点券功能暂时下线（先保留代码，后续可能会恢复）
+const ENABLE_COUPONS = false;
+
 const SHOP_ITEMS = {
   frames: [
     { id: "f_ten_years", title: "头像框：TapTap十周年", cost: 120, icon: "🟩" },
@@ -700,7 +703,7 @@ function clamp(n, a, b) {
 }
 
 function calcSnapshotGrants(recap) {
-  const fixed = (points, coupons = 0) => ({ points, coupons });
+  const fixed = (points, coupons = 0) => ({ points, coupons: ENABLE_COUPONS ? coupons : 0 });
   const daysActive = Number(recap?.daysActive || 0);
   const gamesPlayed = Number(recap?.gamesPlayed || 0);
   const reviewsHelpful = Number(recap?.reviewsHelpful || 0);
@@ -710,7 +713,7 @@ function calcSnapshotGrants(recap) {
   const legacy = {
     snap_daysActive: { points: clamp(Math.floor(daysActive / 10) * 10, 10, 500), coupons: 0 },
     // Example: 5 款 -> 50 积分 + 5 点券
-    snap_gamesPlayed: { points: clamp(gamesPlayed * 10, 10, 800), coupons: clamp(Math.floor(gamesPlayed / 5) * 5, 0, 50) },
+    snap_gamesPlayed: { points: clamp(gamesPlayed * 10, 10, 800), coupons: ENABLE_COUPONS ? clamp(Math.floor(gamesPlayed / 5) * 5, 0, 50) : 0 },
     snap_reviewsHelpful: { points: clamp(reviewsHelpful * 5, 10, 800), coupons: 0 },
     snap_genre: fixed(10, 0),
   };
@@ -724,7 +727,7 @@ function calcSnapshotGrants(recap) {
     snap_reserve: fixed(10),
     snap_streak: fixed(10),
     // TapTap 消费：积分按原规则，点券=消费金额的10%（向下取整）
-    snap_spend: fixed(clamp(Math.floor(spendTotal / 100) * 10, 10, 300), Math.max(0, Math.floor(spendTotal * 0.1))),
+    snap_spend: fixed(clamp(Math.floor(spendTotal / 100) * 10, 10, 300), ENABLE_COUPONS ? Math.max(0, Math.floor(spendTotal * 0.1)) : 0),
 
     // 玩游戏
     snap_playtime: fixed(20),
@@ -772,6 +775,7 @@ function addPoints(s, delta) {
 }
 
 function addCoupons(s, delta) {
+  if (!ENABLE_COUPONS) return;
   s.walletCoupons = Math.max(0, (s.walletCoupons || 0) + delta);
 }
 
@@ -1071,7 +1075,7 @@ async function flyGrantToSticky({ fromRect, grant }) {
         );
       }
     }
-    if (Number(grant?.coupons || grant?.walletCoupons || grant?.coupon || 0) > 0) {
+    if (ENABLE_COUPONS && Number(grant?.coupons || grant?.walletCoupons || grant?.coupon || 0) > 0) {
       const c = Number(grant?.coupons || 0);
       const target = document.getElementById("pillCoupons");
       if (target) {
@@ -1951,18 +1955,22 @@ function stickyStatsView(s) {
         <div class="sticky-hub__info">
           <div class="sticky-hub__row">
             <div class="sticky-hub__stat">
-              <div class="pill pill--brand" id="pillPoints">积分 <b>${fmt(s.points)}</b></div>
-              <div class="muted small">积分兑换装饰和参与点券抽奖</div>
+              <div class="sticky-hub__stat-top">
+                <div class="pill pill--brand" id="pillPoints">积分 <b>${fmt(s.points)}</b></div>
+                <button class="link-btn" id="btnGoShop" type="button">积分商店入口</button>
+              </div>
+              <div class="muted small">积分兑换装饰与纪念物</div>
             </div>
-            <button class="link-btn" id="btnGoShop" type="button">积分商店入口</button>
           </div>
-          <div class="sticky-hub__row">
-            <div class="sticky-hub__stat">
-              <div class="pill" id="pillCoupons">已得点券 <b>${fmt(s.walletCoupons || 0)}</b></div>
-              <div class="muted small">购买游戏、PC CDKey、云玩服务等</div>
+          ${ENABLE_COUPONS ? `
+            <div class="sticky-hub__row">
+              <div class="sticky-hub__stat">
+                <div class="pill" id="pillCoupons">已得点券 <b>${fmt(s.walletCoupons || 0)}</b></div>
+                <div class="muted small">购买游戏、PC CDKey、云玩服务等</div>
+              </div>
+              <button class="link-btn" id="btnWallet" type="button">查看我的钱包</button>
             </div>
-            <button class="link-btn" id="btnWallet" type="button">查看我的钱包</button>
-          </div>
+          ` : ""}
         </div>
       </div>
     </section>
@@ -1974,7 +1982,7 @@ function stickyStatsLiteView(s) {
     <section class="card sticky-stats__card" style="border-radius:0; box-shadow:none;">
       <div class="row" style="gap:10px; justify-content:flex-start;">
         <div class="pill pill--brand" id="pillPoints">积分 <b>${fmt(s.points)}</b></div>
-        <div class="pill" id="pillCoupons">点券 <b>${fmt(s.walletCoupons || 0)}</b></div>
+        ${ENABLE_COUPONS ? `<div class="pill" id="pillCoupons">点券 <b>${fmt(s.walletCoupons || 0)}</b></div>` : ""}
       </div>
     </section>
   `;
@@ -1988,7 +1996,7 @@ function wireStickyStats() {
 
   // 已登录时的正常交互
   $("#btnGoShop")?.addEventListener("click", () => openShopModal());
-  $("#btnWallet")?.addEventListener("click", openWalletModal);
+  if (ENABLE_COUPONS) $("#btnWallet")?.addEventListener("click", openWalletModal);
   $("#btnOpenMemorial")?.addEventListener("click", () => openMemorialEditModal());
   $("#btnEditMemorial")?.addEventListener("click", () => openMemorialEditModal());
 }
@@ -2001,21 +2009,23 @@ function firstRecapView(s, recap) {
       </div>
 
       <div class="firstrecap-stage" aria-label="十年回顾舞台">
-        <div class="firstrecap-currency" aria-label="积分与点券">
+        <div class="firstrecap-currency" aria-label="积分">
           <div class="pill pill--brand firstrecap-money firstrecap-money--points" id="pillPoints">
             <div class="firstrecap-money__top">
               <div class="firstrecap-money__k">积分</div>
               <div class="firstrecap-money__v">${fmt(s.points)}</div>
             </div>
-            <div class="firstrecap-money__d">活动内装扮十周年名片，抽奖点券</div>
+            <div class="firstrecap-money__d">活动内装扮十周年名片，兑换纪念装饰</div>
           </div>
-          <div class="pill firstrecap-money firstrecap-money--coupons" id="pillCoupons">
-            <div class="firstrecap-money__top">
-              <div class="firstrecap-money__k">点券</div>
-              <div class="firstrecap-money__v">${fmt(s.walletCoupons || 0)}</div>
+          ${ENABLE_COUPONS ? `
+            <div class="pill firstrecap-money firstrecap-money--coupons" id="pillCoupons">
+              <div class="firstrecap-money__top">
+                <div class="firstrecap-money__k">点券</div>
+                <div class="firstrecap-money__v">${fmt(s.walletCoupons || 0)}</div>
+              </div>
+              <div class="firstrecap-money__d">购买游戏/PC CDKey/云玩服务等</div>
             </div>
-            <div class="firstrecap-money__d">购买游戏/PC CDKey/云玩服务等</div>
-          </div>
+          ` : ""}
         </div>
 
         <div class="firstrecap-body">
@@ -2298,9 +2308,8 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
       </div>
   `;
 
-  const shopHtml = `
-      <div class="divider"></div>
-      <div class="list">
+  const lotteryHtml = ENABLE_COUPONS
+    ? `
         <div class="item">
           <div class="row">
             <div class="grow">
@@ -2312,7 +2321,13 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
             </div>
           </div>
         </div>
+      `
+    : "";
 
+  const shopHtml = `
+      <div class="divider"></div>
+      <div class="list">
+        ${lotteryHtml}
         <div class="item">
           <div class="row">
             <div class="equip equip--frame">${escapeHtml(MEM_SHOP.frame.icon)}</div>
@@ -3401,14 +3416,8 @@ function shopModalView(s) {
   const badgeCards = SHOP_ITEMS.badges.map((b) => shopItemCard("badge", b, s)).join("");
   const today = dayKeyLocal();
   const already = String(s.daily?.lotteryDayKey || "") === today;
-  return `
-    <div>
-      <div style="margin-bottom:12px">
-        <span class="pill pill--brand">当前积分：<b>${fmt(s.points)}</b></span>
-      </div>
-      <div class="list">${frameCards}</div>
-      <div class="divider"></div>
-      <div class="list">${badgeCards}</div>
+  const lotteryHtml = ENABLE_COUPONS
+    ? `
       <div class="divider"></div>
       <div class="item" style="margin-top:10px">
         <div class="row">
@@ -3423,6 +3432,17 @@ function shopModalView(s) {
           <button class="btn btn--brand" id="btnLottery" ${already ? "disabled" : ""}>${already ? "今日已抽" : "每日抽一次"}</button>
         </div>
       </div>
+    `
+    : "";
+  return `
+    <div>
+      <div style="margin-bottom:12px">
+        <span class="pill pill--brand">当前积分：<b>${fmt(s.points)}</b></span>
+      </div>
+      <div class="list">${frameCards}</div>
+      <div class="divider"></div>
+      <div class="list">${badgeCards}</div>
+      ${lotteryHtml}
     </div>
   `;
 }
@@ -3713,27 +3733,29 @@ function wireMemorialInline({ inModal = false } = {}) {
     }),
   );
 
-  $("#btnMemLottery")?.addEventListener("click", () => {
-    const today = dayKeyLocal();
-    if (String(state.daily?.lotteryDayKey || "") === today) return toast("今天已经抽过了");
-    openSpendModal({
-      title: "每日抽点券",
-      cost: MEM_SHOP.lottery.cost,
-      onConfirm: () => {
-        if (!state.daily || typeof state.daily !== "object") state.daily = { lotteryDayKey: "" };
-        state.points -= MEM_SHOP.lottery.cost;
-        state.daily.lotteryDayKey = today;
-        // No pity: random 1 coupon or none.
-        const hit = Math.random() < 0.5;
-        const add = hit ? 1 : 0;
-        if (add > 0) addCoupons(state, add);
-        saveState();
-        closeModal();
-        refreshAfterChange();
-        openLotteryResultModal({ hit, add, cost: MEM_SHOP.lottery.cost });
-      },
+  if (ENABLE_COUPONS) {
+    $("#btnMemLottery")?.addEventListener("click", () => {
+      const today = dayKeyLocal();
+      if (String(state.daily?.lotteryDayKey || "") === today) return toast("今天已经抽过了");
+      openSpendModal({
+        title: "每日抽点券",
+        cost: MEM_SHOP.lottery.cost,
+        onConfirm: () => {
+          if (!state.daily || typeof state.daily !== "object") state.daily = { lotteryDayKey: "" };
+          state.points -= MEM_SHOP.lottery.cost;
+          state.daily.lotteryDayKey = today;
+          // No pity: random 1 coupon or none.
+          const hit = Math.random() < 0.5;
+          const add = hit ? 1 : 0;
+          if (add > 0) addCoupons(state, add);
+          saveState();
+          closeModal();
+          refreshAfterChange();
+          openLotteryResultModal({ hit, add, cost: MEM_SHOP.lottery.cost });
+        },
+      });
     });
-  });
+  }
 }
 
 function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
@@ -5128,7 +5150,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
 function grantPillsHtml(grant) {
   const parts = [];
   if (grant?.points) parts.push(`<span class="pill pill--brand">${fmt(grant.points)} 积分</span>`);
-  if (grant?.coupons) parts.push(`<span class="pill">${fmt(grant.coupons)} 点券</span>`);
+  if (ENABLE_COUPONS && grant?.coupons) parts.push(`<span class="pill">${fmt(grant.coupons)} 点券</span>`);
   return parts.join(" ");
 }
 
@@ -5376,7 +5398,7 @@ function wireRecapInline() {
           if (!id || !id.startsWith("snap_")) return false;
           if (hasClaimed(state, id)) return false;
           const g = snapshotClaimGrant(state, id);
-          return !!g && (Number(g.points || 0) > 0 || Number(g.coupons || 0) > 0);
+          return !!g && (Number(g.points || 0) > 0 || (ENABLE_COUPONS && Number(g.coupons || 0) > 0));
         });
         if (idx >= 0) requestCarouselInit("recapCarouselSnap", idx);
       }
@@ -5451,7 +5473,7 @@ function wireRecapInline() {
         const fromRect = b.getBoundingClientRect();
         const grant = snapshotClaimGrant(state, id);
         if (!grant) return;
-        if (!grant.points && !grant.coupons) return;
+        if (!grant.points && (!ENABLE_COUPONS || !grant.coupons)) return;
         markClaimed(state, id);
         const aliases = SNAP_REWARD_ALIASES[id];
         if (aliases?.length) aliases.forEach((a) => markClaimed(state, a));
@@ -5718,7 +5740,7 @@ function wireFirstRecap() {
         const startC = Math.max(0, Number(state.firstRecapRun?.startCoupons || 0));
         const gained = {
           points: Math.max(0, Math.floor(Number(state.points || 0) - startP)),
-          coupons: Math.max(0, Math.floor(Number(state.walletCoupons || 0) - startC)),
+          coupons: ENABLE_COUPONS ? Math.max(0, Math.floor(Number(state.walletCoupons || 0) - startC)) : 0,
         };
 
         // Mark as shown before opening (avoid double-open on re-render).
@@ -5733,11 +5755,11 @@ function wireFirstRecap() {
               <div class="celebrate-grant celebrate-grant--points">
                 <div class="celebrate-grant__k">积分</div>
                 <div class="celebrate-grant__v">+${fmt(gained.points)}</div>
-                <div class="celebrate-grant__d">在活动会场装扮十周年名片，抽奖点券</div>
+                <div class="celebrate-grant__d">在活动会场装扮十周年名片，兑换纪念装饰</div>
               </div>
             `);
           }
-          if (gained.coupons > 0) {
+          if (ENABLE_COUPONS && gained.coupons > 0) {
             parts.push(`
               <div class="celebrate-grant celebrate-grant--coupons">
                 <div class="celebrate-grant__k">点券</div>
@@ -5850,7 +5872,7 @@ function wireFirstRecap() {
       if (id.startsWith("snap_")) {
         const grant = snapshotClaimGrant(state, id);
         if (!grant) return;
-        if (!grant.points && !grant.coupons) return;
+        if (!grant.points && (!ENABLE_COUPONS || !grant.coupons)) return;
         wireFirstRecap._claiming = true;
         markClaimed(state, id);
         const aliases = SNAP_REWARD_ALIASES[id];
@@ -6545,31 +6567,8 @@ function shopView(s) {
   const badgeCards = SHOP_ITEMS.badges.map((b) => shopItemCard("badge", b, s)).join("");
   const today = dayKeyLocal();
   const already = String(s.daily?.lotteryDayKey || "") === today;
-  return `
-    <section class="card">
-      <div class="row">
-        <div class="grow">
-          <p class="h1">活动积分商店</p>
-          <p class="muted small" style="margin:6px 0 0">把参与留下的积分，兑换成可展示的纪念痕迹。</p>
-        </div>
-        <span class="pill">当前积分：<b>${fmt(s.points)}</b></span>
-      </div>
-      <div class="divider"></div>
-      <div class="hint">
-        <b>小提示</b>：头像框/徽章先作为可收藏的纪念；也可以用积分抽点券（小概率中奖）。
-      </div>
-    </section>
-
-    <section class="card">
-      <p class="h2">兑换：头像框</p>
-      <div class="list">${frameCards}</div>
-    </section>
-
-    <section class="card">
-      <p class="h2">兑换：徽章</p>
-      <div class="list">${badgeCards}</div>
-    </section>
-
+  const lotteryHtml = ENABLE_COUPONS
+    ? `
     <section class="card">
       <div class="row">
         <p class="h2 grow">抽点券</p>
@@ -6589,6 +6588,33 @@ function shopView(s) {
         </div>
       </div>
     </section>
+    `
+    : "";
+  return `
+    <section class="card">
+      <div class="row">
+        <div class="grow">
+          <p class="h1">活动积分商店</p>
+          <p class="muted small" style="margin:6px 0 0">把参与留下的积分，兑换成可展示的纪念痕迹。</p>
+        </div>
+        <span class="pill">当前积分：<b>${fmt(s.points)}</b></span>
+      </div>
+      <div class="divider"></div>
+      <div class="hint">
+        <b>小提示</b>：头像框/徽章先作为可收藏的纪念；也可以在这里兑换常用装饰。
+      </div>
+    </section>
+
+    <section class="card">
+      <p class="h2">兑换：头像框</p>
+      <div class="list">${frameCards}</div>
+    </section>
+
+    <section class="card">
+      <p class="h2">兑换：徽章</p>
+      <div class="list">${badgeCards}</div>
+    </section>
+    ${lotteryHtml}
   `;
 }
 
@@ -6659,21 +6685,23 @@ function wireShop({ inModal = false } = {}) {
     }),
   );
 
-  $("#btnLottery")?.addEventListener("click", () => {
-    const today = dayKeyLocal();
-    if (String(state.daily?.lotteryDayKey || "") === today) return toast("今天已经抽过了");
-    if (state.points < SHOP_ITEMS.lottery.cost) return toast("积分不足");
-    if (!state.daily || typeof state.daily !== "object") state.daily = { lotteryDayKey: "" };
-    state.points -= SHOP_ITEMS.lottery.cost;
-    state.daily.lotteryDayKey = today;
-    // No pity: random 1 coupon or none.
-    const hit = Math.random() < 0.5;
-    const add = hit ? 1 : 0;
-    if (add > 0) addCoupons(state, add);
-    saveState();
-    render();
-    openLotteryResultModal({ hit, add, cost: SHOP_ITEMS.lottery.cost });
-  });
+  if (ENABLE_COUPONS) {
+    $("#btnLottery")?.addEventListener("click", () => {
+      const today = dayKeyLocal();
+      if (String(state.daily?.lotteryDayKey || "") === today) return toast("今天已经抽过了");
+      if (state.points < SHOP_ITEMS.lottery.cost) return toast("积分不足");
+      if (!state.daily || typeof state.daily !== "object") state.daily = { lotteryDayKey: "" };
+      state.points -= SHOP_ITEMS.lottery.cost;
+      state.daily.lotteryDayKey = today;
+      // No pity: random 1 coupon or none.
+      const hit = Math.random() < 0.5;
+      const add = hit ? 1 : 0;
+      if (add > 0) addCoupons(state, add);
+      saveState();
+      render();
+      openLotteryResultModal({ hit, add, cost: SHOP_ITEMS.lottery.cost });
+    });
+  }
 }
 
 function openWalletModal() {

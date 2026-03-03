@@ -866,6 +866,12 @@ html.is-firstrecap .firstrecap-body::before{
 .sticky-hub__stat{
   min-width: 0;
 }
+.sticky-hub__stat-top{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
 .sticky-hub__stat .pill{
   margin-bottom: 2px;
 }
