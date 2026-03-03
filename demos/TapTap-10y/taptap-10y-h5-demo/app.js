@@ -2002,12 +2002,12 @@ function stickyStatsView(s) {
         <div class="sticky-hub__cards">
           <div class="sticky-hub__card sticky-hub__card--points">
             <div class="sticky-hub__card-title">总积分 <b id="pillPoints">${fmt(s.points)}</b></div>
-            <div class="sticky-hub__card-desc">可兑换福利和名片装饰</div>
+            <div class="sticky-hub__card-desc">兑换福利和名片装饰</div>
             <button class="btn btn--brand sticky-hub__card-btn" id="btnGoShop" type="button">福利兑换</button>
           </div>
           <div class="sticky-hub__card sticky-hub__card--checkin">
             <div class="sticky-hub__card-title">签到天数 <b>${checkinDays}</b> <span class="checkin-streak-tag">连签${streak}天</span></div>
-            <div class="sticky-hub__card-desc">${isDouble ? `每天可领 <b>${reward}</b> 积分（翻倍中）` : `每天可领 ${CHECKIN_BASE} 积分，连签${CHECKIN_STREAK_GOAL}天翻倍`}</div>
+            <div class="sticky-hub__card-desc">${isDouble ? `每天可领 <b>${reward}</b> 积分（翻倍中）` : `每天可领 ${CHECKIN_BASE} 积分<br>连签${CHECKIN_STREAK_GOAL}天翻倍`}</div>
             <button class="btn ${checkedToday ? "" : "btn--brand"} sticky-hub__card-btn" id="btnCheckin" type="button" ${checkedToday ? "disabled" : ""}>${checkedToday ? "今日已签" : "立即签到"}</button>
           </div>
         </div>
@@ -5129,19 +5129,21 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
       rewardId: "bind_steam",
       visible: true,
     },
-    {
-      label: "绑定角色",
-      value: (() => {
-        const cards = Array.isArray(s.boundRoleCards) ? s.boundRoleCards.filter(c => c && String(c.name || "").trim()) : [];
-        if (!cards.length) return "";
+    ...(() => {
+      const roleCards = Array.isArray(s.boundRoleCards) ? s.boundRoleCards.filter(c => c && String(c.name || "").trim()) : [];
+      const claimedCount = Math.max(0, Number(s.claimedRoleRewardsCount || 0));
 
-        const allBound = !!s.allRolesBound;
-        const slideHtml = cards.map((c, i) => {
-          const statsHtml = (c.stats || []).map(st =>
-            `<div class="rolecard__stat"><span class="rolecard__stat-num">${escapeHtml(String(st.value))}</span><span class="rolecard__stat-label">${escapeHtml(String(st.label))}</span></div>`
-          ).join("");
-          return `
-            <div class="rolecard__slide ${i === 0 ? "rolecard__slide--active" : ""}" data-role-idx="${i}" style="background:${c.bg || "#e2e8f0"}">
+      const cards = roleCards.map((c, i) => {
+        const roleClaimed = i < claimedCount;
+        const statsHtml = (c.stats || []).map(st =>
+          `<div class="rolecard__stat"><span class="rolecard__stat-num">${escapeHtml(String(st.value))}</span><span class="rolecard__stat-label">${escapeHtml(String(st.label))}</span></div>`
+        ).join("");
+        return {
+          label: `绑定角色 ${i + 1}`,
+          _roleClaimed: roleClaimed,
+          _roleOrigIdx: i,
+          value: `
+            <div class="rolecard-single" style="background:${c.bg || "#e2e8f0"}">
               <div class="rolecard__top">
                 <img class="rolecard__avatar" src="${c.avatar || ""}" alt="" />
                 <div class="rolecard__info">
@@ -5152,42 +5154,30 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
               ${c.job || c.level ? `<div class="rolecard__meta">${c.job ? escapeHtml(c.job) : ""}${c.job && c.level ? "　" : ""}${c.level ? "Lv." + c.level : ""}</div>` : ""}
               <div class="rolecard__stats">${statsHtml}</div>
             </div>
-          `;
-        }).join("");
+          `,
+          desc: "",
+          rewardId: `bind_role_${i}`,
+          visible: true,
+        };
+      });
 
-        const lastPageHtml = !allBound ? "" : `
-          <div class="rolecard__slide rolecard__slide--hint" data-role-idx="${cards.length}">
-            <div class="rolecard__hint-text">更多绑定战绩<br>请前往个人主页查看</div>
-          </div>
-        `;
+      cards.sort((a, b) => {
+        if (a._roleClaimed !== b._roleClaimed) return a._roleClaimed ? 1 : -1;
+        return a._roleOrigIdx - b._roleOrigIdx;
+      });
 
-        const totalSlides = cards.length + (allBound ? 0 : 0) + (allBound ? 1 : 0);
-        const dotsHtml = (cards.length + (allBound ? 1 : 0)) > 1
-          ? `<div class="rolecard__dots">${cards.map((_, i) => `<span class="rolecard__dot ${i === 0 ? "rolecard__dot--active" : ""}" data-rdot="${i}"></span>`).join("")}${allBound ? `<span class="rolecard__dot" data-rdot="${cards.length}"></span>` : ""}</div>`
-          : "";
+      if (!cards.length && !s.allRolesBound) {
+        cards.push({
+          label: "绑定角色",
+          value: "",
+          desc: "绑定游戏角色即可领取积分奖励，快去绑定吧！",
+          rewardId: "bind_roles",
+          visible: true,
+        });
+      }
 
-        return `
-          <div class="rolecard-carousel" data-role-total="${cards.length + (allBound ? 1 : 0)}">
-            <div class="rolecard__track">
-              ${slideHtml}
-              ${lastPageHtml}
-            </div>
-            ${dotsHtml}
-            ${cards.length > 1 || allBound ? `
-              <button class="rolecard__arrow rolecard__arrow--left" data-role-dir="-1">‹</button>
-              <button class="rolecard__arrow rolecard__arrow--right" data-role-dir="1">›</button>
-            ` : ""}
-          </div>
-        `;
-      })(),
-      desc: (() => {
-        const cards = Array.isArray(s.boundRoleCards) ? s.boundRoleCards.filter(c => c && String(c.name || "").trim()) : [];
-        if (cards.length > 0) return "";
-        return "每个绑定角色都能领取奖励，多多绑定吧！";
-      })(),
-      rewardId: "bind_roles",
-      visible: true,
-    },
+      return cards;
+    })(),
   ];
 
   const snapshotSection = snapshotCards.length
@@ -5221,12 +5211,23 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
       </div>
     `;
 
+  const hasBoundRoles = Array.isArray(s.boundRoleCards) && s.boundRoleCards.filter(c => c && String(c.name || "").trim()).length > 0;
+  const showAddRoleLink = !s.allRolesBound && hasBoundRoles;
+
   const bindSection = `
     <div class="recap-section" data-recap-section="bind">
       <div class="divider"></div>
-      <div class="recap-section__head">
-        <div class="h2" style="margin:0 0 8px">将我的游戏世界融入TapTap</div>
-        <div class="muted small">现在绑定数据也可领取奖励哦</div>
+      <div class="recap-section__head bind-section__head">
+        <div>
+          <div class="h2" style="margin:0 0 8px">将我的游戏世界融入TapTap</div>
+          <div class="muted small">现在绑定数据也可领取奖励哦</div>
+        </div>
+        ${showAddRoleLink ? `
+          <button class="bind-add-link" data-bind="bind_roles" type="button">
+            <span class="bind-add-link__icon">+</span>
+            <span class="bind-add-link__text">绑定游戏角色</span>
+          </button>
+        ` : ""}
       </div>
       <div style="margin-top:10px" class="carousel" aria-label="可补齐数据卡片">
         <div class="hscroll carousel__track" id="recapCarouselBind" role="list">
@@ -5320,6 +5321,33 @@ function rewardBlockHtml(rewardId, s, recap, isEmpty = false) {
     `;
   }
 
+  // Individual role card: bind_role_0, bind_role_1, ...
+  const roleMatch = rewardId.match(/^bind_role_(\d+)$/);
+  if (roleMatch) {
+    const roleIdx = Number(roleMatch[1]);
+    const claimedCount = Math.max(0, Number(s.claimedRoleRewardsCount || 0));
+    const roleClaimed = roleIdx < claimedCount;
+    const per = BIND_REWARDS.find((x) => x.id === "bind_roles")?.perRole || { points: 20, coupons: 0 };
+    const btn = roleClaimed
+      ? `<button class="btn" disabled>已领</button>`
+      : `<button class="btn btn--brand" data-claim-role="${roleIdx}">领取</button>`;
+    return `
+      <div class="mini-card__reward">
+        <div class="row" style="align-items:flex-start; justify-content:space-between">
+          <div class="grow">
+            <div class="mini-card__rewardline">
+              <div class="mini-card__rk">奖励</div>
+              <div class="mini-card__grant">${grantPillsHtml(per)}</div>
+            </div>
+          </div>
+          <div class="mini-card__reward-actions">
+            ${btn}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   // Bind rewards: can be completed after entering activity
   const r = BIND_REWARDS.find((x) => x.id === rewardId);
   if (!r) return "";
@@ -5348,7 +5376,7 @@ function rewardBlockHtml(rewardId, s, recap, isEmpty = false) {
     `;
   }
 
-  // Roles: repeatable bind & claim by count
+  // Roles: repeatable bind & claim by count (fallback for unbound state)
   if (rewardId === "bind_roles") {
     const bound = Math.max(0, Number(s.boundRolesCount || 0));
     const claimedCount = Math.max(0, Number(s.claimedRoleRewardsCount || 0));
@@ -5541,34 +5569,27 @@ function wireRecapInline() {
   wireCarousel("recapCarouselSnap", "recapDotsSnap");
   wireCarousel("recapCarouselBind", "recapDotsBind");
 
-  // Role card carousel inside bind_roles
-  $$(".rolecard-carousel").forEach(carousel => {
-    const track = carousel.querySelector(".rolecard__track");
-    if (!track) return;
-    const total = Number(carousel.dataset.roleTotal || 0);
-    let cur = 0;
-    const go = (idx) => {
-      cur = ((idx % total) + total) % total;
-      track.querySelectorAll(".rolecard__slide").forEach((s, i) => {
-        s.classList.toggle("rolecard__slide--active", i === cur);
-      });
-      carousel.querySelectorAll(".rolecard__dot").forEach((d, i) => {
-        d.classList.toggle("rolecard__dot--active", i === cur);
-      });
-    };
-    carousel.querySelectorAll(".rolecard__arrow").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        go(cur + Number(btn.dataset.roleDir || 1));
-      });
-    });
-    carousel.querySelectorAll(".rolecard__dot").forEach(dot => {
-      dot.addEventListener("click", (e) => {
-        e.stopPropagation();
-        go(Number(dot.dataset.rdot || 0));
-      });
-    });
-  });
+  // Individual role card claim buttons
+  $$("[data-claim-role]").forEach((b) =>
+    b.addEventListener("click", () => {
+      const roleIdx = Number(b.dataset.claimRole || 0);
+      const claimedCount = Math.max(0, Number(state.claimedRoleRewardsCount || 0));
+      if (roleIdx < claimedCount) return;
+      const r = BIND_REWARDS.find((x) => x.id === "bind_roles");
+      const per = r?.perRole || { points: 20, coupons: 0 };
+      const fromRect = b.getBoundingClientRect();
+      state.claimedRoleRewardsCount = roleIdx + 1;
+      const grant = { points: per.points || 0, coupons: per.coupons || 0 };
+      addPoints(state, grant.points || 0);
+      addCoupons(state, grant.coupons || 0);
+      saveState();
+      const trackId = b.closest?.(".carousel__track")?.id || "";
+      const currentIdx = Number(b.closest?.(".mini-card")?.getAttribute("data-card-idx") || 0);
+      render();
+      flyGrantToSticky({ fromRect, grant }).then(() => scheduleScrollToNextCard(trackId, currentIdx));
+    }),
+  );
+
 
   // 年度数据柱状图点击交互
   $$(".ychart-col").forEach((col) => {
@@ -6134,23 +6155,21 @@ function openBindSteamModal() {
 }
 
 function openBindRolesModal() {
-  const per = BIND_REWARDS.find((x) => x.id === "bind_roles")?.perRole || { points: 0, coupons: 0 };
   const body = `
     <div class="small" style="line-height:1.55">
       <div class="hint">
-        <b>绑定更多角色</b>：这里会打开数据绑定界面。
+        正式环境下，点击后会跳转到<b>游戏角色绑定页面</b>。<br>
+        绑定完成后返回活动页，即可在卡片上领取积分奖励。
       </div>
       <div class="divider"></div>
-      <div class="muted small">每绑定 1 个角色可领取：${grantPillsHtml(per)}</div>
-      <div class="divider"></div>
-      <div class="muted small">当前已绑定：<b>${fmt(state.boundRolesCount || 0)}</b> 个角色</div>
+      <div class="muted small">跳转：<span class="mono">taptap://bind_game_role</span></div>
     </div>
   `;
   const footer = `
-    <button class="btn btn--brand" id="btnBindOneRole">绑定 1 个角色（模拟）</button>
+    <button class="btn btn--brand" id="btnBindOneRole">模拟绑定角色</button>
     <button class="btn" id="btnCancelBindRole">取消</button>
   `;
-  openModal({ title: "绑定角色", bodyHtml: body, footerHtml: footer });
+  openModal({ title: "绑定游戏角色", bodyHtml: body, footerHtml: footer });
   $("#btnCancelBindRole")?.addEventListener("click", closeModal);
   const sampleRoles = [
     { name: "轮椅指挥官", game: "明日方舟", job: "", level: 0, stats: [{ label: "登录天数", value: "65天" }, { label: "传说级人物", value: "10" }, { label: "传说级装备", value: "49" }], bg: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)", avatar: "https://img.tapimg.net/market/images/e2b7259807d30e498a3008cbed6be542.png" },
@@ -6160,13 +6179,27 @@ function openBindRolesModal() {
     state.boundRolesCount = Math.max(0, Number(state.boundRolesCount || 0)) + 1;
     state.boundData = state.boundRolesCount > 0;
     if (!Array.isArray(state.boundRoleCards)) state.boundRoleCards = [];
-    const idx = state.boundRoleCards.length;
-    state.boundRoleCards.push(sampleRoles[idx % sampleRoles.length]);
+    const newRoleIdx = state.boundRoleCards.length;
+    state.boundRoleCards.push(sampleRoles[newRoleIdx % sampleRoles.length]);
     saveState();
     closeModal();
-    if (lastBindClickCtx?.trackId) requestCarouselInit(lastBindClickCtx.trackId, lastBindClickCtx.currentIdx);
+
+    const newRewardId = `bind_role_${newRoleIdx}`;
+    requestCarouselInit("recapCarouselBind", 0);
     render();
-    toast("已绑定 1 个角色，可领取奖励");
+
+    setTimeout(() => {
+      const track = document.getElementById("recapCarouselBind");
+      if (track) {
+        const cards = Array.from(track.querySelectorAll(".mini-card"));
+        const targetIdx = cards.findIndex(el => el.getAttribute("data-reward-id") === newRewardId);
+        if (targetIdx >= 0 && cards[targetIdx]) {
+          cards[targetIdx].scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+        }
+      }
+    }, 100);
+
+    toast("绑定成功，可在卡片上领取奖励");
     lastBindClickCtx = null;
   });
 }
@@ -6233,15 +6266,17 @@ function discoverInlineView(s) {
         ? `<button class="btn guess-card__story-btn" type="button" data-guess-story="${g.id}">再听听它的故事</button>`
         : `<button class="btn btn--brand guess-card__action" type="button" data-guess-claim="${g.id}">领取 ${g.points} 积分</button>`;
 
+      const tagsHtml = (g.tags || []).slice(0, 2).map(t => `<span class="guess-card__tag">${escapeHtml(t)}</span>`).join("");
       return `
-        <div class="guess-card guess-card--open guess-card--row" style="--layer-color:${g.layerColor}">
-          <div class="guess-card__left">
+        <div class="guess-card guess-card--open guess-card--col" style="--layer-color:${g.layerColor}">
+          <div class="guess-card__top">
             <div class="guess-card__icon">${g.icon}</div>
+            <div class="guess-card__info">
+              <div class="guess-card__name">${escapeHtml(g.title)}</div>
+              ${tagsHtml ? `<div class="guess-card__tags">${tagsHtml}</div>` : ""}
+            </div>
           </div>
           <div class="guess-card__body">
-            <div class="guess-card__head">
-              <span class="guess-card__name">${escapeHtml(g.title)}</span>
-            </div>
             <div class="guess-card__marquee marquee" aria-label="热门评论">
               <div class="${marqueeTrackClass}">
                 ${marqueeItems}${top.length ? marqueeItems : ""}
@@ -6269,66 +6304,52 @@ function discoverInlineView(s) {
   })
     .sort((a, b) => (a.group - b.group) || (b.heat - a.heat) || (a.idx - b.idx));
 
-  const chunk3 = (arr) => {
-    const pages = [];
-    for (let i = 0; i < arr.length; i += 3) pages.push(arr.slice(i, i + 3));
-    return pages;
+  const PAGE_SIZE = 8;
+  const playCardHtml = ({ p, claimable, claimed }) => {
+    const icon = iconChar(p.title);
+    const tags = (p.tags || [])
+      .filter((t) => !/^\s*\d+\s*分钟\s*$/g.test(String(t || "")))
+      .slice(0, 3)
+      .map((t) => escapeHtml(t))
+      .join(" · ");
+    const heat = Math.max(0, Number(p.heat || 0));
+    const cardClass = claimable ? "play-card2--claim" : claimed ? "play-card2--claimed" : "";
+    const btnArea = claimable
+      ? `<button class="btn btn--brand play-card2__btn" type="button" data-play-claim="${p.id}">领奖</button>
+         <span class="play-card2__reward">${fmt(p.points)} 积分</span>`
+      : claimed
+        ? `<span class="play-card2__claimed-text">已获得 ${fmt(p.points)} 积分</span>`
+        : `<button class="btn btn--brand play-card2__btn" type="button" data-play-go="${p.id}">试玩</button>
+           <span class="play-card2__reward">${fmt(p.points)} 积分</span>`;
+    return `
+      <div class="play-card2 ${cardClass}">
+        <div class="play-card2__cover">
+          <span class="play-card2__cover-icon">${escapeHtml(icon)}</span>
+          <span class="play-card2__heat">🔥 ${fmt(heat)}</span>
+        </div>
+        <div class="play-card2__body">
+          <div class="play-card2__name">${escapeHtml(p.title)}</div>
+          <div class="play-card2__tags">${tags}</div>
+          <div class="play-card2__action">${btnArea}</div>
+        </div>
+      </div>`;
   };
 
-  const playPages = chunk3(playStates);
+  const playPages = [];
+  for (let i = 0; i < playStates.length; i += PAGE_SIZE) playPages.push(playStates.slice(i, i + PAGE_SIZE));
+
   const playPagesHtml = playPages
-    .map((page, pageIdx) => {
-      const items = page
-        .map(({ p, claimable, claimed }) => {
-          const icon = iconChar(p.title);
-          // Remove the "minutes" tag (e.g. "10分钟") for the TapTap 制造 GameJam module.
-          const tags = (p.tags || [])
-            .filter((t) => !/^\s*\d+\s*分钟\s*$/g.test(String(t || "")))
-            .slice(0, 4)
-            .map((t) => `<span class="tag">${escapeHtml(t)}</span>`)
-            .join("");
-          const heat = Math.max(0, Number(p.heat || 0));
-          const btn = claimable
-            ? `<button class="btn btn--brand" type="button" data-play-claim="${p.id}">领奖</button>`
-            : claimed
-              ? `<button class="btn" type="button" disabled>已领取</button>`
-              : `<button class="btn btn--brand btn--sm" type="button" data-play-go="${p.id}">试玩</button>`;
-          const cardClass = claimable ? "play-card--claim" : claimed ? "play-card--claimed" : "";
-          return `
-            <div class="item play-card ${cardClass}">
-              <div class="row play-row" style="align-items:flex-start">
-                <div class="grow" style="min-width:0">
-                  <div class="play-titleline">
-                    <span class="game-ico play-ico" aria-hidden="true">${escapeHtml(icon)}</span>
-                    <span class="play-title">${escapeHtml(p.title)}</span>
-                    <span class="play-heat" aria-label="热度">🔥 ${fmt(heat)}</span>
-                  </div>
-                  <div class="play-tags" aria-label="标签">${tags}</div>
-                </div>
-                <div class="play-right">
-                  ${btn}
-                  <div class="muted small play-points">可获得 <b>${fmt(p.points)}</b> 积分</div>
-                </div>
-              </div>
-            </div>
-          `;
-        })
-        .join("");
-
-      return `
-        <div class="play-page" data-card-idx="${pageIdx}" role="listitem" aria-label="第 ${pageIdx + 1} 页">
-          <div class="play-page__stack">${items}</div>
-        </div>
-      `;
-    })
+    .map((page, pi) => `
+      <div class="play-page2" data-card-idx="${pi}">
+        <div class="play-grid">${page.map(playCardHtml).join("")}</div>
+      </div>`)
     .join("");
 
-  const playDotsHtml = playPages
-    .map(
-      (_, i) =>
-        `<button class="dot ${i === 0 ? "dot--active" : ""}" type="button" data-dot="${i}" aria-label="第 ${i + 1} 页"></button>`,
-    )
-    .join("");
+  const playDotsHtml = playPages.length > 1
+    ? playPages.map((_, i) =>
+        `<button class="dot ${i === 0 ? "dot--active" : ""}" type="button" data-dot="${i}"></button>`
+      ).join("")
+    : "";
 
   return `
     <div class="home-module" id="section-discover">
@@ -6352,13 +6373,11 @@ function discoverInlineView(s) {
         <p class="muted small" style="margin:6px 0 0">
           完成试玩即可领取积分，请友善交流，支持开发者发布作品。
         </p>
-        <div style="margin-top:10px" class="carousel" aria-label="GameJam 试玩列表">
-          <div class="hscroll carousel__track" id="playCarousel" role="list">
+        <div class="carousel" style="margin-top:10px">
+          <div class="hscroll carousel__track play-carousel-track" id="playCarousel" role="list">
             ${playPagesHtml}
           </div>
-          <div class="carousel__dots" id="playDots" aria-label="试玩分页">
-            ${playDotsHtml}
-          </div>
+          ${playDotsHtml ? `<div class="carousel__dots" id="playDots">${playDotsHtml}</div>` : ""}
         </div>
       </section>
     </div>
@@ -6368,31 +6387,38 @@ function discoverInlineView(s) {
         <div class="row">
           <p class="h2 grow">相关活动</p>
         </div>
-        <div class="related-banners">
-          <button class="related-banner" type="button" data-related="spring" style="--banner-color:#FF6B6B">
-            <div class="related-banner__img">🌸</div>
-            <div class="related-banner__info">
-              <div class="related-banner__title">TapTap 春日祭</div>
-              <div class="related-banner__desc">限定春日活动，丰厚奖励等你来拿</div>
+        <div class="related-carousel carousel" style="margin-top:10px">
+          <div class="hscroll carousel__track related-carousel__track" id="relatedTrack">
+            <div class="related-slide" data-related="spring" data-card-idx="0">
+              <div class="related-slide__bg" style="background:linear-gradient(135deg,#FFE0E0 0%,#FFB3B3 50%,#FF8A8A 100%)"></div>
+              <div class="related-slide__content">
+                <span class="related-slide__icon">🌸</span>
+                <div class="related-slide__title">TapTap 春日祭</div>
+                <div class="related-slide__desc">限定春日活动，丰厚奖励等你来拿</div>
+              </div>
             </div>
-            <div class="related-banner__arrow">→</div>
-          </button>
-          <button class="related-banner" type="button" data-related="tappc" style="--banner-color:#6C5CE7">
-            <div class="related-banner__img">💻</div>
-            <div class="related-banner__info">
-              <div class="related-banner__title">TapTap PC 十周年活动</div>
-              <div class="related-banner__desc">PC 端专属庆典，精彩不容错过</div>
+            <div class="related-slide" data-related="tappc" data-card-idx="1">
+              <div class="related-slide__bg" style="background:linear-gradient(135deg,#E8E0FF 0%,#C4B5FD 50%,#A78BFA 100%)"></div>
+              <div class="related-slide__content">
+                <span class="related-slide__icon">💻</span>
+                <div class="related-slide__title">TapTap PC 十周年活动</div>
+                <div class="related-slide__desc">PC 端专属庆典，精彩不容错过</div>
+              </div>
             </div>
-            <div class="related-banner__arrow">→</div>
-          </button>
-          <button class="related-banner" type="button" data-related="creator" style="--banner-color:#00B894">
-            <div class="related-banner__img">✏️</div>
-            <div class="related-banner__info">
-              <div class="related-banner__title">创作者招募计划</div>
-              <div class="related-banner__desc">加入 TapTap 创作者社区</div>
+            <div class="related-slide" data-related="creator" data-card-idx="2">
+              <div class="related-slide__bg" style="background:linear-gradient(135deg,#D1FAE5 0%,#6EE7B7 50%,#34D399 100%)"></div>
+              <div class="related-slide__content">
+                <span class="related-slide__icon">✏️</span>
+                <div class="related-slide__title">创作者招募计划</div>
+                <div class="related-slide__desc">加入 TapTap 创作者社区</div>
+              </div>
             </div>
-            <div class="related-banner__arrow">→</div>
-          </button>
+          </div>
+          <div class="carousel__dots" id="relatedDots">
+            <span class="dot dot--active" data-dot="0"></span>
+            <span class="dot" data-dot="1"></span>
+            <span class="dot" data-dot="2"></span>
+          </div>
         </div>
       </section>
     </div>
@@ -6400,21 +6426,8 @@ function discoverInlineView(s) {
 }
 
 function wireDiscoverInline() {
-  const playOrderList = (st) =>
-    PLAYTEST_GAMES.map((p, idx) => {
-      const completed = st.playtest.completed.includes(p.id);
-      const claimed = (st.playtest.claimed || []).includes(p.id);
-      const claimable = completed && !claimed;
-      const group = claimable ? 0 : claimed ? 2 : 1;
-      const heat = Math.max(0, Number(p.heat || 0));
-      return { id: p.id, idx, group, heat };
-    }).sort((a, b) => (a.group - b.group) || (b.heat - a.heat) || (a.idx - b.idx));
-
-  const playPageIndexOf = (st, gameId) => {
-    const arr = playOrderList(st);
-    const pos = arr.findIndex((x) => x.id === gameId);
-    return pos < 0 ? 0 : Math.floor(pos / 3);
-  };
+  // ── 试玩轮播 ──
+  wireCarousel("playCarousel", "playDots", { cardSelector: ".play-page2", activeCardClass: "" });
 
   // ── 猜猜是什么游戏 交互 ──
 
@@ -6606,17 +6619,12 @@ function wireDiscoverInline() {
     });
   })();
 
-  wireCarousel("playCarousel", "playDots", { cardSelector: ".play-page", activeCardClass: "play-page--active" });
-
   $$("[data-play-go]").forEach((b) =>
     b.addEventListener("click", (e) => {
       e.stopPropagation();
       const id = String(b.dataset.playGo || "");
       const p = PLAYTEST_GAMES.find((x) => x.id === id);
       if (!p) return;
-
-      const pageIdx = Number(b.closest?.(".play-page")?.getAttribute("data-card-idx") || 0);
-      requestCarouselInit("playCarousel", pageIdx);
 
       const body = `
         <div class="small" style="line-height:1.6">
@@ -6638,7 +6646,6 @@ function wireDiscoverInline() {
         if (!state.playtest.completed.includes(p.id)) state.playtest.completed.push(p.id);
         saveState();
         closeModal();
-        requestCarouselInit("playCarousel", playPageIndexOf(state, p.id));
         render();
         toast("已试玩完成，可领奖");
       });
@@ -6653,9 +6660,6 @@ function wireDiscoverInline() {
       if (!p) return;
 
       const fromRect = b.getBoundingClientRect();
-      const pageIdx = Number(b.closest?.(".play-page")?.getAttribute("data-card-idx") || 0);
-      requestCarouselInit("playCarousel", pageIdx);
-
       const completed = state.playtest.completed.includes(p.id);
       if (!completed) return toast("请先完成试玩");
       if ((state.playtest.claimed || []).includes(p.id)) return toast("已领取过该奖励");
@@ -6663,7 +6667,6 @@ function wireDiscoverInline() {
       state.playtest.claimed.push(p.id);
       addPoints(state, p.points);
       saveState();
-      requestCarouselInit("playCarousel", 0);
       render();
       flyGrantToSticky({ fromRect, grant: { points: p.points, coupons: 0 } });
     }),
@@ -6671,25 +6674,81 @@ function wireDiscoverInline() {
 
   // ── 相关活动 banner 点击 ──
   const relatedInfo = {
-    spring: { title: "TapTap 春日祭", url: "https://www.taptap.cn/events/spring-festival", desc: "春日限定活动，参与互动赢取丰厚奖励，与好友一起迎接春天！" },
-    tappc: { title: "TapTap PC 十周年活动", url: "https://www.taptap.cn/events/tappc-10th-anniversary", desc: "TapTap PC 端十周年专属庆典，参与活动赢取 PC 游戏大奖！" },
-    creator: { title: "创作者招募计划", url: "https://www.taptap.cn/events/creator-program", desc: "加入 TapTap 创作者社区，分享你的游戏见解，获得专属权益！" },
+    spring: { title: "TapTap 春日祭", url: "https://www.taptap.cn/events/spring-festival", type: "h5", desc: "春日限定活动，参与互动赢取丰厚奖励，与好友一起迎接春天！" },
+    tappc: { title: "TapTap PC 十周年活动", url: "https://www.taptap.cn/events/tappc-10th-anniversary", type: "h5", desc: "TapTap PC 端十周年专属庆典，参与活动赢取 PC 游戏大奖！" },
+    creator: { title: "创作者招募计划", url: "https://www.taptap.cn/moment/creator-program", type: "post", desc: "加入 TapTap 创作者社区，分享你的游戏见解，获得专属权益！" },
   };
   $$("[data-related]").forEach((el) =>
     el.addEventListener("click", () => {
       const key = el.dataset.related;
       const info = relatedInfo[key];
       if (!info) return;
+      const isPost = info.type === "post";
+      const typeLabel = isPost ? "论坛帖子" : "H5 活动页";
+      const btnLabel = isPost ? "查看帖子 →" : "前往活动 →";
       openModal({
         title: info.title,
         bodyHtml: `<div style="text-align:center;padding:12px 0">
           <p style="font-size:14px;color:rgba(15,23,42,.7);line-height:1.8;margin:0 0 16px">${escapeHtml(info.desc)}</p>
-          <p style="font-size:12px;color:rgba(15,23,42,.4);margin:0 0 16px">点击下方按钮前往活动页面</p>
-          <button class="btn btn--brand" type="button" style="padding:8px 24px;font-size:14px" onclick="try{window.open('${info.url}','_blank','noopener,noreferrer')}catch(e){}">前往活动 →</button>
+          <div style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;background:rgba(15,23,42,.04);margin:0 0 14px">
+            <span style="font-size:12px;color:rgba(15,23,42,.45)">跳转类型：</span>
+            <span style="font-size:12px;font-weight:700;color:rgba(15,23,42,.65)">${typeLabel}</span>
+          </div>
+          <p style="font-size:11px;color:rgba(15,23,42,.35);margin:0 0 16px;line-height:1.5">
+            运营可配置跳转目标为 TapTap 论坛帖子链接 或 独立 H5 活动页链接
+          </p>
+          <button class="btn btn--brand" type="button" style="padding:8px 24px;font-size:14px" onclick="try{window.open('${info.url}','_blank','noopener,noreferrer')}catch(e){}">${btnLabel}</button>
         </div>`,
       });
     }),
   );
+
+  // ── 相关活动轮播（自定义拖拽，不阻止 click 事件） ──
+  {
+    const track = $("#relatedTrack");
+    const dotsWrap = $("#relatedDots");
+    if (track && dotsWrap) {
+      const slides = () => Array.from(track.querySelectorAll(".related-slide"));
+      const dots = () => Array.from(dotsWrap.querySelectorAll(".dot"));
+      const syncDots = () => {
+        const sl = slides();
+        if (!sl.length) return;
+        const idx = Math.round(track.scrollLeft / sl[0].offsetWidth);
+        dots().forEach((d, i) => d.classList.toggle("dot--active", i === idx));
+      };
+      track.addEventListener("scroll", syncDots, { passive: true });
+      dotsWrap.addEventListener("click", (e) => {
+        const d = e.target.closest(".dot");
+        if (!d) return;
+        const i = Number(d.dataset.dot || 0);
+        const sl = slides();
+        if (sl[i]) sl[i].scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+      });
+
+      let dragStartX = 0, dragStartScroll = 0, isDrag = false, didMove = false;
+      track.addEventListener("mousedown", (e) => {
+        if (e.button !== 0) return;
+        isDrag = true; didMove = false;
+        dragStartX = e.pageX;
+        dragStartScroll = track.scrollLeft;
+        track.style.cursor = "grabbing";
+      });
+      track.addEventListener("mousemove", (e) => {
+        if (!isDrag) return;
+        const dx = e.pageX - dragStartX;
+        if (Math.abs(dx) > 4) didMove = true;
+        track.scrollLeft = dragStartScroll - dx;
+      });
+      const endDrag = () => { isDrag = false; track.style.cursor = ""; };
+      track.addEventListener("mouseup", endDrag);
+      track.addEventListener("mouseleave", endDrag);
+      track.addEventListener("click", (e) => {
+        if (!didMove) return;
+        e.stopPropagation();
+        didMove = false;
+      }, true);
+    }
+  }
 
 }
 
