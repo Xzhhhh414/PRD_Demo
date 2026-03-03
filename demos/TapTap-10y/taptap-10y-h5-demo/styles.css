@@ -817,7 +817,7 @@ html.is-firstrecap .firstrecap-body::before{
 }
 .sticky-hub__thumb{
   position: relative;
-  width: 82px;
+  width: 96px;
   height: 96px;
   border-radius: var(--radius2);
   background: var(--mem-bg, #F7E3C5);
@@ -880,6 +880,62 @@ html.is-firstrecap .firstrecap-body::before{
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+/* 顶部三栏卡片区 */
+.sticky-hub__cards{
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: 8px;
+}
+.sticky-hub__card{
+  flex: 1;
+  min-width: 0;
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sticky-hub__card--points{
+  flex: 0.75;
+  background: linear-gradient(135deg, #E8FAF3 0%, #D1F5E8 100%);
+}
+.sticky-hub__card--checkin{
+  flex: 1;
+  background: linear-gradient(135deg, #E8F4FD 0%, #D1E8F8 100%);
+}
+.sticky-hub__card-title{
+  font-size: 14px;
+  font-weight: 900;
+  color: #0F172A;
+  white-space: nowrap;
+}
+.sticky-hub__card-title b{
+  font-size: 20px;
+  font-weight: 950;
+  margin-left: 2px;
+}
+.sticky-hub__card-desc{
+  font-size: 11px;
+  color: rgba(15,23,42,.55);
+  white-space: nowrap;
+}
+.sticky-hub__card-btn{
+  margin-top: auto;
+  align-self: flex-start;
+  font-size: 12px;
+  min-height: 0;
+  padding: 5px 14px;
+  border-radius: 999px;
+}
+/* 连续签到标签（标题行内） */
+.checkin-streak-tag{
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(15,23,42,.45);
+  margin-left: 4px;
+  vertical-align: baseline;
 }
 
 .hscroll{
@@ -1816,6 +1872,144 @@ html.is-firstrecap .firstrecap-body::before{
 }
 .equip--frame{border-color: rgba(0,184,148,.25); background: rgba(0,184,148,.08)}
 .equip--badge{border-color: rgba(59,130,246,.22); background: rgba(59,130,246,.08)}
+
+/* ── 十周年福利页 ── */
+.welfare-section__header{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  margin-bottom:12px;
+}
+.welfare-section__title{
+  font-size:16px;
+  font-weight:900;
+  color:#0F172A;
+}
+/* 抽奖操作行 */
+.lottery-action{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  margin-top:14px;
+}
+.lottery-action__btn{
+  padding:10px 28px;
+  font-size:15px;
+  border-radius:999px;
+  flex-shrink:0;
+}
+.lottery-hint{
+  font-size:12px;
+  color:rgba(15,23,42,.5);
+  white-space:nowrap;
+}
+.lottery-hint--countdown{
+  font-variant-numeric: tabular-nums;
+  font-weight:700;
+  color:rgba(15,23,42,.6);
+}
+/* 奖池网格 */
+.pool-grid{
+  display:grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap:8px;
+}
+.pool-item{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  padding:10px 4px;
+  border-radius:12px;
+  background:rgba(255,255,255,.7);
+  border:2px solid var(--border);
+  transition: all .15s ease-out;
+}
+.pool-item--depleted{
+  opacity:.4;
+}
+.pool-item--highlight{
+  border-color:var(--brand);
+  background:rgba(0,207,172,.15);
+  box-shadow:0 0 0 2px rgba(0,207,172,.35);
+  transform:scale(1.08);
+  transition: all .08s;
+}
+.pool-item--highlight .pool-item__icon{
+  transform:scale(1.2);
+  transition: transform .08s;
+}
+.pool-item__icon{
+  font-size:24px;
+}
+.pool-item__name{
+  font-size:10px;
+  font-weight:700;
+  color:rgba(15,23,42,.7);
+  text-align:center;
+  line-height:1.3;
+  word-break:break-all;
+}
+.pool-item__tag{
+  position:absolute;
+  top:4px;
+  right:4px;
+  font-size:8px;
+  font-weight:800;
+  color:#fff;
+  background:rgba(15,23,42,.45);
+  border-radius:4px;
+  padding:1px 4px;
+  line-height:1.3;
+}
+/* 兑换网格 */
+.exchange-grid{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap:8px;
+}
+.exchange-card{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  padding:12px 6px 10px;
+  border-radius:14px;
+  background:rgba(255,255,255,.7);
+  border:1px solid var(--border);
+}
+.exchange-card--owned{
+  opacity:.55;
+}
+.exchange-card--soldout{
+  opacity:.5;
+}
+.exchange-card__icon{
+  font-size:30px;
+}
+.exchange-card__name{
+  font-size:11px;
+  font-weight:800;
+  color:#0F172A;
+  text-align:center;
+  line-height:1.3;
+}
+.exchange-card__status{
+  font-size:10px;
+  font-weight:700;
+  color:rgba(15,23,42,.4);
+}
+.exchange-card__status--soldout{
+  color:rgba(220,38,38,.7);
+}
+.exchange-card__btn{
+  font-size:10px;
+  min-height:0;
+  padding:4px 10px;
+  border-radius:999px;
+}
 
 .hint{
   padding:10px 12px;

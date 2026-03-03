@@ -20,7 +20,9 @@ const STORAGE_KEY = "taptap10y_state_v1";
  *   playtest: { completed: string[]; feedback: Record<string,string>; claimed: string[] };
  *   memorial?: { tab: "color" | "sticker" | "avatar"; colorId: string; stickerId: string; avatarId: string };
  *   memorialUnlocks?: { colors: string[]; stickers: string[]; avatars: string[] };
- *   daily?: { lotteryDayKey?: string };
+ *   daily?: { lotteryDayKey?: string; checkinDays?: number; checkinStreak?: number; lastCheckinDay?: string; welfareLotteryDay?: string };
+ *   lotteryWins?: string[];
+ *   exchangeOwned?: string[];
  *   mutualMessages?: Record<string, { text: string; ts: number; likes?: number }[]>;
  *   entryGateDone?: boolean;
  *   firstRecapDone?: boolean;
@@ -455,6 +457,35 @@ const SHOP_ITEMS = {
   },
 };
 
+const LOTTERY_COST = 100;
+const LOTTERY_POOL = [
+  { id: "lp_frame_gold",   icon: "🖼️", title: "金色十周年头像框",   qty: 500 },
+  { id: "lp_badge_plat",   icon: "🏆", title: "白金纪念徽章",       qty: 300 },
+  { id: "lp_sticker_set",  icon: "🎨", title: "限定贴纸礼包",       qty: 800 },
+  { id: "lp_coupon50",     icon: "🎫", title: "50 点券",             qty: 1000 },
+  { id: "lp_coupon20",     icon: "🎟️", title: "20 点券",            qty: 2000 },
+  { id: "lp_avatar_rare",  icon: "👑", title: "稀有角色形象",        qty: 0 },
+  { id: "lp_theme_dark",   icon: "🌙", title: "暗夜主题背景",        qty: 600 },
+  { id: "lp_emoji_pack",   icon: "😎", title: "专属表情包",          qty: 1500 },
+  { id: "lp_points200",    icon: "💎", title: "200 积分",            qty: 3000 },
+  { id: "lp_points50",     icon: "✨", title: "50 积分",             qty: 5000 },
+];
+
+const EXCHANGE_ITEMS = [
+  { id: "ex_frame_10y",    icon: "🟩", title: "十周年头像框",   cost: 120, qty: 500 },
+  { id: "ex_badge_10y",    icon: "🛠️", title: "十周年徽章",    cost: 200, qty: 300 },
+  { id: "ex_frame_retro",  icon: "🖼️", title: "复古头像框",    cost: 150, qty: 400 },
+  { id: "ex_badge_star",   icon: "⭐", title: "星耀徽章",       cost: 180, qty: 200 },
+  { id: "ex_frame_neon",   icon: "💜", title: "霓虹头像框",     cost: 160, qty: 350 },
+  { id: "ex_badge_fire",   icon: "🔥", title: "烈焰徽章",       cost: 220, qty: 150 },
+  { id: "ex_frame_pixel",  icon: "👾", title: "像素头像框",     cost: 100, qty: 600 },
+  { id: "ex_badge_crown",  icon: "👑", title: "皇冠徽章",       cost: 250, qty: 0 },
+  { id: "ex_frame_bloom",  icon: "🌸", title: "花语头像框",     cost: 130, qty: 450 },
+  { id: "ex_badge_bolt",   icon: "⚡", title: "闪电徽章",       cost: 170, qty: 250 },
+  { id: "ex_frame_ocean",  icon: "🌊", title: "海浪头像框",     cost: 140, qty: 380 },
+  { id: "ex_badge_gem",    icon: "💎", title: "宝石徽章",       cost: 300, qty: 100 },
+];
+
 const MEM_CARD_COLORS = [
   // Background themes (kept name `MEM_CARD_COLORS` for storage compatibility)
   { id: "mc_cream", label: "奶油", bg: "radial-gradient(520px 260px at 20% 10%, rgba(255,255,255,.32), transparent 60%), repeating-linear-gradient(135deg, rgba(15,23,42,.04) 0 10px, rgba(15,23,42,0) 10px 20px), #F7E3C5", panel: "#FFF7EB", accent: "#F2B46B" },
@@ -555,7 +586,9 @@ function loadState() {
       avatarId: "ma_me",
     },
     memorialUnlocks: { colors: ["mc_cream"], stickers: ["ms_star"], avatars: ["ma_me", "ma_bunny"] },
-    daily: { lotteryDayKey: "" },
+    daily: { lotteryDayKey: "", checkinDays: 0, checkinStreak: 0, lastCheckinDay: "", welfareLotteryDay: "" },
+    lotteryWins: [],
+    exchangeOwned: [],
     mutualMessages: {
       m1: [
         { text: "音游党狂喜，谱面真的太有创意了", ts: Date.now() - 86400000 * 3, likes: 128 },
@@ -638,6 +671,13 @@ function loadState() {
     merged.daily = { ...fallback.daily, ...(parsed?.daily || {}) };
     if (!merged.daily || typeof merged.daily !== "object") merged.daily = { ...fallback.daily };
     if (!String(merged.daily.lotteryDayKey || "").trim()) merged.daily.lotteryDayKey = "";
+    if (!Number.isFinite(merged.daily.checkinDays)) merged.daily.checkinDays = 0;
+    if (!Number.isFinite(merged.daily.checkinStreak)) merged.daily.checkinStreak = 0;
+    if (!String(merged.daily.lastCheckinDay || "").trim()) merged.daily.lastCheckinDay = "";
+    if (!String(merged.daily.welfareLotteryDay || "").trim()) merged.daily.welfareLotteryDay = "";
+
+    if (!Array.isArray(merged.lotteryWins)) merged.lotteryWins = [];
+    if (!Array.isArray(merged.exchangeOwned)) merged.exchangeOwned = [];
 
     if (typeof merged.loggedIn !== "boolean") merged.loggedIn = fallback.loggedIn;
     merged.entryGateDone = !!merged.entryGateDone;
@@ -1942,6 +1982,13 @@ function stickyStatsView(s) {
       return `<span class="sticky-hub__sticker" style="left:${x}%; top:${y}%;">${escapeHtml(def.icon)}</span>`;
     })
     .join("");
+  const today = dayKeyLocal();
+  const checkedToday = String(s.daily?.lastCheckinDay || "") === today;
+  const checkinDays = Math.max(0, Number(s.daily?.checkinDays || 0));
+  const streak = Math.max(0, Number(s.daily?.checkinStreak || 0));
+  const isDouble = streak >= CHECKIN_STREAK_GOAL;
+  const reward = isDouble ? CHECKIN_BASE * 2 : CHECKIN_BASE;
+
   return `
     <section class="card sticky-stats__card" style="border-radius:0; box-shadow:none;">
       <div class="sticky-hub">
@@ -1950,27 +1997,19 @@ function stickyStatsView(s) {
             <div class="sticky-hub__avatar">${avatarDisplayHtml(avatar, String(s.profile?.nickname || ""), { size: "small" })}</div>
             ${stickersHtml}
           </div>
-          <button class="link-btn" id="btnEditMemorial" type="button" style="font-size:11px; margin-top:4px">编辑十周年名片</button>
+          <button class="link-btn" id="btnEditMemorial" type="button" style="font-size:11px; margin-top:4px">开始装扮吧</button>
         </div>
-        <div class="sticky-hub__info">
-          <div class="sticky-hub__row">
-            <div class="sticky-hub__stat">
-              <div class="sticky-hub__stat-top">
-                <div class="pill pill--brand" id="pillPoints">积分 <b>${fmt(s.points)}</b></div>
-                <button class="link-btn" id="btnGoShop" type="button">积分商店入口</button>
-              </div>
-              <div class="muted small">积分兑换装饰与纪念物</div>
-            </div>
+        <div class="sticky-hub__cards">
+          <div class="sticky-hub__card sticky-hub__card--points">
+            <div class="sticky-hub__card-title">总积分 <b id="pillPoints">${fmt(s.points)}</b></div>
+            <div class="sticky-hub__card-desc">可兑换福利和名片装饰</div>
+            <button class="btn btn--brand sticky-hub__card-btn" id="btnGoShop" type="button">福利兑换</button>
           </div>
-          ${ENABLE_COUPONS ? `
-            <div class="sticky-hub__row">
-              <div class="sticky-hub__stat">
-                <div class="pill" id="pillCoupons">已得点券 <b>${fmt(s.walletCoupons || 0)}</b></div>
-                <div class="muted small">购买游戏、PC CDKey、云玩服务等</div>
-              </div>
-              <button class="link-btn" id="btnWallet" type="button">查看我的钱包</button>
-            </div>
-          ` : ""}
+          <div class="sticky-hub__card sticky-hub__card--checkin">
+            <div class="sticky-hub__card-title">签到天数 <b>${checkinDays}</b> <span class="checkin-streak-tag">连签${streak}天</span></div>
+            <div class="sticky-hub__card-desc">${isDouble ? `每天可领 <b>${reward}</b> 积分（翻倍中）` : `每天可领 ${CHECKIN_BASE} 积分，连签${CHECKIN_STREAK_GOAL}天翻倍`}</div>
+            <button class="btn ${checkedToday ? "" : "btn--brand"} sticky-hub__card-btn" id="btnCheckin" type="button" ${checkedToday ? "disabled" : ""}>${checkedToday ? "今日已签" : "立即签到"}</button>
+          </div>
         </div>
       </div>
     </section>
@@ -1999,6 +2038,31 @@ function wireStickyStats() {
   if (ENABLE_COUPONS) $("#btnWallet")?.addEventListener("click", openWalletModal);
   $("#btnOpenMemorial")?.addEventListener("click", () => openMemorialEditModal());
   $("#btnEditMemorial")?.addEventListener("click", () => openMemorialEditModal());
+
+  // 每日签到
+  $("#btnCheckin")?.addEventListener("click", () => {
+    const today = dayKeyLocal();
+    if (String(state.daily?.lastCheckinDay || "") === today) return toast("今天已经签到过了");
+    if (!state.daily || typeof state.daily !== "object") state.daily = { lotteryDayKey: "", checkinDays: 0, checkinStreak: 0, lastCheckinDay: "", welfareLotteryDay: "" };
+
+    const lastDay = String(state.daily.lastCheckinDay || "");
+    const yesterday = yesterdayKeyLocal();
+    const oldStreak = Math.max(0, Number(state.daily.checkinStreak || 0));
+    const newStreak = (lastDay === yesterday) ? oldStreak + 1 : 1;
+
+    state.daily.lastCheckinDay = today;
+    state.daily.checkinDays = Math.max(0, Number(state.daily.checkinDays || 0)) + 1;
+    state.daily.checkinStreak = newStreak;
+
+    const isDouble = newStreak >= CHECKIN_STREAK_GOAL;
+    const reward = isDouble ? CHECKIN_BASE * 2 : CHECKIN_BASE;
+    addPoints(state, reward);
+    saveState();
+    const fromRect = $("#btnCheckin")?.getBoundingClientRect();
+    if (fromRect) flyGrantToSticky({ fromRect, grant: { points: reward, coupons: 0 } });
+    toast(isDouble ? `签到成功！连签翻倍，获得 ${reward} 积分 🔥` : `签到成功！获得 ${reward} 积分`);
+    render();
+  });
 }
 
 function firstRecapView(s, recap) {
@@ -2056,7 +2120,7 @@ function homeView(s, recap) {
 
     ${discoverInlineView(s)}
   `;
-  // 十周年名片和积分商店已拆到顶部置顶区域的弹窗入口中
+  // 十周年名片和十周年福利已拆到顶部置顶区域的弹窗入口中
 }
 
 function wireHome() {
@@ -2072,6 +2136,15 @@ function dayKeyLocal(d = new Date()) {
   const dd = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${dd}`;
 }
+
+function yesterdayKeyLocal() {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return dayKeyLocal(d);
+}
+
+const CHECKIN_BASE = 50;
+const CHECKIN_STREAK_GOAL = 14;
 
 function identityTitleForRecap(recap) {
   const ys = recap?.taptapCriticYears;
@@ -3407,42 +3480,100 @@ function openSaveImageModal() {
 
 function openShopModal() {
   const body = shopModalView(state);
-  openModal({ title: "积分商店", bodyHtml: body, footerHtml: "" });
+  openModal({ title: "十周年福利", bodyHtml: body, footerHtml: "" });
   wireShop({ inModal: true });
 }
 
+function lotteryPoolItemHtml(item, s) {
+  const wonCount = (s.lotteryWins || []).filter((id) => id === item.id).length;
+  const depleted = wonCount >= item.qty;
+  return `
+    <div class="pool-item ${depleted ? "pool-item--depleted" : ""}">
+      <span class="pool-item__icon">${item.icon}</span>
+      <span class="pool-item__name">${escapeHtml(item.title)}</span>
+      ${depleted ? `<span class="pool-item__tag">已抽完</span>` : ""}
+    </div>
+  `;
+}
+
+function exchangeItemCard(item, s) {
+  const owned = (s.exchangeOwned || []).includes(item.id);
+  const exchangedCount = (s.exchangeOwned || []).filter((id) => id === item.id).length;
+  const soldOut = exchangedCount >= item.qty;
+  const canBuy = s.points >= item.cost;
+
+  let btnHtml;
+  if (owned) {
+    btnHtml = `<div class="exchange-card__status">已拥有</div>`;
+  } else if (soldOut) {
+    btnHtml = `<div class="exchange-card__status exchange-card__status--soldout">库存不足</div>`;
+  } else {
+    btnHtml = `<button class="btn btn--brand exchange-card__btn" data-exchange="${item.id}" ${canBuy ? "" : "disabled"}>${fmt(item.cost)} 积分</button>`;
+  }
+
+  return `
+    <div class="exchange-card ${owned ? "exchange-card--owned" : ""} ${soldOut && !owned ? "exchange-card--soldout" : ""}">
+      <div class="exchange-card__icon">${item.icon}</div>
+      <div class="exchange-card__name">${escapeHtml(item.title)}</div>
+      ${btnHtml}
+    </div>
+  `;
+}
+
 function shopModalView(s) {
-  const frameCards = SHOP_ITEMS.frames.map((f) => shopItemCard("frame", f, s)).join("");
-  const badgeCards = SHOP_ITEMS.badges.map((b) => shopItemCard("badge", b, s)).join("");
   const today = dayKeyLocal();
-  const already = String(s.daily?.lotteryDayKey || "") === today;
-  const lotteryHtml = ENABLE_COUPONS
-    ? `
-      <div class="divider"></div>
-      <div class="item" style="margin-top:10px">
-        <div class="row">
-          <div class="grow">
-            <div class="item__title">${SHOP_ITEMS.lottery.title}</div>
-            <div class="item__desc">每日限 1 次，消耗 ${SHOP_ITEMS.lottery.cost} 积分抽取点券（可能抽不到）。</div>
-          </div>
-          <span class="pill">-${SHOP_ITEMS.lottery.cost} 积分</span>
-        </div>
-        <div class="item__meta">
-          <span class="tag">${already ? "今天已抽" : "今日可抽"}</span>
-          <button class="btn btn--brand" id="btnLottery" ${already ? "disabled" : ""}>${already ? "今日已抽" : "每日抽一次"}</button>
-        </div>
-      </div>
-    `
-    : "";
+  const drawnToday = String(s.daily?.welfareLotteryDay || "") === today;
+  const canAfford = s.points >= LOTTERY_COST;
+  const poolEmpty = LOTTERY_POOL.every((p) => {
+    const wonCount = (s.lotteryWins || []).filter((id) => id === p.id).length;
+    return wonCount >= p.qty;
+  });
+
+  const poolHtml = LOTTERY_POOL.map((p) => lotteryPoolItemHtml(p, s)).join("");
+  const exchangeHtml = EXCHANGE_ITEMS.map((item) => exchangeItemCard(item, s)).join("");
+
+  let lotteryBtnText, lotteryDisabled, lotteryHint = "";
+  if (poolEmpty) {
+    lotteryBtnText = "奖池已抽空";
+    lotteryDisabled = true;
+  } else if (drawnToday) {
+    lotteryBtnText = "今日已参与";
+    lotteryDisabled = true;
+    lotteryHint = `<span class="lottery-hint">凌晨4点刷新抽奖机会</span>`;
+  } else if (!canAfford) {
+    lotteryBtnText = "参与抽奖";
+    lotteryDisabled = true;
+    lotteryHint = `<span class="lottery-hint">每日 1 次 · ${LOTTERY_COST} 积分/次</span>`;
+  } else {
+    lotteryBtnText = "参与抽奖";
+    lotteryDisabled = false;
+    lotteryHint = `<span class="lottery-hint">每日 1 次 · ${LOTTERY_COST} 积分/次</span>`;
+  }
+
   return `
     <div>
-      <div style="margin-bottom:12px">
+      <div style="margin-bottom:16px">
         <span class="pill pill--brand">当前积分：<b>${fmt(s.points)}</b></span>
       </div>
-      <div class="list">${frameCards}</div>
-      <div class="divider"></div>
-      <div class="list">${badgeCards}</div>
-      ${lotteryHtml}
+
+      <div class="welfare-section">
+        <div class="welfare-section__header">
+          <span class="welfare-section__title">🎰 抽奖</span>
+        </div>
+        <div class="pool-grid">${poolHtml}</div>
+        <div class="lottery-action">
+          <button class="btn btn--brand lottery-action__btn" id="btnWelfareLottery"
+            ${lotteryDisabled ? "disabled" : ""}>${lotteryBtnText}</button>
+          ${lotteryHint}
+        </div>
+      </div>
+
+      <div class="welfare-section" style="margin-top:20px">
+        <div class="welfare-section__header">
+          <span class="welfare-section__title">🎁 兑换</span>
+        </div>
+        <div class="exchange-grid">${exchangeHtml}</div>
+      </div>
     </div>
   `;
 }
@@ -6594,8 +6725,8 @@ function shopView(s) {
     <section class="card">
       <div class="row">
         <div class="grow">
-          <p class="h1">活动积分商店</p>
-          <p class="muted small" style="margin:6px 0 0">把参与留下的积分，兑换成可展示的纪念痕迹。</p>
+          <p class="h1">十周年福利</p>
+          <p class="muted small" style="margin:6px 0 0">用积分抽奖或兑换纪念装饰。</p>
         </div>
         <span class="pill">当前积分：<b>${fmt(s.points)}</b></span>
       </div>
@@ -6640,42 +6771,103 @@ function shopItemCard(kind, item, s) {
 }
 
 function wireShop({ inModal = false } = {}) {
-  $$("[data-buy]").forEach((b) =>
+  // 抽奖按钮
+  $("#btnWelfareLottery")?.addEventListener("click", () => {
+    const today = dayKeyLocal();
+    if (String(state.daily?.welfareLotteryDay || "") === today) return toast("今天已经抽过了");
+    if (state.points < LOTTERY_COST) return toast("积分不足");
+    if (!state.daily || typeof state.daily !== "object") state.daily = { lotteryDayKey: "", checkinDays: 0, lastCheckinDay: "", welfareLotteryDay: "" };
+    state.points -= LOTTERY_COST;
+    state.daily.welfareLotteryDay = today;
+    if (!Array.isArray(state.lotteryWins)) state.lotteryWins = [];
+
+    const available = LOTTERY_POOL.filter((p) => {
+      const wonCount = state.lotteryWins.filter((id) => id === p.id).length;
+      return wonCount < p.qty;
+    });
+    const prize = available.length > 0 ? available[Math.floor(Math.random() * available.length)] : null;
+    if (prize) state.lotteryWins.push(prize.id);
+    saveState();
+
+    const btn = $("#btnWelfareLottery");
+    if (btn) { btn.disabled = true; btn.textContent = "抽奖中…"; }
+
+    const items = $$(".pool-grid .pool-item");
+    const prizeIdx = prize ? LOTTERY_POOL.findIndex((p) => p.id === prize.id) : -1;
+    const totalSteps = items.length * 3 + (prizeIdx >= 0 ? prizeIdx : Math.floor(Math.random() * items.length));
+    let step = 0;
+
+    function runHighlight() {
+      items.forEach((el) => el.classList.remove("pool-item--highlight"));
+      const cur = step % items.length;
+      items[cur]?.classList.add("pool-item--highlight");
+
+      step++;
+      if (step <= totalSteps) {
+        const progress = step / totalSteps;
+        const delay = 60 + 260 * progress * progress;
+        setTimeout(runHighlight, delay);
+      } else {
+        setTimeout(() => {
+          items.forEach((el) => el.classList.remove("pool-item--highlight"));
+          render();
+          showLotteryResult(prize);
+        }, 350);
+      }
+    }
+    runHighlight();
+  });
+
+  function showLotteryResult(prize) {
+    const body = prize
+      ? `<div style="text-align:center;padding:16px 0"><div style="font-size:48px;margin-bottom:12px">${prize.icon}</div><div style="font-size:16px;font-weight:800;color:#0F172A">${escapeHtml(prize.title)}</div><div class="muted small" style="margin-top:8px">消耗 ${LOTTERY_COST} 积分</div></div>`
+      : `<div style="text-align:center;padding:16px 0"><div style="font-size:48px;margin-bottom:12px">😢</div><div style="font-size:16px;font-weight:800;color:#0F172A">很遗憾，没有抽到</div><div class="muted small" style="margin-top:8px">消耗 ${LOTTERY_COST} 积分</div></div>`;
+    openModal({
+      title: "抽奖结果",
+      bodyHtml: body,
+      footerHtml: `<button class="btn btn--brand" id="btnLotteryOk">知道了</button>`,
+    });
+    $("#btnLotteryOk")?.addEventListener("click", () => {
+      closeModal();
+      if (inModal) openShopModal();
+    });
+  }
+
+  // 兑换按钮
+  $$("[data-exchange]").forEach((b) =>
     b.addEventListener("click", () => {
-      const [kind, id] = (b.dataset.buy || "").split(":");
-      const item = kind === "frame" ? SHOP_ITEMS.frames.find((x) => x.id === id) : SHOP_ITEMS.badges.find((x) => x.id === id);
+      const id = String(b.dataset.exchange || "");
+      const item = EXCHANGE_ITEMS.find((x) => x.id === id);
       if (!item) return;
-      const owned = kind === "frame" ? state.inventory.frames.includes(id) : state.inventory.badges.includes(id);
-      if (owned) return toast("已拥有");
+      if (!Array.isArray(state.exchangeOwned)) state.exchangeOwned = [];
+      if (state.exchangeOwned.includes(id)) return toast("已拥有");
+      const exchangedCount = state.exchangeOwned.filter((eid) => eid === id).length;
+      if (exchangedCount >= item.qty) return toast("库存不足");
       const enough = state.points >= item.cost;
       const body = `
         <div class="small" style="line-height:1.6">
           <div class="hint">
+            <div style="font-size:32px;text-align:center;margin-bottom:8px">${item.icon}</div>
             <b>${escapeHtml(item.title)}</b>
             <div class="muted small" style="margin-top:6px">消耗 <b>${fmt(item.cost)}</b> 积分</div>
           </div>
           <div class="divider"></div>
           <div class="muted small">当前积分：<b>${fmt(state.points || 0)}</b></div>
-          ${enough ? "" : `<div class="muted small" style="margin-top:6px">积分不足，去试玩/回顾领奖赚积分吧。</div>`}
+          ${enough ? "" : `<div class="muted small" style="margin-top:6px">积分不足</div>`}
         </div>
       `;
       const footer = enough
-        ? `<button class="btn" id="btnSpendCancel">取消</button><button class="btn btn--brand" id="btnSpendOk">${fmt(item.cost)}积分兑换</button>`
-        : `<button class="btn btn--brand" id="btnSpendOk">知道了</button>`;
+        ? `<button class="btn" id="btnExCancel">取消</button><button class="btn btn--brand" id="btnExOk">${fmt(item.cost)} 积分兑换</button>`
+        : `<button class="btn btn--brand" id="btnExOk">知道了</button>`;
       openModal({ title: enough ? "确认兑换" : "积分不足", bodyHtml: body, footerHtml: footer });
-      $("#btnSpendCancel")?.addEventListener("click", () => {
+      $("#btnExCancel")?.addEventListener("click", () => {
         closeModal();
         if (inModal) openShopModal();
       });
-      $("#btnSpendOk")?.addEventListener("click", () => {
-        if (!enough) {
-          closeModal();
-          if (inModal) openShopModal();
-          return;
-        }
+      $("#btnExOk")?.addEventListener("click", () => {
+        if (!enough) { closeModal(); if (inModal) openShopModal(); return; }
         state.points -= item.cost;
-        if (kind === "frame") state.inventory.frames.push(id);
-        if (kind === "badge") state.inventory.badges.push(id);
+        state.exchangeOwned.push(id);
         saveState();
         closeModal();
         render();
@@ -6685,23 +6877,6 @@ function wireShop({ inModal = false } = {}) {
     }),
   );
 
-  if (ENABLE_COUPONS) {
-    $("#btnLottery")?.addEventListener("click", () => {
-      const today = dayKeyLocal();
-      if (String(state.daily?.lotteryDayKey || "") === today) return toast("今天已经抽过了");
-      if (state.points < SHOP_ITEMS.lottery.cost) return toast("积分不足");
-      if (!state.daily || typeof state.daily !== "object") state.daily = { lotteryDayKey: "" };
-      state.points -= SHOP_ITEMS.lottery.cost;
-      state.daily.lotteryDayKey = today;
-      // No pity: random 1 coupon or none.
-      const hit = Math.random() < 0.5;
-      const add = hit ? 1 : 0;
-      if (add > 0) addCoupons(state, add);
-      saveState();
-      render();
-      openLotteryResultModal({ hit, add, cost: SHOP_ITEMS.lottery.cost });
-    });
-  }
 }
 
 function openWalletModal() {
