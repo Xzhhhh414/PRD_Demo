@@ -555,7 +555,6 @@ const MEM_SHOP = {
   unlocks: [
     { id: "u_colors_pack", title: "纪念卡配色包", desc: "解锁更多卡片颜色", cost: 80, kind: "colors", unlockIds: ["mc_pink", "mc_mint", "mc_sky", "mc_lav", "mc_sand"] },
     { id: "u_stickers_pack", title: "纪念卡贴纸包", desc: "解锁更多小贴纸", cost: 80, kind: "stickers", unlockIds: ["ms_heart", "ms_bulb", "ms_crown", "ms_note", "ms_cat", "ms_trophy", "ms_cloud"] },
-    { id: "u_avatars_pack", title: "纪念卡角色包", desc: "解锁更多角色形象", cost: 100, kind: "avatars", unlockIds: ["ma_cat", "ma_robot", "ma_fox", "ma_panda", "ma_penguin"] },
   ],
   lottery: { cost: SHOP_ITEMS.lottery.cost, prize: SHOP_ITEMS.lottery.prize.value },
 };
@@ -594,7 +593,7 @@ function loadState() {
     equipped: {},
     playtest: { completed: [], feedback: {}, claimed: [], playMinutes: 0, tiersClaimed: [] },
     memorial: {
-      tab: "color",
+      tab: "avatar",
       // `colorId` now represents background theme (with patterns)
       colorId: "mc_cream",
       // Multi-sticker placement
@@ -604,7 +603,7 @@ function loadState() {
       stickerId: "ms_star",
       avatarId: "ma_me",
     },
-    memorialUnlocks: { colors: ["mc_cream"], stickers: ["ms_star"], avatars: ["ma_me", "ma_bunny"] },
+    memorialUnlocks: { colors: ["mc_cream"], stickers: ["ms_star"], avatars: ["ma_me", "ma_bunny", "ma_cat", "ma_robot", "ma_fox", "ma_panda", "ma_penguin"] },
     daily: { lotteryDayKey: "", checkinDays: 0, checkinStreak: 0, lastCheckinDay: "", welfareLotteryDay: "" },
     lotteryWins: [],
     exchangeOwned: [],
@@ -686,8 +685,10 @@ function loadState() {
     if (!Array.isArray(merged.memorialUnlocks.colors)) merged.memorialUnlocks.colors = [...fallback.memorialUnlocks.colors];
     if (!Array.isArray(merged.memorialUnlocks.stickers)) merged.memorialUnlocks.stickers = [...fallback.memorialUnlocks.stickers];
     if (!Array.isArray(merged.memorialUnlocks.avatars)) merged.memorialUnlocks.avatars = [...fallback.memorialUnlocks.avatars];
-    // 确保"我的头像"始终解锁
-    if (!merged.memorialUnlocks.avatars.includes("ma_me")) merged.memorialUnlocks.avatars.unshift("ma_me");
+    // 所有角色默认拥有，无需积分兑换
+    MEM_AVATARS.forEach((av) => {
+      if (!merged.memorialUnlocks.avatars.includes(av.id)) merged.memorialUnlocks.avatars.push(av.id);
+    });
 
     merged.daily = { ...fallback.daily, ...(parsed?.daily || {}) };
     if (!merged.daily || typeof merged.daily !== "object") merged.daily = { ...fallback.daily };
@@ -2372,8 +2373,8 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
       icon: iconHtml,
       active: (s.memorial?.avatarId || "") === av.id,
       used: (s.memorial?.avatarId || "") === av.id,
-      locked: !isUnlockedKind("avatar", av.id),
-      cost: costFor("avatar", av.id),
+      locked: false,
+      cost: 0,
       ariaLabel: `角色：${av.label}`,
       compact: true,
     });
@@ -2457,11 +2458,15 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
   const diyHtml = `
       <div class="mem-diy">
       <div class="mem-tabs" role="tablist" aria-label="DIY 选项">
+        ${tabBtn("avatar", "角色")}
         ${tabBtn("color", "背景")}
         ${tabBtn("sticker", "贴纸")}
-        ${tabBtn("avatar", "角色")}
       </div>
 
+        <div class="mem-panel ${tab === "avatar" ? "" : "hidden"}" data-mem-panel="avatar">
+          <div class="muted small" style="margin-top:2px">选择名片上展示的角色形象。</div>
+          <div class="mem-grid mem-grid--avatars" style="margin-top:10px">${avatarOpts}</div>
+        </div>
         <div class="mem-panel ${tab === "color" ? "" : "hidden"}" data-mem-panel="color">
           <div class="muted small" style="margin-top:2px">选择一款背景主题（支持不同图案）。</div>
           <div class="mem-swatches" style="margin-top:10px">${colorOpts}</div>
@@ -2469,10 +2474,6 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
         <div class="mem-panel ${tab === "sticker" ? "" : "hidden"}" data-mem-panel="sticker">
           <div class="muted small" style="margin-top:2px">点选添加贴纸；拖动贴纸可调整位置。</div>
           <div class="mem-grid" style="margin-top:10px">${stickerOpts}</div>
-        </div>
-        <div class="mem-panel ${tab === "avatar" ? "" : "hidden"}" data-mem-panel="avatar">
-          <div class="muted small" style="margin-top:2px">选择名片上展示的角色形象。</div>
-          <div class="mem-grid mem-grid--avatars" style="margin-top:10px">${avatarOpts}</div>
         </div>
       </div>
   `;
@@ -6559,7 +6560,7 @@ function discoverInlineView(s) {
       .join(" · ");
     const heat = Math.max(0, Number(p.heat || 0));
     return `
-      <div class="play-card2" data-game-url="${escapeHtml(p.url || "")}">
+      <div class="play-card2" data-game-url="${escapeHtml(p.url || "")}" role="button" tabindex="0">
         <div class="play-card2__cover">
           <span class="play-card2__cover-icon">${escapeHtml(icon)}</span>
           <span class="play-card2__heat">🔥 ${fmt(heat)}</span>
@@ -6856,6 +6857,14 @@ function wireDiscoverInline() {
   $("#btnShuffleGames")?.addEventListener("click", () => {
     render();
   });
+
+  // ── 游乐场游戏卡片点击 ──
+  $$(".play-card2[data-game-url]").forEach((card) =>
+    card.addEventListener("click", () => {
+      const url = card.dataset.gameUrl;
+      if (url) openGameDetail(url);
+    })
+  );
 
   // ── 游玩时长任务 ──
   function autoClaimTiers() {
