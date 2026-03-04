@@ -6406,7 +6406,7 @@ function discoverInlineView(s) {
     const currentHtml = `
       <div class="playtime-task-current">
         <div class="playtime-task-current__encourage"><span>去游乐场里寻找自己喜欢的游戏吧~</span><button class="btn btn--sm" id="btnShuffleGames" type="button" style="margin-left:auto">🎲 换一换</button></div>
-        <div class="playtime-task-current__target">累计游玩 ${current.label}，自动领取 <b>${fmt(current.points)}</b> 积分</div>
+        <div class="playtime-task-current__target">活动期间累计游玩 ${current.label}，自动领取 <b>${fmt(current.points)}</b> 积分</div>
         <div class="playtime-task-current__bar">
           <div class="playtime-task-current__fill" style="width:${pct}%"></div>
         </div>
