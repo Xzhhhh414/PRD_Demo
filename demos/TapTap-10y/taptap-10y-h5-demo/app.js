@@ -21,7 +21,7 @@ const STORAGE_KEY = "taptap10y_state_v1";
  *   memorial?: { tab: "color" | "sticker" | "avatar"; colorId: string; stickerId: string; avatarId: string };
  *   memorialUnlocks?: { colors: string[]; stickers: string[]; avatars: string[] };
  *   daily?: { lotteryDayKey?: string; checkinDays?: number; checkinStreak?: number; lastCheckinDay?: string; welfareLotteryDay?: string };
- *   lotteryWins?: string[];
+ *   lotteryWins?: Array<{id:string, kind:string, title:string, icon:string, time:string}>;
  *   exchangeOwned?: string[];
  *   mutualMessages?: Record<string, { text: string; ts: number; likes?: number }[]>;
  *   entryGateDone?: boolean;
@@ -345,15 +345,29 @@ const GROWTH_GAMES = [
 ];
 
 const PLAYTEST_GAMES = [
-  { id: "p1", title: "《雾灯之下》", desc: "10 分钟试玩 · 轻解谜 · 叙事氛围", tags: ["轻解谜", "叙事", "氛围感", "10分钟"], heat: 300, points: 25 },
-  { id: "p2", title: "《纸片机甲工坊》", desc: "10 分钟试玩 · 组装 · 轻战斗", tags: ["组装", "轻战斗", "机甲", "10分钟"], heat: 275, points: 25 },
-  { id: "p3", title: "《夜行列车·7号车厢》", desc: "10 分钟试玩 · 推理 · 多结局", tags: ["推理", "多结局", "悬疑", "10分钟"], heat: 250, points: 30 },
-  { id: "p4", title: "《像素海盗电台》", desc: "10 分钟试玩 · 节奏 · 轻 Roguelike", tags: ["节奏", "Roguelike", "像素", "10分钟"], heat: 225, points: 25 },
-  { id: "p5", title: "《月面快递》", desc: "10 分钟试玩 · 经营 · 轻策略", tags: ["经营", "轻策略", "治愈", "10分钟"], heat: 200, points: 20 },
-  { id: "p6", title: "《玻璃花园》", desc: "10 分钟试玩 · 叙事 · 互动选择", tags: ["叙事", "互动选择", "情感", "10分钟"], heat: 175, points: 20 },
-  { id: "p7", title: "《重力回廊》", desc: "10 分钟试玩 · 动作 · 平台跳跃", tags: ["动作", "平台跳跃", "挑战", "10分钟"], heat: 150, points: 30 },
-  { id: "p8", title: "《纸上迷宫》", desc: "10 分钟试玩 · 解谜 · 手绘风", tags: ["解谜", "手绘", "烧脑", "10分钟"], heat: 125, points: 25 },
-  { id: "p9", title: "《喵喵合唱团》", desc: "10 分钟试玩 · 音游 · 合作", tags: ["音游", "合作", "可爱", "10分钟"], heat: 100, points: 30 },
+  { id: "p1", title: "《雾灯之下》", desc: "10 分钟试玩 · 轻解谜 · 叙事氛围", tags: ["轻解谜", "叙事", "氛围感", "10分钟"], heat: 300, url: "https://www.taptap.cn/app/300001" },
+  { id: "p2", title: "《纸片机甲工坊》", desc: "10 分钟试玩 · 组装 · 轻战斗", tags: ["组装", "轻战斗", "机甲", "10分钟"], heat: 275, url: "https://www.taptap.cn/app/300002" },
+  { id: "p3", title: "《夜行列车·7号车厢》", desc: "10 分钟试玩 · 推理 · 多结局", tags: ["推理", "多结局", "悬疑", "10分钟"], heat: 250, url: "https://www.taptap.cn/app/300003" },
+  { id: "p4", title: "《像素海盗电台》", desc: "10 分钟试玩 · 节奏 · 轻 Roguelike", tags: ["节奏", "Roguelike", "像素", "10分钟"], heat: 225, url: "https://www.taptap.cn/app/300004" },
+  { id: "p5", title: "《月面快递》", desc: "10 分钟试玩 · 经营 · 轻策略", tags: ["经营", "轻策略", "治愈", "10分钟"], heat: 200, url: "https://www.taptap.cn/app/300005" },
+  { id: "p6", title: "《玻璃花园》", desc: "10 分钟试玩 · 叙事 · 互动选择", tags: ["叙事", "互动选择", "情感", "10分钟"], heat: 175, url: "https://www.taptap.cn/app/300006" },
+  { id: "p7", title: "《重力回廊》", desc: "10 分钟试玩 · 动作 · 平台跳跃", tags: ["动作", "平台跳跃", "挑战", "10分钟"], heat: 150, url: "https://www.taptap.cn/app/300007" },
+  { id: "p8", title: "《纸上迷宫》", desc: "10 分钟试玩 · 解谜 · 手绘风", tags: ["解谜", "手绘", "烧脑", "10分钟"], heat: 125, url: "https://www.taptap.cn/app/300008" },
+  { id: "p9", title: "《喵喵合唱团》", desc: "10 分钟试玩 · 音游 · 合作", tags: ["音游", "合作", "可爱", "10分钟"], heat: 100, url: "https://www.taptap.cn/app/300009" },
+  { id: "p10", title: "《星尘信号》", desc: "10 分钟试玩 · 科幻 · 解谜", tags: ["科幻", "解谜", "太空", "10分钟"], heat: 310, url: "https://www.taptap.cn/app/300010" },
+  { id: "p11", title: "《竹林深处》", desc: "10 分钟试玩 · 武侠 · 动作", tags: ["武侠", "动作", "水墨", "10分钟"], heat: 290, url: "https://www.taptap.cn/app/300011" },
+  { id: "p12", title: "《咕噜厨房》", desc: "10 分钟试玩 · 经营 · 休闲", tags: ["经营", "休闲", "美食", "10分钟"], heat: 260, url: "https://www.taptap.cn/app/300012" },
+  { id: "p13", title: "《深渊潜行者》", desc: "10 分钟试玩 · 肉鸽 · 策略", tags: ["肉鸽", "策略", "暗黑", "10分钟"], heat: 240, url: "https://www.taptap.cn/app/300013" },
+  { id: "p14", title: "《时光邮局》", desc: "10 分钟试玩 · 叙事 · 治愈", tags: ["叙事", "治愈", "文字", "10分钟"], heat: 220, url: "https://www.taptap.cn/app/300014" },
+];
+
+const PLAY_TIME_TIERS = [
+  { id: "pt_10m",  minutes: 10,   points: 100, label: "10 分钟" },
+  { id: "pt_1h",   minutes: 60,   points: 200, label: "1 小时" },
+  { id: "pt_5h",   minutes: 300,  points: 300, label: "5 小时" },
+  { id: "pt_10h",  minutes: 600,  points: 400, label: "10 小时" },
+  { id: "pt_25h",  minutes: 1500, points: 500, label: "25 小时" },
+  { id: "pt_50h",  minutes: 3000, points: 600, label: "50 小时" },
 ];
 
 const MUTUAL_GAMES = [
@@ -459,16 +473,21 @@ const SHOP_ITEMS = {
 
 const LOTTERY_COST = 100;
 const LOTTERY_POOL = [
-  { id: "lp_frame_gold",   icon: "🖼️", title: "金色十周年头像框",   qty: 500 },
-  { id: "lp_badge_plat",   icon: "🏆", title: "白金纪念徽章",       qty: 300 },
-  { id: "lp_sticker_set",  icon: "🎨", title: "限定贴纸礼包",       qty: 800 },
-  { id: "lp_coupon50",     icon: "🎫", title: "50 点券",             qty: 1000 },
-  { id: "lp_coupon20",     icon: "🎟️", title: "20 点券",            qty: 2000 },
-  { id: "lp_avatar_rare",  icon: "👑", title: "稀有角色形象",        qty: 0 },
-  { id: "lp_theme_dark",   icon: "🌙", title: "暗夜主题背景",        qty: 600 },
-  { id: "lp_emoji_pack",   icon: "😎", title: "专属表情包",          qty: 1500 },
-  { id: "lp_points200",    icon: "💎", title: "200 积分",            qty: 3000 },
-  { id: "lp_points50",     icon: "✨", title: "50 积分",             qty: 5000 },
+  // 头像框
+  { id: "lp_frame_gold",   icon: "🖼️", title: "金色十周年头像框",   kind: "frame",   qty: 500 },
+  { id: "lp_frame_retro",  icon: "🎞️", title: "复古胶片头像框",     kind: "frame",   qty: 400 },
+  // 点券
+  { id: "lp_coupon50",     icon: "🎫", title: "50 点券",             kind: "coupon",  qty: 1000, value: 50 },
+  { id: "lp_coupon20",     icon: "🎟️", title: "20 点券",            kind: "coupon",  qty: 2000, value: 20 },
+  // 优惠券
+  { id: "lp_voucher10",    icon: "🏷️", title: "满50减10优惠券",     kind: "voucher", qty: 1500, desc: "购买游戏满50元减10元，有效期30天" },
+  { id: "lp_voucher5",     icon: "🎀", title: "满30减5优惠券",       kind: "voucher", qty: 2000, desc: "购买游戏满30元减5元，有效期30天" },
+  // 云玩时长
+  { id: "lp_cloud60",      icon: "☁️", title: "云玩时长 60 分钟",    kind: "cloud",   qty: 800, minutes: 60 },
+  { id: "lp_cloud30",      icon: "🌤️", title: "云玩时长 30 分钟",   kind: "cloud",   qty: 1200, minutes: 30 },
+  // CDKey
+  { id: "lp_cdkey_a",      icon: "🔑", title: "游戏A CDKey",          kind: "cdkey",   qty: 200, cdkey: "TAPTAP-10Y-XXXX-AAAA" },
+  { id: "lp_cdkey_b",      icon: "🗝️", title: "游戏B CDKey",        kind: "cdkey",   qty: 150, cdkey: "TAPTAP-10Y-XXXX-BBBB" },
 ];
 
 const EXCHANGE_ITEMS = [
@@ -573,7 +592,7 @@ function loadState() {
     claimedRewardIds: [],
     inventory: { frames: [], badges: [] },
     equipped: {},
-    playtest: { completed: [], feedback: {}, claimed: [] },
+    playtest: { completed: [], feedback: {}, claimed: [], playMinutes: 0, tiersClaimed: [] },
     memorial: {
       tab: "color",
       // `colorId` now represents background theme (with patterns)
@@ -624,6 +643,8 @@ function loadState() {
     if (!Array.isArray(merged.playtest.completed)) merged.playtest.completed = [];
     if (!merged.playtest.feedback || typeof merged.playtest.feedback !== "object") merged.playtest.feedback = {};
     if (!Array.isArray(merged.playtest.claimed)) merged.playtest.claimed = [];
+    if (!Number.isFinite(merged.playtest.playMinutes)) merged.playtest.playMinutes = 0;
+    if (!Array.isArray(merged.playtest.tiersClaimed)) merged.playtest.tiersClaimed = [];
 
     merged.profile = { ...fallback.profile, ...(parsed?.profile || {}) };
     if (!merged.profile || typeof merged.profile !== "object") merged.profile = { ...fallback.profile };
@@ -677,6 +698,13 @@ function loadState() {
     if (!String(merged.daily.welfareLotteryDay || "").trim()) merged.daily.welfareLotteryDay = "";
 
     if (!Array.isArray(merged.lotteryWins)) merged.lotteryWins = [];
+    merged.lotteryWins = merged.lotteryWins.map((w) => {
+      if (typeof w === "string") {
+        const pool = LOTTERY_POOL.find((p) => p.id === w);
+        return { id: w, kind: pool?.kind || "", title: pool?.title || w, icon: pool?.icon || "🎁", time: "" };
+      }
+      return w;
+    });
     if (!Array.isArray(merged.exchangeOwned)) merged.exchangeOwned = [];
 
     if (typeof merged.loggedIn !== "boolean") merged.loggedIn = fallback.loggedIn;
@@ -712,7 +740,9 @@ function loadState() {
 }
 
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  const clone = { ...state };
+  Object.keys(clone).forEach((k) => { if (k.startsWith("_")) delete clone[k]; });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(clone));
 }
 
 function resetState() {
@@ -1949,7 +1979,7 @@ function setTopbarHeightVar() {
 }
 
 function stickyStatsView(s) {
-  // 未登录时，名片区域显示登录提示
+  // 未登录时，名片区域显示登录提示（不折叠）
   if (!s.loggedIn) {
     return `
       <section class="card sticky-stats__card" style="border-radius:0; box-shadow:none;">
@@ -1989,31 +2019,52 @@ function stickyStatsView(s) {
   const isDouble = streak >= CHECKIN_STREAK_GOAL;
   const reward = isDouble ? CHECKIN_BASE * 2 : CHECKIN_BASE;
 
-  return `
-    <section class="card sticky-stats__card" style="border-radius:0; box-shadow:none;">
-      <div class="sticky-hub">
-        <div class="sticky-hub__left">
-          <div class="sticky-hub__thumb" id="btnOpenMemorial" role="button" tabindex="0" aria-label="编辑十周年名片" style="--mem-bg:${color.bg};">
-            <div class="sticky-hub__avatar">${avatarDisplayHtml(avatar, String(s.profile?.nickname || ""), { size: "small" })}</div>
-            ${stickersHtml}
+  // ── 展开态 ──
+  const expandedHtml = `
+    <div class="sticky-stats__expanded">
+      <section class="card sticky-stats__card" style="border-radius:0; box-shadow:none;">
+        <div class="sticky-hub">
+          <div class="sticky-hub__left">
+            <div class="sticky-hub__thumb" id="btnOpenMemorial" role="button" tabindex="0" aria-label="编辑十周年名片" style="--mem-bg:${color.bg};">
+              <div class="sticky-hub__avatar">${avatarDisplayHtml(avatar, String(s.profile?.nickname || ""), { size: "small" })}</div>
+              ${stickersHtml}
+            </div>
+            <button class="link-btn" id="btnEditMemorial" type="button" style="font-size:11px; margin-top:4px">开始装扮吧</button>
           </div>
-          <button class="link-btn" id="btnEditMemorial" type="button" style="font-size:11px; margin-top:4px">开始装扮吧</button>
+          <div class="sticky-hub__cards">
+            <div class="sticky-hub__card sticky-hub__card--points">
+              <div class="sticky-hub__card-title">总积分 <b id="pillPoints">${fmt(s.points)}</b></div>
+              <div class="sticky-hub__card-desc">兑换福利和名片装饰</div>
+              <button class="btn btn--brand sticky-hub__card-btn" id="btnGoShop" type="button">福利兑换</button>
+            </div>
+            <div class="sticky-hub__card sticky-hub__card--checkin">
+              <div class="sticky-hub__card-title">签到天数 <b>${checkinDays}</b> <span class="checkin-streak-tag">连签${streak}天</span></div>
+              <div class="sticky-hub__card-desc">${isDouble ? `每天可领 <b>${reward}</b> 积分（翻倍中）` : `每天可领 ${CHECKIN_BASE} 积分<br>连签${CHECKIN_STREAK_GOAL}天翻倍`}</div>
+              <button class="btn ${checkedToday ? "" : "btn--brand"} sticky-hub__card-btn" id="btnCheckin" type="button" ${checkedToday ? "disabled" : ""}>${checkedToday ? "今日已签" : "立即签到"}</button>
+            </div>
+          </div>
         </div>
-        <div class="sticky-hub__cards">
-          <div class="sticky-hub__card sticky-hub__card--points">
-            <div class="sticky-hub__card-title">总积分 <b id="pillPoints">${fmt(s.points)}</b></div>
-            <div class="sticky-hub__card-desc">兑换福利和名片装饰</div>
-            <button class="btn btn--brand sticky-hub__card-btn" id="btnGoShop" type="button">福利兑换</button>
-          </div>
-          <div class="sticky-hub__card sticky-hub__card--checkin">
-            <div class="sticky-hub__card-title">签到天数 <b>${checkinDays}</b> <span class="checkin-streak-tag">连签${streak}天</span></div>
-            <div class="sticky-hub__card-desc">${isDouble ? `每天可领 <b>${reward}</b> 积分（翻倍中）` : `每天可领 ${CHECKIN_BASE} 积分<br>连签${CHECKIN_STREAK_GOAL}天翻倍`}</div>
-            <button class="btn ${checkedToday ? "" : "btn--brand"} sticky-hub__card-btn" id="btnCheckin" type="button" ${checkedToday ? "disabled" : ""}>${checkedToday ? "今日已签" : "立即签到"}</button>
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
+    </div>
   `;
+
+  // ── 收起态 ──
+  const collapsedHtml = `
+    <div class="sticky-stats__collapsed">
+      <div class="sticky-compact">
+        <div class="sticky-compact__thumb" id="btnCompactMemorial" role="button" tabindex="0" aria-label="编辑十周年名片" style="--mem-bg:${color.bg};">
+          <div class="sticky-compact__avatar">${avatarDisplayHtml(avatar, String(s.profile?.nickname || ""), { size: "small" })}</div>
+        </div>
+        <div class="sticky-compact__info">
+          <span class="pill pill--brand">总积分 <b>${fmt(s.points)}</b></span>
+          <span class="muted" style="font-size:12px">签到 ${checkinDays} 天</span>
+        </div>
+        <button class="sticky-compact__expand" id="btnStickyExpand" type="button" aria-label="展开">▼</button>
+      </div>
+    </div>
+  `;
+
+  return expandedHtml + collapsedHtml;
 }
 
 function stickyStatsLiteView(s) {
@@ -2038,6 +2089,51 @@ function wireStickyStats() {
   if (ENABLE_COUPONS) $("#btnWallet")?.addEventListener("click", openWalletModal);
   $("#btnOpenMemorial")?.addEventListener("click", () => openMemorialEditModal());
   $("#btnEditMemorial")?.addEventListener("click", () => openMemorialEditModal());
+  $("#btnCompactMemorial")?.addEventListener("click", () => openMemorialEditModal());
+
+  // ── 置顶栏折叠/展开 ──
+  const stickyEl = document.getElementById("stickyStats");
+  if (stickyEl && state.loggedIn) {
+    const SCROLL_THRESHOLD = 40;
+    let scrollTimer = null;
+    let anchorY = window.scrollY;
+    let ignoreUntil = 0;
+
+    const collapse = () => { stickyEl.classList.add("is-collapsed"); };
+    const expand = () => { stickyEl.classList.remove("is-collapsed"); };
+
+    // 展开按钮：点击展开，短暂忽略 scroll（展开引起的布局偏移）
+    $("#btnStickyExpand")?.addEventListener("click", () => {
+      expand();
+      ignoreUntil = Date.now() + 350;
+      setTimeout(() => { anchorY = window.scrollY; }, 320);
+    });
+
+    const onScroll = () => {
+      if (Date.now() < ignoreUntil) return;
+
+      const y = window.scrollY;
+
+      if (y <= 10) {
+        expand();
+        anchorY = y;
+        return;
+      }
+
+      if (Math.abs(y - anchorY) > SCROLL_THRESHOLD) {
+        collapse();
+      }
+
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => { anchorY = window.scrollY; }, 150);
+    };
+
+    if (wireStickyStats._scrollHandler) {
+      window.removeEventListener("scroll", wireStickyStats._scrollHandler);
+    }
+    wireStickyStats._scrollHandler = onScroll;
+    window.addEventListener("scroll", onScroll, { passive: true });
+  }
 
   // 每日签到
   $("#btnCheckin")?.addEventListener("click", () => {
@@ -3484,11 +3580,14 @@ function openShopModal() {
   wireShop({ inModal: true });
 }
 
+const LOTTERY_KIND_LABELS = { frame: "头像框", coupon: "点券", voucher: "优惠券", cloud: "云玩时长", cdkey: "CDKey" };
+
 function lotteryPoolItemHtml(item, s) {
-  const wonCount = (s.lotteryWins || []).filter((id) => id === item.id).length;
+  const wonCount = (s.lotteryWins || []).filter((w) => w.id === item.id).length;
   const depleted = wonCount >= item.qty;
+  const kindLabel = LOTTERY_KIND_LABELS[item.kind] || "";
   return `
-    <div class="pool-item ${depleted ? "pool-item--depleted" : ""}">
+    <div class="pool-item ${depleted ? "pool-item--depleted" : ""}" data-kind="${item.kind}">
       <span class="pool-item__icon">${item.icon}</span>
       <span class="pool-item__name">${escapeHtml(item.title)}</span>
       ${depleted ? `<span class="pool-item__tag">已抽完</span>` : ""}
@@ -3525,7 +3624,7 @@ function shopModalView(s) {
   const drawnToday = String(s.daily?.welfareLotteryDay || "") === today;
   const canAfford = s.points >= LOTTERY_COST;
   const poolEmpty = LOTTERY_POOL.every((p) => {
-    const wonCount = (s.lotteryWins || []).filter((id) => id === p.id).length;
+    const wonCount = (s.lotteryWins || []).filter((w) => w.id === p.id).length;
     return wonCount >= p.qty;
   });
 
@@ -3550,6 +3649,40 @@ function shopModalView(s) {
     lotteryHint = `<span class="lottery-hint">每日 1 次 · ${LOTTERY_COST} 积分/次</span>`;
   }
 
+  const winCount = (s.lotteryWins || []).length;
+  const currentForceKind = s._testForceKind || "";
+  const testKindOptions = Object.entries(LOTTERY_KIND_LABELS).map(([k, v]) =>
+    `<option value="${k}" ${currentForceKind === k ? "selected" : ""}>${v}</option>`
+  ).join("");
+
+  let prizesDrawerHtml = "";
+  if (winCount > 0) {
+    const wins = (s.lotteryWins || []).slice().reverse();
+    const prizeHintMap = {
+      frame: { inline: "", below: `<span class="prize-row__hint">可在个人主页使用</span>` },
+      coupon: { inline: `<button class="btn btn--sm prize-row__action" data-prize-wallet type="button">查看我的钱包</button>`, below: "" },
+      voucher: { inline: "", below: `<span class="prize-row__hint">前往 TapTap 兑换中心查看</span>` },
+      cloud: { inline: "", below: `<span class="prize-row__hint">前往 TapTap 兑换中心使用</span>` },
+      cdkey: { inline: "", below: `<span class="prize-row__hint">前往 TapTap 兑换中心使用</span>` },
+    };
+    const rows = wins.map((w) => {
+      const d = new Date(w.time);
+      const timeStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+      const h = prizeHintMap[w.kind] || { inline: "", below: "" };
+      return `<tr><td style="font-size:20px;text-align:center;width:40px">${w.icon}</td><td><div style="display:flex;align-items:center;gap:8px"><span style="font-weight:600;font-size:14px">${escapeHtml(w.title)}</span>${h.inline}</div>${h.below ? `<div style="margin-top:4px">${h.below}</div>` : ""}</td><td style="font-size:12px;color:rgba(15,23,42,.45);text-align:right;white-space:nowrap;vertical-align:top">${timeStr}</td></tr>`;
+    }).join("");
+    prizesDrawerHtml = `
+      <div class="welfare-section prizes-drawer" style="margin-top:20px">
+        <button class="prizes-drawer__toggle" id="btnTogglePrizes" type="button">
+          <span class="welfare-section__title">🎁 我的奖品</span>
+          <span class="prizes-drawer__arrow" id="prizesArrow">▼</span>
+        </button>
+        <div class="prizes-drawer__body" id="prizesDrawerBody">
+          <table class="prize-table" style="width:100%;border-collapse:collapse"><tbody>${rows}</tbody></table>
+        </div>
+      </div>`;
+  }
+
   return `
     <div>
       <div style="margin-bottom:16px">
@@ -3566,9 +3699,19 @@ function shopModalView(s) {
             ${lotteryDisabled ? "disabled" : ""}>${lotteryBtnText}</button>
           ${lotteryHint}
         </div>
+        <div class="lottery-test-bar">
+          <label class="lottery-test-bar__label">测试：指定必中类型</label>
+          <select id="selTestForceKind" class="lottery-test-bar__select">
+            <option value="">随机</option>
+            ${testKindOptions}
+          </select>
+          <button class="btn btn--sm" id="btnTestResetLottery" type="button" ${drawnToday ? "" : "disabled"}>重置今日机会</button>
+        </div>
       </div>
+      ${prizesDrawerHtml}
 
-      <div class="welfare-section" style="margin-top:20px">
+      <div class="divider" style="margin:20px 0"></div>
+      <div class="welfare-section">
         <div class="welfare-section__header">
           <span class="welfare-section__title">🎁 兑换</span>
         </div>
@@ -5676,7 +5819,10 @@ function wireRecapInline() {
       const currentIdx = Number(b.closest?.(".mini-card")?.getAttribute("data-card-idx") || 0);
       lastBindClickCtx = { trackId, currentIdx };
       if (id === "bind_steam") return openBindSteamModal();
-      if (id === "bind_roles") return openBindRolesModal();
+      if (id === "bind_roles") {
+        const fromAddLink = b.classList.contains("bind-add-link");
+        return openBindRolesModal({ autoClaim: fromAddLink });
+      }
     }),
   );
 
@@ -6154,13 +6300,14 @@ function openBindSteamModal() {
   });
 }
 
-function openBindRolesModal() {
+function openBindRolesModal({ autoClaim = false } = {}) {
+  const isFirst = Math.max(0, Number(state.boundRolesCount || 0)) === 0;
+  const hintText = isFirst
+    ? "正式环境下，点击后会跳转到<b>游戏角色绑定页面</b>。<br>绑定完成后返回活动页，即可在卡片上领取积分奖励。"
+    : "正式环境下，点击后会跳转到<b>游戏角色绑定页面</b>。<br>绑定完成后积分将自动发放。";
   const body = `
     <div class="small" style="line-height:1.55">
-      <div class="hint">
-        正式环境下，点击后会跳转到<b>游戏角色绑定页面</b>。<br>
-        绑定完成后返回活动页，即可在卡片上领取积分奖励。
-      </div>
+      <div class="hint">${hintText}</div>
       <div class="divider"></div>
       <div class="muted small">跳转：<span class="mono">taptap://bind_game_role</span></div>
     </div>
@@ -6181,25 +6328,34 @@ function openBindRolesModal() {
     if (!Array.isArray(state.boundRoleCards)) state.boundRoleCards = [];
     const newRoleIdx = state.boundRoleCards.length;
     state.boundRoleCards.push(sampleRoles[newRoleIdx % sampleRoles.length]);
-    saveState();
-    closeModal();
 
-    const newRewardId = `bind_role_${newRoleIdx}`;
-    requestCarouselInit("recapCarouselBind", 0);
-    render();
-
-    setTimeout(() => {
-      const track = document.getElementById("recapCarouselBind");
-      if (track) {
-        const cards = Array.from(track.querySelectorAll(".mini-card"));
-        const targetIdx = cards.findIndex(el => el.getAttribute("data-reward-id") === newRewardId);
-        if (targetIdx >= 0 && cards[targetIdx]) {
-          cards[targetIdx].scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    if (autoClaim) {
+      const per = BIND_REWARDS.find((x) => x.id === "bind_roles")?.perRole || { points: 20, coupons: 0 };
+      state.claimedRoleRewardsCount = Math.max(0, Number(state.claimedRoleRewardsCount || 0)) + 1;
+      addPoints(state, per.points || 0);
+      addCoupons(state, per.coupons || 0);
+      saveState();
+      closeModal();
+      render();
+      toast(`绑定成功，获得 ${per.points} 积分`);
+    } else {
+      saveState();
+      closeModal();
+      const newRewardId = `bind_role_${newRoleIdx}`;
+      requestCarouselInit("recapCarouselBind", 0);
+      render();
+      setTimeout(() => {
+        const track = document.getElementById("recapCarouselBind");
+        if (track) {
+          const cards = Array.from(track.querySelectorAll(".mini-card"));
+          const targetIdx = cards.findIndex(el => el.getAttribute("data-reward-id") === newRewardId);
+          if (targetIdx >= 0 && cards[targetIdx]) {
+            cards[targetIdx].scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+          }
         }
-      }
-    }, 100);
-
-    toast("绑定成功，可在卡片上领取奖励");
+      }, 100);
+      toast("绑定成功，可在卡片上领取奖励");
+    }
     lastBindClickCtx = null;
   });
 }
@@ -6232,6 +6388,71 @@ function discoverInlineView(s) {
     return `${arr.slice(0, 24).join("")}…`;
   };
 
+  const playTimeTiersHtml = (s) => {
+    const mins = s.playtest?.playMinutes || 0;
+    const claimed = s.playtest?.tiersClaimed || [];
+    const fmtTime = (m) => m < 60 ? `${m} 分钟` : `${Math.floor(m / 60)} 小时${m % 60 ? ` ${m % 60} 分钟` : ""}`;
+    const fmtTimeAs = (m, targetMinutes) => targetMinutes < 60 ? `${m} 分钟` : `${(m / 60).toFixed(1).replace(/\.0$/, "")} 小时`;
+
+    let currentIdx = PLAY_TIME_TIERS.findIndex((t) => !claimed.includes(t.id));
+    if (currentIdx === -1) currentIdx = PLAY_TIME_TIERS.length - 1;
+
+    const current = PLAY_TIME_TIERS[currentIdx];
+    const currentClaimed = claimed.includes(current.id);
+    const currentDone = mins >= current.minutes;
+    const progress = Math.min(1, mins / current.minutes);
+    const pct = Math.round(progress * 100);
+
+    const currentHtml = `
+      <div class="playtime-task-current">
+        <div class="playtime-task-current__encourage"><span>去游乐场里寻找自己喜欢的游戏吧~</span><button class="btn btn--sm" id="btnShuffleGames" type="button" style="margin-left:auto">🎲 换一换</button></div>
+        <div class="playtime-task-current__target">累计游玩 ${current.label}，自动领取 <b>${fmt(current.points)}</b> 积分</div>
+        <div class="playtime-task-current__bar">
+          <div class="playtime-task-current__fill" style="width:${pct}%"></div>
+        </div>
+        <div class="playtime-task-current__status" id="btnToggleTiers" role="button" tabindex="0">
+          <span>${fmtTimeAs(mins, current.minutes)} / ${current.label}　→　${fmt(current.points)} 积分</span>
+          <span class="playtime-task__arrow" id="tiersArrow">▼</span>
+        </div>
+      </div>`;
+
+    const sortedTiers = PLAY_TIME_TIERS.map((t, i) => {
+      const done = mins >= t.minutes;
+      const isClaimed = claimed.includes(t.id);
+      return { ...t, done, isClaimed, origIdx: i };
+    }).sort((a, b) => {
+      const aWeight = a.isClaimed ? 2 : a.done ? 0 : 1;
+      const bWeight = b.isClaimed ? 2 : b.done ? 0 : 1;
+      return (aWeight - bWeight) || (a.origIdx - b.origIdx);
+    });
+
+    const allTiersRows = sortedTiers.map((t) => {
+      const statusCls = t.isClaimed ? "playtime-tier--claimed" : t.done ? "playtime-tier--done" : "";
+      const statusText = t.isClaimed ? "已领取" : t.done ? "已达成" : `${fmtTimeAs(mins, t.minutes)}/${t.label}`;
+      return `<div class="playtime-tier ${statusCls}"><span class="playtime-tier__label">累计 ${t.label}</span><span class="playtime-tier__reward">${fmt(t.points)} 积分</span><span class="playtime-tier__status">${statusText}</span></div>`;
+    }).join("");
+
+    return `
+      <div class="playtime-task" style="margin-top:12px">
+        ${currentHtml}
+        <div class="playtime-task__drawer" id="tiersDrawer">
+          ${allTiersRows}
+          <div class="lottery-test-bar" style="margin-top:10px">
+            <label class="lottery-test-bar__label">测试：增加游玩时长</label>
+            <select id="selAddPlayTime" class="lottery-test-bar__select">
+              <option value="10">+10 分钟</option>
+              <option value="30">+30 分钟</option>
+              <option value="60">+1 小时</option>
+              <option value="300">+5 小时</option>
+              <option value="600">+10 小时</option>
+            </select>
+            <button class="btn btn--sm" id="btnAddPlayTime" type="button">增加</button>
+            <button class="btn btn--sm" id="btnResetPlayTime" type="button">重置</button>
+          </div>
+        </div>
+      </div>`;
+  };
+
   const capsuleHtml = (() => {
     const cards = MUTUAL_GAMES.map((g) => {
       const isRevealed = revealedIds.includes(g.id);
@@ -6249,6 +6470,7 @@ function discoverInlineView(s) {
             </div>
             <div class="guess-card__right">
               <div class="guess-card__cta">听听它的故事</div>
+              <div class="guess-card__cta-points">${g.points} 积分</div>
             </div>
           </button>
         `;
@@ -6261,14 +6483,13 @@ function discoverInlineView(s) {
         : `<span class="marquee__item">还没有热评，快来留言做第一个上墙的人吧</span>`;
       const marqueeTrackClass = top.length ? "marquee__track" : "marquee__track marquee__track--static";
 
-      // 合并按钮：未领取=领取积分，已领取=再听一次
       const mainBtn = isClaimed
         ? `<button class="btn guess-card__story-btn" type="button" data-guess-story="${g.id}">再听听它的故事</button>`
-        : `<button class="btn btn--brand guess-card__action" type="button" data-guess-claim="${g.id}">领取 ${g.points} 积分</button>`;
+        : `<button class="btn guess-card__story-btn" type="button" data-guess-story="${g.id}">听听它的故事</button>`;
 
       const tagsHtml = (g.tags || []).slice(0, 2).map(t => `<span class="guess-card__tag">${escapeHtml(t)}</span>`).join("");
       return `
-        <div class="guess-card guess-card--open guess-card--col" style="--layer-color:${g.layerColor}">
+        <div class="guess-card guess-card--open guess-card--col" style="--layer-color:${g.layerColor}" data-game-url="${escapeHtml(g.url || "")}">
           <div class="guess-card__top">
             <div class="guess-card__icon">${g.icon}</div>
             <div class="guess-card__info">
@@ -6294,18 +6515,42 @@ function discoverInlineView(s) {
     return `<div class="guess-list">${cards}</div>`;
   })();
 
-  const playStates = PLAYTEST_GAMES.map((p, idx) => {
-    const completed = s.playtest.completed.includes(p.id);
-    const claimed = (s.playtest.claimed || []).includes(p.id);
-    const claimable = completed && !claimed;
-    const group = claimable ? 0 : claimed ? 2 : 1;
-    const heat = Math.max(0, Number(p.heat || 0));
-    return { p, idx, completed, claimed, claimable, group, heat };
-  })
-    .sort((a, b) => (a.group - b.group) || (b.heat - a.heat) || (a.idx - b.idx));
+  const allByHeat = PLAYTEST_GAMES.map((p) => ({ p, heat: Math.max(0, Number(p.heat || 0)) }))
+    .sort((a, b) => b.heat - a.heat);
+  const mid = Math.ceil(allByHeat.length / 2);
+  const hotGroup = allByHeat.slice(0, mid);
+  const freshGroup = allByHeat.slice(mid);
+
+  function pickFromGroup(group, count, excludeIds) {
+    const preferred = group.filter((g) => !excludeIds.includes(g.p.id));
+    const fallback = group.filter((g) => excludeIds.includes(g.p.id));
+    const result = [];
+    const pool = [...preferred];
+    while (result.length < count && pool.length > 0) {
+      const idx = Math.floor(Math.random() * pool.length);
+      result.push(pool.splice(idx, 1)[0]);
+    }
+    const backup = [...fallback];
+    while (result.length < count && backup.length > 0) {
+      const idx = Math.floor(Math.random() * backup.length);
+      result.push(backup.splice(idx, 1)[0]);
+    }
+    return result;
+  }
+
+  if (!state._lastPlayIds) state._lastPlayIds = [];
+  const PICK_PER_GROUP = 4;
+  const firstPage = [
+    ...pickFromGroup(hotGroup, PICK_PER_GROUP, state._lastPlayIds),
+    ...pickFromGroup(freshGroup, PICK_PER_GROUP, state._lastPlayIds),
+  ].sort(() => Math.random() - 0.5);
+  state._lastPlayIds = firstPage.map((g) => g.p.id);
+  const firstPageIds = new Set(state._lastPlayIds);
+  const restPages = allByHeat.filter((g) => !firstPageIds.has(g.p.id));
+  const playItems = [...firstPage, ...restPages];
 
   const PAGE_SIZE = 8;
-  const playCardHtml = ({ p, claimable, claimed }) => {
+  const playCardHtml = ({ p }) => {
     const icon = iconChar(p.title);
     const tags = (p.tags || [])
       .filter((t) => !/^\s*\d+\s*分钟\s*$/g.test(String(t || "")))
@@ -6313,16 +6558,8 @@ function discoverInlineView(s) {
       .map((t) => escapeHtml(t))
       .join(" · ");
     const heat = Math.max(0, Number(p.heat || 0));
-    const cardClass = claimable ? "play-card2--claim" : claimed ? "play-card2--claimed" : "";
-    const btnArea = claimable
-      ? `<button class="btn btn--brand play-card2__btn" type="button" data-play-claim="${p.id}">领奖</button>
-         <span class="play-card2__reward">${fmt(p.points)} 积分</span>`
-      : claimed
-        ? `<span class="play-card2__claimed-text">已获得 ${fmt(p.points)} 积分</span>`
-        : `<button class="btn btn--brand play-card2__btn" type="button" data-play-go="${p.id}">试玩</button>
-           <span class="play-card2__reward">${fmt(p.points)} 积分</span>`;
     return `
-      <div class="play-card2 ${cardClass}">
+      <div class="play-card2" data-game-url="${escapeHtml(p.url || "")}">
         <div class="play-card2__cover">
           <span class="play-card2__cover-icon">${escapeHtml(icon)}</span>
           <span class="play-card2__heat">🔥 ${fmt(heat)}</span>
@@ -6330,13 +6567,12 @@ function discoverInlineView(s) {
         <div class="play-card2__body">
           <div class="play-card2__name">${escapeHtml(p.title)}</div>
           <div class="play-card2__tags">${tags}</div>
-          <div class="play-card2__action">${btnArea}</div>
         </div>
       </div>`;
   };
 
   const playPages = [];
-  for (let i = 0; i < playStates.length; i += PAGE_SIZE) playPages.push(playStates.slice(i, i + PAGE_SIZE));
+  for (let i = 0; i < playItems.length; i += PAGE_SIZE) playPages.push(playItems.slice(i, i + PAGE_SIZE));
 
   const playPagesHtml = playPages
     .map((page, pi) => `
@@ -6354,12 +6590,10 @@ function discoverInlineView(s) {
   return `
     <div class="home-module" id="section-discover">
       <section class="card">
-        <div class="row">
-          <p class="h1 grow">发现好游戏</p>
+        <div class="row" style="align-items:baseline">
+          <p class="h1 grow">发现好游戏<br><span style="font-weight:400;font-size:13px;color:rgba(15,23,42,.35)">Discover Games</span></p>
+          <span class="muted small">TapTap 坚持：<b>零分成</b></span>
         </div>
-        <p class="muted small" style="margin:6px 0 0">
-          TapTap 坚持： <b>零分成</b>
-        </p>
         <div class="divider"></div>
         ${capsuleHtml}
       </section>
@@ -6367,12 +6601,11 @@ function discoverInlineView(s) {
 
     <div class="home-module" id="section-gamejam">
       <section class="card">
-        <div class="row">
-          <p class="h2 grow">TapTap制造 GameJam 游戏体验</p>
+        <div class="row" style="align-items:baseline">
+          <p class="h1 grow">游戏游乐场<br><span style="font-weight:400;font-size:13px;color:rgba(15,23,42,.35)">Game Playground</span></p>
+          <span class="muted small">游戏来源：TapTap制造 聚光灯GameJam</span>
         </div>
-        <p class="muted small" style="margin:6px 0 0">
-          完成试玩即可领取积分，请友善交流，支持开发者发布作品。
-        </p>
+        ${playTimeTiersHtml(s)}
         <div class="carousel" style="margin-top:10px">
           <div class="hscroll carousel__track play-carousel-track" id="playCarousel" role="list">
             ${playPagesHtml}
@@ -6494,47 +6727,47 @@ function wireDiscoverInline() {
       el.style.pointerEvents = "none";
 
       setTimeout(() => {
-        // 更新状态
         if (!state.capsule) state.capsule = { revealed: [], claimed: [] };
         if (!state.capsule.revealed.includes(g.id)) {
           state.capsule.revealed.push(g.id);
         }
         saveState();
 
-        // 打开分页故事，关闭后刷新页面
-        openGameStoryModal(g, () => render());
+        openGameStoryModal(g, () => {
+          if (!state.capsule.claimed.includes(g.id)) {
+            state.capsule.claimed.push(g.id);
+            addPoints(state, g.points);
+            saveState();
+            toast(`听完故事，获得 ${g.points} 积分`);
+            render();
+            const stickyEl = document.querySelector(".sticky-hub");
+            if (stickyEl) flyGrantToSticky({ fromRect: stickyEl.getBoundingClientRect(), grant: { points: g.points, coupons: 0 } });
+          } else {
+            render();
+          }
+        });
       }, 400);
     }),
   );
 
-  // 已揭示卡片 - 重新听故事
+  // 已揭示卡片 - 听故事（首次自动领取积分）
   $$("[data-guess-story]").forEach((el) =>
     el.addEventListener("click", (e) => {
       e.stopPropagation();
       const g = MUTUAL_GAMES.find((x) => x.id === el.dataset.guessStory);
       if (!g) return;
-      openGameStoryModal(g);
-    }),
-  );
-
-  // 领取积分
-  $$("[data-guess-claim]").forEach((el) =>
-    el.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const g = MUTUAL_GAMES.find((x) => x.id === el.dataset.guessClaim);
-      if (!g) return;
-      if (!state.capsule) state.capsule = { revealed: [], claimed: [] };
-      if (state.capsule.claimed.includes(g.id)) return;
-
-      state.capsule.claimed.push(g.id);
-      addPoints(state, g.points);
-      saveState();
-
-      const fromRect = el.getBoundingClientRect();
-      if (fromRect) flyGrantToSticky({ fromRect, grant: { points: g.points, coupons: 0 } });
-
-      toast(`获得 ${g.points} 积分`);
-      render();
+      openGameStoryModal(g, () => {
+        if (!state.capsule) state.capsule = { revealed: [], claimed: [] };
+        if (!state.capsule.claimed.includes(g.id)) {
+          state.capsule.claimed.push(g.id);
+          addPoints(state, g.points);
+          saveState();
+          toast(`听完故事，获得 ${g.points} 积分`);
+          render();
+          const stickyEl = document.querySelector(".sticky-hub");
+          if (stickyEl) flyGrantToSticky({ fromRect: stickyEl.getBoundingClientRect(), grant: { points: g.points, coupons: 0 } });
+        }
+      });
     }),
   );
 
@@ -6619,56 +6852,66 @@ function wireDiscoverInline() {
     });
   })();
 
-  $$("[data-play-go]").forEach((b) =>
-    b.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const id = String(b.dataset.playGo || "");
-      const p = PLAYTEST_GAMES.find((x) => x.id === id);
-      if (!p) return;
+  // ── 换一批 ──
+  $("#btnShuffleGames")?.addEventListener("click", () => {
+    render();
+  });
 
-      const body = `
-        <div class="small" style="line-height:1.6">
-          <div class="hint">
-            完成试玩即可领奖。此 demo 为测试机制：点击下方按钮即视为已试玩完成，可返回列表领取积分。
-          </div>
-          <div class="divider"></div>
-          <div class="small"><b>${escapeHtml(p.title)}</b></div>
-          <div class="muted small" style="margin-top:6px">${escapeHtml(p.desc)}</div>
-        </div>
-      `;
-      const footer = `
-        <button class="btn btn--brand" id="btnCompletePlay">已完成试玩</button>
-        <button class="btn" id="btnCancelPlay">稍后再说</button>
-      `;
-      openModal({ title: "试玩", bodyHtml: body, footerHtml: footer });
-      $("#btnCancelPlay")?.addEventListener("click", closeModal);
-      $("#btnCompletePlay")?.addEventListener("click", () => {
-        if (!state.playtest.completed.includes(p.id)) state.playtest.completed.push(p.id);
-        saveState();
-        closeModal();
-        render();
-        toast("已试玩完成，可领奖");
-      });
-    }),
-  );
-
-  $$("[data-play-claim]").forEach((b) =>
-    b.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const id = String(b.dataset.playClaim || "");
-      const p = PLAYTEST_GAMES.find((x) => x.id === id);
-      if (!p) return;
-
-      const fromRect = b.getBoundingClientRect();
-      const completed = state.playtest.completed.includes(p.id);
-      if (!completed) return toast("请先完成试玩");
-      if ((state.playtest.claimed || []).includes(p.id)) return toast("已领取过该奖励");
-
-      state.playtest.claimed.push(p.id);
-      addPoints(state, p.points);
+  // ── 游玩时长任务 ──
+  function autoClaimTiers() {
+    const mins = state.playtest.playMinutes || 0;
+    if (!Array.isArray(state.playtest.tiersClaimed)) state.playtest.tiersClaimed = [];
+    let totalGranted = 0;
+    PLAY_TIME_TIERS.forEach((t) => {
+      if (mins >= t.minutes && !state.playtest.tiersClaimed.includes(t.id)) {
+        state.playtest.tiersClaimed.push(t.id);
+        addPoints(state, t.points);
+        totalGranted += t.points;
+      }
+    });
+    if (totalGranted > 0) {
       saveState();
       render();
-      flyGrantToSticky({ fromRect, grant: { points: p.points, coupons: 0 } });
+      toast(`自动领取 ${totalGranted} 积分`);
+    }
+  }
+
+  $("#btnToggleTiers")?.addEventListener("click", () => {
+    const drawer = $("#tiersDrawer");
+    const arrow = $("#tiersArrow");
+    if (!drawer) return;
+    const open = drawer.classList.toggle("is-open");
+    if (arrow) arrow.textContent = open ? "▲" : "▼";
+  });
+
+  $("#btnAddPlayTime")?.addEventListener("click", () => {
+    const sel = $("#selAddPlayTime");
+    const add = Number(sel?.value || 10);
+    if (!Number.isFinite(state.playtest.playMinutes)) state.playtest.playMinutes = 0;
+    state.playtest.playMinutes += add;
+    saveState();
+    autoClaimTiers();
+    render();
+    const drawer = $("#tiersDrawer");
+    const arrow = $("#tiersArrow");
+    if (drawer) { drawer.classList.add("is-open"); }
+    if (arrow) { arrow.textContent = "▲"; }
+  });
+
+  $("#btnResetPlayTime")?.addEventListener("click", () => {
+    state.playtest.playMinutes = 0;
+    state.playtest.tiersClaimed = [];
+    saveState();
+    render();
+    toast("已重置游玩时长和任务进度");
+  });
+
+  // ── 游戏卡片点击跳转详情页 ──
+  $$("[data-game-url]").forEach((card) =>
+    card.addEventListener("click", (e) => {
+      if (e.target.closest("button, a, [data-play-go], [data-play-claim], [data-guess-story], [data-guess-claim], [data-guess-post], [data-guess-reveal]")) return;
+      const url = card.dataset.gameUrl;
+      if (url) openGameDetail(url);
     }),
   );
 
@@ -6840,12 +7083,17 @@ function wireShop({ inModal = false } = {}) {
     state.daily.welfareLotteryDay = today;
     if (!Array.isArray(state.lotteryWins)) state.lotteryWins = [];
 
-    const available = LOTTERY_POOL.filter((p) => {
-      const wonCount = state.lotteryWins.filter((id) => id === p.id).length;
+    const forceKind = state._testForceKind || null;
+    let available = LOTTERY_POOL.filter((p) => {
+      const wonCount = state.lotteryWins.filter((w) => w.id === p.id).length;
       return wonCount < p.qty;
     });
+    if (forceKind) {
+      const kindPool = available.filter((p) => p.kind === forceKind);
+      if (kindPool.length > 0) available = kindPool;
+    }
     const prize = available.length > 0 ? available[Math.floor(Math.random() * available.length)] : null;
-    if (prize) state.lotteryWins.push(prize.id);
+    if (prize) state.lotteryWins.push({ id: prize.id, kind: prize.kind, title: prize.title, icon: prize.icon, time: new Date().toISOString() });
     saveState();
 
     const btn = $("#btnWelfareLottery");
@@ -6878,19 +7126,65 @@ function wireShop({ inModal = false } = {}) {
   });
 
   function showLotteryResult(prize) {
+    let extraHtml = "";
+    let footerExtra = "";
+    if (prize) {
+      if (prize.kind === "frame") {
+        extraHtml = `<div style="margin-top:12px"><span style="font-size:13px;color:rgba(15,23,42,.55)">恭喜获得头像框，可在个人主页使用</span></div>`;
+      } else if (prize.kind === "coupon") {
+        extraHtml = `<div style="margin-top:12px"><span style="font-size:13px;color:rgba(15,23,42,.55)">可购买站内游戏、PC CDKey、云玩服务等</span></div>`;
+        footerExtra = `<button class="btn" id="btnLotteryWallet" type="button">查看我的钱包</button>`;
+      } else if (prize.kind === "voucher") {
+        extraHtml = `<div style="margin-top:12px;font-size:13px;color:rgba(15,23,42,.55);line-height:1.6">TapTap 安卓客户端 - 我的游戏 - 右上角更多 - 兑换中心。<br>游戏库存有限，优惠券有效期以实际游戏库存为准，请尽快兑换下单。</div>`;
+      } else if (prize.kind === "cloud") {
+        extraHtml = `<div style="margin-top:12px;font-size:13px;color:rgba(15,23,42,.55);line-height:1.6">恭喜获得云玩兑换码，在 TapTap 安卓客户端 - 我的游戏 - 右上角更多 - 兑换中心，兑换时长。</div>`;
+      } else if (prize.kind === "cdkey") {
+        extraHtml = `<div style="margin-top:12px;padding:10px 14px;background:rgba(15,23,42,.04);border-radius:8px;font-family:monospace;font-size:14px;letter-spacing:1px;word-break:break-all;color:#0F172A">${escapeHtml(prize.cdkey || "XXXX-XXXX")}</div><div style="margin-top:8px"><span style="font-size:13px;color:rgba(15,23,42,.55)">前往 TapTap 兑换中心使用</span></div>`;
+      }
+    }
     const body = prize
-      ? `<div style="text-align:center;padding:16px 0"><div style="font-size:48px;margin-bottom:12px">${prize.icon}</div><div style="font-size:16px;font-weight:800;color:#0F172A">${escapeHtml(prize.title)}</div><div class="muted small" style="margin-top:8px">消耗 ${LOTTERY_COST} 积分</div></div>`
-      : `<div style="text-align:center;padding:16px 0"><div style="font-size:48px;margin-bottom:12px">😢</div><div style="font-size:16px;font-weight:800;color:#0F172A">很遗憾，没有抽到</div><div class="muted small" style="margin-top:8px">消耗 ${LOTTERY_COST} 积分</div></div>`;
+      ? `<div style="text-align:center;padding:16px 0"><div style="font-size:48px;margin-bottom:12px">${prize.icon}</div><div style="font-size:16px;font-weight:800;color:#0F172A">${escapeHtml(prize.title)}</div>${extraHtml}</div>`
+      : `<div style="text-align:center;padding:16px 0"><div style="font-size:48px;margin-bottom:12px">😢</div><div style="font-size:16px;font-weight:800;color:#0F172A">很遗憾，没有抽到</div></div>`;
+    const footerBtns = `${footerExtra}<button class="btn btn--brand" id="btnLotteryOk">知道了</button>`;
     openModal({
       title: "抽奖结果",
       bodyHtml: body,
-      footerHtml: `<button class="btn btn--brand" id="btnLotteryOk">知道了</button>`,
+      footerHtml: footerBtns,
     });
     $("#btnLotteryOk")?.addEventListener("click", () => {
       closeModal();
       if (inModal) openShopModal();
     });
+    $("#btnLotteryWallet")?.addEventListener("click", () => {
+      closeModal();
+      openWalletModal();
+    });
   }
+
+  // 测试：指定必中类型
+  $("#selTestForceKind")?.addEventListener("change", (e) => {
+    state._testForceKind = e.target.value || "";
+  });
+
+  // 测试：重置今日抽奖机会
+  $("#btnTestResetLottery")?.addEventListener("click", () => {
+    if (state.daily) state.daily.welfareLotteryDay = "";
+    saveState();
+    toast("已重置今日抽奖机会");
+    if (inModal) openShopModal();
+  });
+
+  // 我的奖品抽屉
+  $("#btnTogglePrizes")?.addEventListener("click", () => {
+    const body = $("#prizesDrawerBody");
+    const arrow = $("#prizesArrow");
+    if (!body) return;
+    const open = body.classList.toggle("is-open");
+    if (arrow) arrow.textContent = open ? "▲" : "▼";
+  });
+  $$("[data-prize-wallet]").forEach((b) =>
+    b.addEventListener("click", () => { closeModal(); openWalletModal(); })
+  );
 
   // 兑换按钮
   $$("[data-exchange]").forEach((b) =>
@@ -7186,6 +7480,32 @@ function openDebug() {
     render();
     toast("已应用演示状态");
   });
+}
+
+function getGamePlatform() {
+  const ua = navigator.userAgent || "";
+  if (/TapTap/i.test(ua)) return "app";
+  if (/TapTapPC|Electron/i.test(ua)) return "pc";
+  return "web";
+}
+
+function openGameDetail(url) {
+  if (!url) return;
+  const platform = getGamePlatform();
+  const platformLabel = platform === "app" ? "App" : platform === "pc" ? "PC 客户端" : "Web 浏览器";
+  openModal({
+    title: "游戏详情页",
+    bodyHtml: `<div style="text-align:center;padding:16px 0">
+      <p style="font-size:14px;color:rgba(15,23,42,.7);line-height:1.8;margin:0 0 12px">点击游戏卡片后，正式环境将跳转到对应的游戏详情页。</p>
+      <div style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;background:rgba(15,23,42,.04);margin:0 0 12px">
+        <span style="font-size:12px;color:rgba(15,23,42,.45)">跳转平台：</span>
+        <span style="font-size:12px;font-weight:700;color:rgba(15,23,42,.65)">${platformLabel}</span>
+      </div>
+      <p class="muted small" style="margin:0;word-break:break-all">${escapeHtml(url)}</p>
+    </div>`,
+    footerHtml: `<button class="btn btn--brand" id="btnGameDetailOk">知道了</button>`,
+  });
+  $("#btnGameDetailOk")?.addEventListener("click", closeModal);
 }
 
 function escapeHtml(str) {

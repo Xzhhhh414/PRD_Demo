@@ -803,6 +803,90 @@ html.is-firstrecap .firstrecap-body::before{
   background: transparent;
 }
 
+/* ── Sticky bar collapse / expand ── */
+.sticky-stats__expanded,
+.sticky-stats__collapsed{
+  transition: opacity .22s ease, max-height .28s ease;
+  overflow: hidden;
+}
+.sticky-stats__expanded{
+  max-height: 500px;
+  opacity: 1;
+}
+.sticky-stats__collapsed{
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.sticky-stats.is-collapsed .sticky-stats__expanded{
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.sticky-stats.is-collapsed .sticky-stats__collapsed{
+  max-height: 200px;
+  opacity: 1;
+  pointer-events: auto;
+}
+.sticky-compact{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  min-height: 44px;
+}
+.sticky-compact__thumb{
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--mem-bg, #F7E3C5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.sticky-compact__avatar{
+  font-size: 14px;
+  line-height: 1;
+}
+.sticky-compact__info{
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.sticky-compact__info .pill{
+  font-size: 12px;
+  padding: 3px 10px;
+}
+.sticky-compact__expand{
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  color: rgba(15,23,42,.55);
+  transition: background .15s, transform .15s;
+}
+.sticky-compact__expand:hover{
+  background: rgba(255,255,255,1);
+}
+.sticky-compact__expand:active{
+  transform: scale(.92);
+}
+
 /* Sticky hub layout */
 .sticky-hub{
   display: flex;
@@ -1109,6 +1193,106 @@ html.is-firstrecap .firstrecap-body::before{
   min-width: 100%;
   scroll-snap-align: start;
 }
+/* 游玩时长任务 */
+.playtime-task{
+  background:rgba(15,23,42,.02);
+  border:1px solid rgba(15,23,42,.06);
+  border-radius:12px;
+  padding:14px;
+}
+.playtime-task-current__encourage{
+  display:flex;
+  align-items:center;
+  font-size:13px;
+  color:rgba(15,23,42,.55);
+  margin-bottom:6px;
+}
+.playtime-task-current__target{
+  font-size:13px;
+  color:rgba(15,23,42,.7);
+  margin-bottom:8px;
+}
+.playtime-task-current__bar{
+  margin-top:10px;
+  height:8px;
+  background:rgba(15,23,42,.06);
+  border-radius:4px;
+  overflow:hidden;
+}
+.playtime-task-current__fill{
+  height:100%;
+  background:var(--brand);
+  border-radius:4px;
+  transition:width .4s ease;
+}
+.playtime-task-current__status{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-top:8px;
+  font-size:12px;
+  color:rgba(15,23,42,.5);
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.playtime-task__arrow{
+  font-size:10px;
+  transition:transform .25s ease;
+}
+.playtime-task__drawer{
+  max-height:0;
+  overflow:hidden;
+  transition:max-height .3s ease, opacity .25s ease;
+  opacity:0;
+}
+.playtime-task__drawer.is-open{
+  max-height:500px;
+  opacity:1;
+  margin-top:8px;
+}
+.playtime-tier{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  border-radius:8px;
+  font-size:13px;
+}
+.playtime-tier + .playtime-tier{
+  margin-top:4px;
+}
+.playtime-tier__label{
+  flex:1;
+  font-weight:600;
+  color:rgba(15,23,42,.7);
+}
+.playtime-tier__reward{
+  font-weight:700;
+  color:var(--brand);
+  white-space:nowrap;
+}
+.playtime-tier__status{
+  font-size:12px;
+  color:rgba(15,23,42,.4);
+  white-space:nowrap;
+}
+.playtime-tier--done{
+  background:rgba(0,207,172,.06);
+}
+.playtime-tier--done .playtime-tier__status{
+  color:var(--brand);
+  font-weight:700;
+}
+.playtime-tier--claimed{
+  opacity:.5;
+}
+.playtime-tier--claimed .playtime-tier__reward{
+  color:rgba(15,23,42,.35);
+}
+.playtime-tier--claimed .playtime-tier__status{
+  color:rgba(15,23,42,.35);
+}
+
 .play-grid{
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2064,6 +2248,11 @@ html.is-firstrecap .firstrecap-body::before{
   line-height:1.3;
   word-break:break-all;
 }
+.pool-item__kind{
+  font-size:9px;
+  color:rgba(15,23,42,.4);
+  margin-top:-2px;
+}
 .pool-item__tag{
   position:absolute;
   top:4px;
@@ -2075,6 +2264,76 @@ html.is-firstrecap .firstrecap-body::before{
   border-radius:4px;
   padding:1px 4px;
   line-height:1.3;
+}
+/* 抽奖测试条 */
+.lottery-test-bar{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:10px;
+  padding:8px 12px;
+  background:rgba(255,200,50,.08);
+  border:1px dashed rgba(200,160,50,.35);
+  border-radius:8px;
+}
+.lottery-test-bar__label{
+  font-size:12px;
+  font-weight:600;
+  color:rgba(15,23,42,.55);
+  white-space:nowrap;
+}
+.lottery-test-bar__select{
+  flex:1;
+  font-size:12px;
+  padding:4px 8px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  background:#fff;
+  color:rgba(15,23,42,.8);
+}
+/* 我的奖品下拉抽屉 */
+.prizes-drawer__toggle{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  width:100%;
+  padding:0;
+  border:none;
+  background:none;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.prizes-drawer__arrow{
+  font-size:12px;
+  color:rgba(15,23,42,.4);
+  transition:transform .25s ease;
+}
+.prizes-drawer__body{
+  max-height:0;
+  overflow:hidden;
+  transition:max-height .3s ease, opacity .25s ease;
+  opacity:0;
+}
+.prizes-drawer__body.is-open{
+  max-height:40vh;
+  overflow-y:auto;
+  opacity:1;
+}
+/* 奖品记录表 */
+.prize-table tr{
+  border-bottom:1px solid rgba(15,23,42,.06);
+}
+.prize-table td{
+  padding:10px 6px;
+  vertical-align:middle;
+}
+.prize-row__hint{
+  font-size:12px;
+  color:rgba(15,23,42,.4);
+}
+.prize-row__action{
+  font-size:12px;
+  padding:2px 8px;
 }
 /* 兑换网格 */
 .exchange-grid{
@@ -2661,6 +2920,21 @@ html.is-firstrecap .firstrecap-body::before{
   font-weight: 800;
   color: var(--brand);
   white-space: nowrap;
+}
+.guess-card__cta-points{
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(15,23,42,.4);
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+/* 可点击卡片样式 */
+[data-game-url]{
+  cursor: pointer;
+}
+[data-game-url]:hover{
+  box-shadow: 0 4px 16px rgba(15,23,42,.10);
 }
 
 /* 翻牌动画 */
