@@ -23,6 +23,7 @@ const STORAGE_KEY = "taptap10y_state_v1";
  *   daily?: { lotteryDayKey?: string; checkinDays?: number; checkinStreak?: number; lastCheckinDay?: string; welfareLotteryDay?: string };
  *   lotteryWins?: Array<{id:string, kind:string, title:string, icon:string, time:string}>;
  *   exchangeOwned?: string[];
+ *   exchangeRecords?: Array<{id:string, title:string, icon:string, time:string, type?:string, key?:string}>;
  *   mutualMessages?: Record<string, { text: string; ts: number; likes?: number }[]>;
  *   entryGateDone?: boolean;
  *   firstRecapDone?: boolean;
@@ -503,6 +504,9 @@ const EXCHANGE_ITEMS = [
   { id: "ex_badge_bolt",   icon: "⚡", title: "闪电徽章",       cost: 170, qty: 250 },
   { id: "ex_frame_ocean",  icon: "🌊", title: "海浪头像框",     cost: 140, qty: 380 },
   { id: "ex_badge_gem",    icon: "💎", title: "宝石徽章",       cost: 300, qty: 100 },
+  { id: "ex_gift_a",       icon: "🎮", title: "游戏A 礼包码",   cost: 80,  qty: 999, type: "giftcode", key: "GIFT-TAPTAP-10Y-AAAA" },
+  { id: "ex_gift_b",       icon: "🎲", title: "游戏B 礼包码",   cost: 80,  qty: 999, type: "giftcode", key: "GIFT-TAPTAP-10Y-BBBB" },
+  { id: "ex_gift_c",       icon: "🕹️", title: "游戏C 礼包码",   cost: 100, qty: 999, type: "giftcode", key: "GIFT-TAPTAP-10Y-CCCC" },
 ];
 
 const MEM_CARD_COLORS = [
@@ -607,6 +611,7 @@ function loadState() {
     daily: { lotteryDayKey: "", checkinDays: 0, checkinStreak: 0, lastCheckinDay: "", welfareLotteryDay: "" },
     lotteryWins: [],
     exchangeOwned: [],
+    exchangeRecords: [],
     mutualMessages: {
       m1: [
         { text: "音游党狂喜，谱面真的太有创意了", ts: Date.now() - 86400000 * 3, likes: 128 },
@@ -707,6 +712,7 @@ function loadState() {
       return w;
     });
     if (!Array.isArray(merged.exchangeOwned)) merged.exchangeOwned = [];
+    if (!Array.isArray(merged.exchangeRecords)) merged.exchangeRecords = [];
 
     if (typeof merged.loggedIn !== "boolean") merged.loggedIn = fallback.loggedIn;
     merged.entryGateDone = !!merged.entryGateDone;
@@ -3605,10 +3611,15 @@ function exchangeItemCard(item, s) {
   const exchangedCount = (s.exchangeOwned || []).filter((id) => id === item.id).length;
   const soldOut = exchangedCount >= item.qty;
   const canBuy = s.points >= item.cost;
+  const isGift = item.type === "giftcode";
 
   let btnHtml;
   if (owned) {
-    btnHtml = `<div class="exchange-card__status">已拥有</div>`;
+    if (isGift) {
+      btnHtml = `<div class="exchange-card__status">已兑换</div><div class="exchange-card__key">${escapeHtml(item.key || "")}</div><div class="exchange-card__desc">可前往游戏内兑换</div>`;
+    } else {
+      btnHtml = `<div class="exchange-card__status">已拥有</div>`;
+    }
   } else if (soldOut) {
     btnHtml = `<div class="exchange-card__status exchange-card__status--soldout">库存不足</div>`;
   } else {
@@ -3660,39 +3671,55 @@ function shopModalView(s) {
     `<option value="${k}" ${currentForceKind === k ? "selected" : ""}>${v}</option>`
   ).join("");
 
-  let prizesDrawerHtml = "";
-  if (winCount > 0) {
-    const wins = (s.lotteryWins || []).slice().reverse();
-    const prizeHintMap = {
+  const lotteryEntries = (s.lotteryWins || []).map((w) => ({ ...w, _source: "lottery" }));
+  const exchangeEntries = (s.exchangeRecords || []).map((r) => ({ ...r, _source: "exchange" }));
+  const allPrizes = [...lotteryEntries, ...exchangeEntries].sort((a, b) => new Date(b.time) - new Date(a.time));
+
+  let prizesDrawerContent = "";
+  if (allPrizes.length > 0) {
+    const lotteryHintMap = {
       frame: { inline: "", below: `<span class="prize-row__hint">可在个人主页使用</span>` },
       coupon: { inline: `<button class="btn btn--sm prize-row__action" data-prize-wallet type="button">查看我的钱包</button>`, below: "" },
       voucher: { inline: "", below: `<span class="prize-row__hint">前往 TapTap 兑换中心查看</span>` },
       cloud: { inline: "", below: `<span class="prize-row__hint">前往 TapTap 兑换中心使用</span>` },
       cdkey: { inline: "", below: `<span class="prize-row__hint">前往 TapTap 兑换中心使用</span>` },
     };
-    const rows = wins.map((w) => {
+    const rows = allPrizes.map((w) => {
       const d = new Date(w.time);
       const timeStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
-      const h = prizeHintMap[w.kind] || { inline: "", below: "" };
-      return `<tr><td style="font-size:20px;text-align:center;width:40px">${w.icon}</td><td><div style="display:flex;align-items:center;gap:8px"><span style="font-weight:600;font-size:14px">${escapeHtml(w.title)}</span>${h.inline}</div>${h.below ? `<div style="margin-top:4px">${h.below}</div>` : ""}</td><td style="font-size:12px;color:rgba(15,23,42,.45);text-align:right;white-space:nowrap;vertical-align:top">${timeStr}</td></tr>`;
+      let inlineHtml = "", belowHtml = "";
+      const srcLabel = w._source === "exchange" ? `<span class="prize-row__src">兑换</span>` : `<span class="prize-row__src prize-row__src--lottery">抽奖</span>`;
+      if (w._source === "lottery") {
+        const h = lotteryHintMap[w.kind] || { inline: "", below: "" };
+        inlineHtml = h.inline;
+        belowHtml = h.below;
+      } else if (w.type === "giftcode") {
+        belowHtml = `<span class="prize-row__hint">可前往游戏内兑换</span>`;
+      }
+      return `<tr><td style="font-size:20px;text-align:center;width:40px">${w.icon}</td><td><div style="display:flex;align-items:center;gap:8px"><span style="font-weight:600;font-size:14px">${escapeHtml(w.title)}</span>${srcLabel}${inlineHtml}</div>${belowHtml ? `<div style="margin-top:4px">${belowHtml}</div>` : ""}</td><td style="font-size:12px;color:rgba(15,23,42,.45);text-align:right;white-space:nowrap;vertical-align:top">${timeStr}</td></tr>`;
     }).join("");
-    prizesDrawerHtml = `
-      <div class="welfare-section prizes-drawer" style="margin-top:20px">
-        <button class="prizes-drawer__toggle" id="btnTogglePrizes" type="button">
-          <span class="welfare-section__title">🎁 我的奖品</span>
-          <span class="prizes-drawer__arrow" id="prizesArrow">▼</span>
-        </button>
-        <div class="prizes-drawer__body" id="prizesDrawerBody">
-          <table class="prize-table" style="width:100%;border-collapse:collapse"><tbody>${rows}</tbody></table>
-        </div>
-      </div>`;
+    prizesDrawerContent = `<table class="prize-table" style="width:100%;border-collapse:collapse"><tbody>${rows}</tbody></table>`;
+  } else {
+    prizesDrawerContent = `<div style="padding:16px 0;text-align:center;color:rgba(15,23,42,.35);font-size:13px">还没有获得奖品，快去抽奖和兑换吧~</div>`;
   }
+  const prizesDrawerHtml = `
+    <div class="welfare-section prizes-drawer" style="margin-bottom:20px">
+      <button class="prizes-drawer__toggle" id="btnTogglePrizes" type="button">
+        <span class="welfare-section__title">🎁 我的奖品</span>
+        <span class="prizes-drawer__arrow" id="prizesArrow">▼</span>
+      </button>
+      <div class="prizes-drawer__body" id="prizesDrawerBody">
+        ${prizesDrawerContent}
+      </div>
+    </div>`;
 
   return `
     <div>
       <div style="margin-bottom:16px">
         <span class="pill pill--brand">当前积分：<b>${fmt(s.points)}</b></span>
       </div>
+
+      ${prizesDrawerHtml}
 
       <div class="welfare-section">
         <div class="welfare-section__header">
@@ -3713,7 +3740,6 @@ function shopModalView(s) {
           <button class="btn btn--sm" id="btnTestResetLottery" type="button" ${drawnToday ? "" : "disabled"}>重置今日机会</button>
         </div>
       </div>
-      ${prizesDrawerHtml}
 
       <div class="divider" style="margin:20px 0"></div>
       <div class="welfare-section">
@@ -7231,11 +7257,23 @@ function wireShop({ inModal = false } = {}) {
         if (!enough) { closeModal(); if (inModal) openShopModal(); return; }
         state.points -= item.cost;
         state.exchangeOwned.push(id);
+        if (!Array.isArray(state.exchangeRecords)) state.exchangeRecords = [];
+        state.exchangeRecords.push({
+          id: item.id, title: item.title, icon: item.icon,
+          time: new Date().toISOString(),
+          type: item.type || "", key: item.key || "",
+        });
         saveState();
-        closeModal();
-        render();
-        toast(`已兑换：${item.title}`);
-        if (inModal) openShopModal();
+        if (item.type === "giftcode") {
+          const giftBody = `<div style="text-align:center;padding:16px 0"><div style="font-size:48px;margin-bottom:12px">${item.icon}</div><div style="font-size:16px;font-weight:800;color:#0F172A">${escapeHtml(item.title)}</div><div style="margin-top:12px;padding:10px 14px;background:rgba(15,23,42,.04);border-radius:8px;font-family:monospace;font-size:14px;letter-spacing:1px;word-break:break-all;color:#0F172A">${escapeHtml(item.key || "")}</div><div style="margin-top:8px"><span style="font-size:13px;color:rgba(15,23,42,.55)">可前往游戏内兑换</span></div></div>`;
+          openModal({ title: "兑换成功", bodyHtml: giftBody, footerHtml: `<button class="btn btn--brand" id="btnGiftOk">知道了</button>` });
+          $("#btnGiftOk")?.addEventListener("click", () => { closeModal(); render(); if (inModal) openShopModal(); });
+        } else {
+          closeModal();
+          render();
+          toast(`已兑换：${item.title}`);
+          if (inModal) openShopModal();
+        }
       });
     }),
   );
