@@ -5430,7 +5430,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         <div class="home-hero__text">
           <div class="home-hero__title">🎉 回顾你与 TapTap 走过的十年时光</div>
           <div class="home-hero__note">
-            数据统计截止到 2026年4月17日
+            数据统计截止到 2026年4月1日
             <span class="home-hero__info-btn" onclick="this.closest('.home-hero__note').querySelector('.home-hero__info-popup').classList.toggle('is-visible')">!</span>
             <div class="home-hero__info-popup">
               <ul>
@@ -7635,15 +7635,15 @@ function runOpeningGate() {
       e.preventDefault();
       e.stopPropagation();
       openModal({
-        title: "TapTap 十周年活动协议",
+        title: "TapTap 十周年活动授权协议",
         bodyHtml: `<div style="padding:16px;font-size:13px;line-height:1.8;color:var(--text-secondary);max-height:60vh;overflow-y:auto">
-          <p>欢迎参加 TapTap 十周年庆典活动（以下简称"本活动"）。在参与本活动之前，请您仔细阅读以下条款：</p>
-          <p><b>1. 活动规则</b><br>本活动由 TapTap 官方举办，活动期间用户可通过完成指定任务获取积分和奖励。活动最终解释权归 TapTap 所有。</p>
-          <p><b>2. 用户行为规范</b><br>参与用户应遵守相关法律法规及平台规则，不得利用技术手段或其他方式进行作弊、刷分等违规行为。</p>
-          <p><b>3. 数据使用</b><br>活动将基于您在 TapTap 平台的公开数据生成个性化回顾内容，相关数据仅用于本活动展示，不会用于其他商业用途。</p>
-          <p><b>4. 奖励发放</b><br>活动奖励将在活动结束后统一发放至用户的 TapTap 账户，具体发放时间以官方公告为准。</p>
-          <p><b>5. 免责声明</b><br>因不可抗力或系统故障等原因导致活动中断或数据异常，TapTap 不承担相关责任，但将尽力恢复并妥善处理。</p>
-          <p style="color:var(--text-tertiary);margin-top:12px">本协议为演示内容，仅供参考。</p>
+          <p>欢迎参与"TapTap十周年"活动！</p>
+          <p>在参与TapTap十周年活动之前，请您仔细阅读并充分理解本协议及<a href="https://www.taptap.cn/doc/privacy-policy/" target="_blank" style="color:var(--brand)">《TapTap隐私政策》</a>，若您不同意本协议及《TapTap隐私政策》中的任何内容，请立即停止参加本活动。您开启"TapTap 十周年"活动将被视为已仔细阅读、充分理解并接受本协议及《TapTap隐私政策》下的所有条款。</p>
+          <p><b>1.</b> 为了生成您的十周年生涯回顾，您同意授权TapTap使用您从注册TapTap平台开始至2026年4月1日期间的相关用户信息、使用记录，并据此进行报告分析，以向您提供个性化专属展示。<br>所涉及的用户信息、使用记录包括：您的账号信息（包括ID、昵称、头像、注册日期及注册天数）；应用启动时间及次数；预约游戏记录；下载游戏记录及游戏时长（含云玩、TapPlay功能）；评价记录；浏览记录；内容发布记录；点赞及获赞记录；游戏成就及战绩记录；STEAM数据记录；徽章取得记录；游戏购买及消费记录。<br>您理解并同意，上述信息是TapTap生成您的十周年生涯回顾的必备信息，如您拒绝授权，TapTap将无法为您提供您的十周年生涯回顾。未经您的书面同意，我们保证仅在本协议及《TapTap隐私政策》约定的范围使用您的个人信息。</p>
+          <p><b>2.</b> 您的十周年生涯回顾依据您的授权范围由系统自动生成，请您理解其与实际情况可能存在偏差。</p>
+          <p><b>3.</b> 您的十周年生涯回顾及其内容（包括但不限于软件、技术、程序、网页、文字、图片、音频、视频、页面设计、商标等）的知识产权由TapTap或实际权利人享有。</p>
+          <p><b>4.</b> 请您注意，本次活动的结果页面会包含您的个人信息，当您选择分享您的十周年生涯回顾截图或结果页面时，其他人会看到您的相关信息，故请您谨慎选择。</p>
+          <p><b>5.</b> 本产品/页面使用 LINE Seed 字体，LINE Seed 字体著作权归 LY Corporation 所有，并依据 SIL Open Font License, Version 1.1 授权发布。</p>
         </div>`,
       });
     });
