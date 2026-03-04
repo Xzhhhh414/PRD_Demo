@@ -2362,7 +2362,7 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
     if (av.img) {
       iconHtml = `<img class="mem-opt__img-ico" src="${av.img}" alt="${escapeHtml(av.label)}" draggable="false" />`;
     } else if (av.isGameRole) {
-      iconHtml = `<span class="mem-opt__role-ico">${escapeHtml(av.game || "游戏")}<br>${escapeHtml(av.label || "角色")}</span>`;
+      iconHtml = `<span class="mem-opt__role-ico">游戏<br>角色</span>`;
     } else {
       iconHtml = av.icon;
     }
