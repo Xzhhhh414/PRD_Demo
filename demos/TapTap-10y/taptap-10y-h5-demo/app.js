@@ -6517,7 +6517,7 @@ function discoverInlineView(s) {
 
       const tagsHtml = (g.tags || []).slice(0, 2).map(t => `<span class="guess-card__tag">${escapeHtml(t)}</span>`).join("");
       return `
-        <div class="guess-card guess-card--open guess-card--col" style="--layer-color:${g.layerColor}" data-game-url="${escapeHtml(g.url || "")}">
+        <div class="guess-card guess-card--open guess-card--col" style="--layer-color:${g.layerColor}">
           <div class="guess-card__top">
             <div class="guess-card__icon">${g.icon}</div>
             <div class="guess-card__info">
@@ -6577,7 +6577,7 @@ function discoverInlineView(s) {
   const restPages = allByHeat.filter((g) => !firstPageIds.has(g.p.id));
   const playItems = [...firstPage, ...restPages];
 
-  const PAGE_SIZE = 8;
+  const PAGE_SIZE = 6;
   const playCardHtml = ({ p }) => {
     const icon = iconChar(p.title);
     const tags = (p.tags || [])
@@ -6587,7 +6587,7 @@ function discoverInlineView(s) {
       .join(" · ");
     const heat = Math.max(0, Number(p.heat || 0));
     return `
-      <div class="play-card2" data-game-url="${escapeHtml(p.url || "")}" role="button" tabindex="0">
+      <div class="play-card2">
         <div class="play-card2__cover">
           <span class="play-card2__cover-icon">${escapeHtml(icon)}</span>
           <span class="play-card2__heat">🔥 ${fmt(heat)}</span>
@@ -6595,6 +6595,7 @@ function discoverInlineView(s) {
         <div class="play-card2__body">
           <div class="play-card2__name">${escapeHtml(p.title)}</div>
           <div class="play-card2__tags">${tags}</div>
+          <button class="btn btn--sm play-card2__go" type="button" data-play-visit="${escapeHtml(p.url || "")}">去看看</button>
         </div>
       </div>`;
   };
@@ -6885,11 +6886,11 @@ function wireDiscoverInline() {
     render();
   });
 
-  // ── 游乐场游戏卡片点击 ──
-  $$(".play-card2[data-game-url]").forEach((card) =>
-    card.addEventListener("click", () => {
-      const url = card.dataset.gameUrl;
-      if (url) openGameDetail(url);
+  // ── 去看看按钮 ──
+  $$("[data-play-visit]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const url = btn.dataset.playVisit || "";
+      openGameDetail(url);
     })
   );
 
@@ -6941,15 +6942,6 @@ function wireDiscoverInline() {
     render();
     toast("已重置游玩时长和任务进度");
   });
-
-  // ── 游戏卡片点击跳转详情页 ──
-  $$("[data-game-url]").forEach((card) =>
-    card.addEventListener("click", (e) => {
-      if (e.target.closest("button, a, [data-play-go], [data-play-claim], [data-guess-story], [data-guess-claim], [data-guess-post], [data-guess-reveal]")) return;
-      const url = card.dataset.gameUrl;
-      if (url) openGameDetail(url);
-    }),
-  );
 
   // ── 相关活动 banner 点击 ──
   const relatedInfo = {

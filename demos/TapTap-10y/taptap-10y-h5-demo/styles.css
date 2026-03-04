@@ -1306,7 +1306,6 @@ html.is-firstrecap .firstrecap-body::before{
   border: 1.5px solid rgba(15,23,42,.06);
   background: #fff;
   display: flex;
-  cursor: pointer;
   flex-direction: column;
 }
 .play-card2--claim{
@@ -1364,6 +1363,14 @@ html.is-firstrecap .firstrecap-body::before{
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.play-card2__go{
+  display: block;
+  margin: 6px auto 0;
+  font-size: 12px;
+  padding: 4px 24px;
+  border-radius: 8px;
+  width: fit-content;
 }
 .play-card2__action{
   margin-top: auto;
