@@ -6411,7 +6411,7 @@ function discoverInlineView(s) {
           <div class="playtime-task-current__fill" style="width:${pct}%"></div>
         </div>
         <div class="playtime-task-current__status" id="btnToggleTiers" role="button" tabindex="0">
-          <span>${fmtTimeAs(mins, current.minutes)} / ${current.label}　→　${fmt(current.points)} 积分</span>
+          <span>${fmtTimeAs(mins, current.minutes)} / ${current.label}</span>
           <span class="playtime-task__arrow" id="tiersArrow">▼</span>
         </div>
       </div>`;
