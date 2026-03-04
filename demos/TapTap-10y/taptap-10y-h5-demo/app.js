@@ -1872,8 +1872,35 @@ function getRoute() {
   return (m?.[1] || "home").replace(/[^a-z]/g, "") || "home";
 }
 
+let _openingGateActive = false;
+function showOpeningGate() {
+  if (_openingGateActive) return;
+  _openingGateActive = true;
+  const opening = document.getElementById("opening");
+  const appRoot = document.getElementById("app");
+  if (opening) {
+    opening.classList.remove("hidden", "opening--exit");
+    opening.removeAttribute("aria-hidden");
+  }
+  if (appRoot) appRoot.classList.add("hidden");
+  state.entryGateDone = false;
+  saveState();
+  runOpeningGate().then(() => {
+    _openingGateActive = false;
+    state.entryGateDone = true;
+    saveState();
+    location.hash = "#/home";
+    render();
+  });
+}
+
 function render() {
   const route = getRoute();
+
+  if (!state.loggedIn) {
+    showOpeningGate();
+    return;
+  }
   // Home-only for “回顾/好游戏/试玩/纪念卡”
   if (route === "discover" || route === "recap" || route === "shop") {
     navigate("home");
@@ -1980,26 +2007,6 @@ function setTopbarHeightVar() {
 }
 
 function stickyStatsView(s) {
-  // 未登录时，名片区域显示登录提示（不折叠）
-  if (!s.loggedIn) {
-    return `
-      <section class="card sticky-stats__card" style="border-radius:0; box-shadow:none;">
-        <div class="sticky-hub">
-          <div class="sticky-hub__left">
-            <div class="sticky-hub__thumb sticky-hub__thumb--login" id="btnStickyLogin" role="button" tabindex="0" aria-label="登录">
-              <div class="sticky-hub__login-icon">👤</div>
-            </div>
-          </div>
-          <div class="sticky-hub__info">
-            <p style="font-size:14px;font-weight:700;color:#0F172A;margin:0 0 4px">登录查看你的十周年名片</p>
-            <p class="muted small" style="margin:0 0 8px">登录后可查看专属回顾数据、领取积分奖励</p>
-            <button class="btn btn--brand" id="btnStickyLoginAction" type="button" style="font-size:13px;padding:6px 20px;min-height:0">登录</button>
-          </div>
-        </div>
-      </section>
-    `;
-  }
-
   const recap = s.careerSnapshot?.recap || recapDataForState(s);
   const color = MEM_CARD_COLORS.find((c) => c.id === s.memorial?.colorId) || MEM_CARD_COLORS[0];
   const avatar = MEM_AVATARS.find((x) => x.id === s.memorial?.avatarId) || MEM_AVATARS[0];
@@ -2080,12 +2087,6 @@ function stickyStatsLiteView(s) {
 }
 
 function wireStickyStats() {
-  // 未登录时的登录按钮
-  const loginHandler = () => openLoginModal(() => render());
-  $("#btnStickyLogin")?.addEventListener("click", loginHandler);
-  $("#btnStickyLoginAction")?.addEventListener("click", loginHandler);
-
-  // 已登录时的正常交互
   $("#btnGoShop")?.addEventListener("click", () => openShopModal());
   if (ENABLE_COUPONS) $("#btnWallet")?.addEventListener("click", openWalletModal);
   $("#btnOpenMemorial")?.addEventListener("click", () => openMemorialEditModal());
@@ -2094,7 +2095,7 @@ function wireStickyStats() {
 
   // ── 置顶栏折叠/展开 ──
   const stickyEl = document.getElementById("stickyStats");
-  if (stickyEl && state.loggedIn) {
+  if (stickyEl) {
     const SCROLL_THRESHOLD = 40;
     let scrollTimer = null;
     let anchorY = window.scrollY;
@@ -2202,16 +2203,7 @@ function firstRecapView(s, recap) {
 }
 
 function homeView(s, recap) {
-  const recapHtml = s.loggedIn
-    ? recapInlineView(s, recap, { sortUnclaimedFirst: false })
-    : `<section class="card">
-        <div class="recap-login-placeholder">
-          <div class="recap-login-placeholder__icon">📖</div>
-          <p class="recap-login-placeholder__title">我的 TapTap 十年回顾</p>
-          <p class="recap-login-placeholder__desc">登录后即可开启你的专属生涯回顾，查看你与 TapTap 的故事</p>
-          <button class="btn btn--brand" id="btnRecapLogin" type="button" style="min-height:0;padding:8px 24px;font-size:14px">登录开启</button>
-        </div>
-      </section>`;
+  const recapHtml = recapInlineView(s, recap, { sortUnclaimedFirst: false });
   return `
     <div class="home-module" id="section-recap">${recapHtml}</div>
 
@@ -2223,8 +2215,6 @@ function homeView(s, recap) {
 function wireHome() {
   wireRecapInline();
   wireDiscoverInline();
-  // 未登录时回顾区域的登录按钮
-  $("#btnRecapLogin")?.addEventListener("click", () => openLoginModal(() => render()));
 }
 
 function dayKeyLocal(d = new Date()) {
@@ -7383,8 +7373,13 @@ function openDebug() {
     state.loggedIn = !state.loggedIn;
     saveState();
     closeModal();
-    toast(state.loggedIn ? "已切换为登录状态" : "已切换为未登录状态");
-    render();
+    if (!state.loggedIn) {
+      toast("已切换为未登录状态，返回开场页");
+      showOpeningGate();
+    } else {
+      toast("已切换为登录状态");
+      render();
+    }
   });
 
   const defaultRecap = () => recapDataForState({ ...state, boundData: false });
@@ -7639,17 +7634,14 @@ async function init() {
   const opening = document.getElementById("opening");
   const appRoot = document.getElementById("app");
 
-  // Only show opening gate once (unless explicitly reset).
-  // After the user refreshes / re-opens, go straight to the activity hall.
-  if (!state.entryGateDone) {
+  if (!state.entryGateDone || !state.loggedIn) {
+    // 首次进入 或 未登录 → 展示开场页
     await runOpeningGate();
     state.entryGateDone = true;
     saveState();
-    // [DISABLED] 首次进入不再走前置十年回顾流程，直接进主会场
-    // location.hash = "#/firstrecap";
     location.hash = "#/home";
   } else {
-    // Re-open: skip opening, go straight to activity home
+    // 已登录 + 已通过开场 → 直接进入活动首页
     try {
       opening?.classList.add("hidden");
       opening?.setAttribute("aria-hidden", "true");
