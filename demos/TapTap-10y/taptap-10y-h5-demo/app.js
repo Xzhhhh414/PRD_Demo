@@ -528,12 +528,12 @@ const MEM_STICKERS = [
 
 const MEM_AVATARS = [
   { id: "ma_me", icon: "👤", label: "Tap头像", isProfileAvatar: true, img: "default.png" },
-  { id: "ma_bunny", icon: "🐰", label: "Tarara", img: "tarara01.png" },
-  { id: "ma_cat", icon: "🐱", label: "Tarara", img: "tarara02.png" },
-  { id: "ma_robot", icon: "🤖", label: "游戏名字", isGameRole: true },
-  { id: "ma_fox", icon: "🦊", label: "游戏名字", isGameRole: true },
-  { id: "ma_panda", icon: "🐼", label: "游戏名字", isGameRole: true },
-  { id: "ma_penguin", icon: "🐧", label: "游戏名字", isGameRole: true },
+  { id: "ma_bunny", icon: "🐰", game: "TapTap", label: "嗒啦啦", img: "tarara01.png" },
+  { id: "ma_cat", icon: "🐱", game: "TapTap", label: "嗒啦啦", img: "tarara02.png" },
+  { id: "ma_robot", icon: "🤖", game: "游戏名字", label: "角色名字", isGameRole: true },
+  { id: "ma_fox", icon: "🦊", game: "游戏名字", label: "角色名字", isGameRole: true },
+  { id: "ma_panda", icon: "🐼", game: "游戏名字", label: "角色名字", isGameRole: true },
+  { id: "ma_penguin", icon: "🐧", game: "游戏名字", label: "角色名字", isGameRole: true },
 ];
 
 /** 渲染角色头像内容 */
@@ -2101,14 +2101,23 @@ function wireStickyStats() {
     let anchorY = window.scrollY;
     let ignoreUntil = 0;
 
-    const collapse = () => { stickyEl.classList.add("is-collapsed"); };
-    const expand = () => { stickyEl.classList.remove("is-collapsed"); };
+    const isCollapsed = () => stickyEl.classList.contains("is-collapsed");
+    const collapse = () => {
+      if (isCollapsed()) return;
+      stickyEl.classList.add("is-collapsed");
+      ignoreUntil = Date.now() + 400;
+      setTimeout(() => { anchorY = window.scrollY; }, 380);
+    };
+    const expand = () => {
+      if (!isCollapsed()) return;
+      stickyEl.classList.remove("is-collapsed");
+      ignoreUntil = Date.now() + 400;
+      setTimeout(() => { anchorY = window.scrollY; }, 380);
+    };
 
-    // 展开按钮：点击展开，短暂忽略 scroll（展开引起的布局偏移）
+    // 展开按钮
     $("#btnStickyExpand")?.addEventListener("click", () => {
       expand();
-      ignoreUntil = Date.now() + 350;
-      setTimeout(() => { anchorY = window.scrollY; }, 320);
     });
 
     const onScroll = () => {
@@ -2118,12 +2127,13 @@ function wireStickyStats() {
 
       if (y <= 10) {
         expand();
-        anchorY = y;
         return;
       }
 
-      if (Math.abs(y - anchorY) > SCROLL_THRESHOLD) {
+      const delta = y - anchorY;
+      if (delta > SCROLL_THRESHOLD) {
         collapse();
+        return;
       }
 
       clearTimeout(scrollTimer);
@@ -2302,9 +2312,9 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
       }
       ${!compact && label ? `<span class="mem-opt__t">${escapeHtml(label)}</span>` : ""}
       ${
-        compact
-          ? `<span class="mem-opt__price ${locked && cost ? "" : "mem-opt__price--ghost"}" aria-hidden="true">${fmt(cost || 0)}积分</span>`
-          : (locked && cost ? `<span class="mem-opt__price" aria-hidden="true">${fmt(cost)}积分</span>` : "")
+        compact && locked && cost
+          ? `<span class="mem-opt__price" aria-hidden="true">${fmt(cost)}积分</span>`
+          : (!compact && locked && cost ? `<span class="mem-opt__price" aria-hidden="true">${fmt(cost)}积分</span>` : "")
       }
       ${locked ? `<span class="mem-opt__lock" aria-hidden="true">🔒</span>` : ""}
       ${used ? `<span class="mem-opt__used" aria-hidden="true">✓</span>` : ""}
@@ -2352,11 +2362,15 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
     if (av.img) {
       iconHtml = `<img class="mem-opt__img-ico" src="${av.img}" alt="${escapeHtml(av.label)}" draggable="false" />`;
     } else if (av.isGameRole) {
-      iconHtml = `<span class="mem-opt__role-ico">游戏<br>角色</span>`;
+      iconHtml = `<span class="mem-opt__role-ico">${escapeHtml(av.game || "游戏")}<br>${escapeHtml(av.label || "角色")}</span>`;
     } else {
       iconHtml = av.icon;
     }
-    iconHtml += `<span class="mem-opt__avatar-label">${escapeHtml(av.label)}</span>`;
+    if (av.game) {
+      iconHtml += `<span class="mem-opt__avatar-label"><span class="mem-opt__avatar-game">${escapeHtml(av.game)}</span>${escapeHtml(av.label)}</span>`;
+    } else {
+      iconHtml += `<span class="mem-opt__avatar-label">${escapeHtml(av.label)}</span>`;
+    }
     return optionBtn({
       id: av.id,
       kind: "avatar",
@@ -2365,7 +2379,7 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
       used: (s.memorial?.avatarId || "") === av.id,
       locked: false,
       cost: 0,
-      ariaLabel: `角色：${av.label}`,
+      ariaLabel: `角色：${av.game ? av.game + " " : ""}${av.label}`,
       compact: true,
     });
   }).join("");
@@ -3740,6 +3754,7 @@ function wireMemorialInline({ inModal = false } = {}) {
     const footer = enough
       ? `<button class="btn" id="btnSpendCancel">取消</button><button class="btn btn--brand" id="btnSpendOk">${fmt(cost)}积分兑换</button>`
       : `<button class="btn btn--brand" id="btnSpendOk">知道了</button>`;
+    if (inModal) _modalAfterClose.push(() => openMemorialEditModal());
     openModal({ title: enough ? "确认兑换" : "积分不足", bodyHtml: body, footerHtml: footer });
     $("#btnSpendCancel")?.addEventListener("click", closeModal);
     $("#btnSpendOk")?.addEventListener("click", () => {
@@ -3831,14 +3846,12 @@ function wireMemorialInline({ inModal = false } = {}) {
         list.push(id);
         if (kind === "color") state.memorial.colorId = id;
         if (kind === "sticker") {
-          // After purchasing, always apply (add/select) immediately.
           applyStickerOnce(id);
         }
         if (kind === "avatar") state.memorial.avatarId = id;
         saveState();
-        closeModal();
         toast("已解锁并应用");
-        refreshAfterChange();
+        closeModal();
       },
     });
   };
@@ -3961,9 +3974,8 @@ function wireMemorialInline({ inModal = false } = {}) {
             state.inventory.frames.push(item.id);
             state.equipped.frame = item.id;
             saveState();
-            closeModal();
             toast(`已兑换：${item.title}`);
-            refreshAfterChange();
+            closeModal();
           },
         });
       }
@@ -3978,9 +3990,8 @@ function wireMemorialInline({ inModal = false } = {}) {
             state.inventory.badges.push(item.id);
             state.equipped.badge = item.id;
             saveState();
-            closeModal();
             toast(`已兑换：${item.title}`);
-            refreshAfterChange();
+            closeModal();
           },
         });
       }

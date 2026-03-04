@@ -1643,12 +1643,22 @@ html.is-firstrecap .firstrecap-body::before{
   font-weight: 800;
   color: rgba(15,23,42,.65);
   text-align: center;
-  line-height: 1.2;
+  line-height: 1.3;
   margin-top: 3px;
-  max-width: 64px;
+  max-width: 72px;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  white-space: normal;
+}
+.mem-opt__avatar-game{
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(15,23,42,.4);
+  line-height: 1.2;
 }
 /* 角色选项列表里的 TapTap头像 小方块（保留兼容） */
 .mem-opt__profile-ico{
