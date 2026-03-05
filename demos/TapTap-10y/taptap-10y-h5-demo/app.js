@@ -787,48 +787,25 @@ function calcSnapshotGrants(recap) {
   const reviewsHelpful = Number(recap?.reviewsHelpful || 0);
   const spendTotal = Number(recap?.spendTotal || 0);
 
-  // Backward compatibility (older ids)
-  const legacy = {
-    snap_daysActive: { points: clamp(Math.floor(daysActive / 10) * 10, 10, 500), coupons: 0 },
-    // Example: 5 款 -> 50 纪念币 + 5 点券
-    snap_gamesPlayed: { points: clamp(gamesPlayed * 10, 10, 800), coupons: ENABLE_COUPONS ? clamp(Math.floor(gamesPlayed / 5) * 5, 0, 50) : 0 },
-    snap_reviewsHelpful: { points: clamp(reviewsHelpful * 5, 10, 800), coupons: 0 },
-    snap_genre: fixed(10, 0),
-  };
-
   return {
-    ...legacy,
-
-    // 基础
-    snap_reg_active: fixed(10),
-    snap_time_habit: fixed(10),
-    snap_reserve: fixed(10),
-    snap_streak: fixed(10),
-    // TapTap 消费：纪念币按原规则，点券=消费金额的10%（向下取整）
-    snap_spend: fixed(clamp(Math.floor(spendTotal / 100) * 10, 10, 300), ENABLE_COUPONS ? Math.max(0, Math.floor(spendTotal * 0.1)) : 0),
-
-    // 玩游戏
-    snap_playtime: fixed(20),
-    snap_top3games: fixed(20, 5),
-    snap_profile: fixed(15),
-    snap_beloved: fixed(15),
-
-    // 社区
-    snap_review_voice: fixed(20),
+    snap_reg_active:      fixed(20),
+    snap_time_habit:      fixed(10),
+    snap_spend:           fixed(15),
+    snap_reserve:         fixed(10),
+    snap_top3games:       fixed(15),
+    snap_playtime:        fixed(15),
+    snap_profile:         fixed(10),
+    snap_achievements:    fixed(15),
+    snap_beloved:         fixed(20),
+    snap_tapexclusive:    fixed(15),
+    snap_editorpick:      fixed(15),
+    snap_review_voice:    fixed(15),
+    snap_community_pub:   fixed(10),
     snap_community_likes: fixed(10),
-    snap_community_pub: fixed(10),
-    snap_friend_msgs: fixed(10),
     snap_night_community: fixed(10),
-    snap_badges: fixed(10),
-
-    // 开发者（合并）
-    snap_dev_create: fixed(20),
-
-    // 新拆分卡片
-    snap_playtime: fixed(15),
-    snap_achievements: fixed(15),
-    snap_tapexclusive: fixed(10),
-    snap_editorpick: fixed(10),
+    snap_badges:          fixed(15),
+    snap_friend_msgs:     fixed(10),
+    snap_dev_create:      fixed(20),
   };
 }
 
@@ -836,38 +813,42 @@ function getMaxClaims(rewardId, snap) {
   const td = calcDaysSince(parseCnDateToTs(snap?.regDate));
   const years = Math.floor((td || 0) / 365);
   switch (rewardId) {
-    case "snap_reg_active": return Math.max(1, years);
-    case "snap_time_habit": return Math.max(1, Math.floor(Number(snap?.lateNightOpenCount || 0) / 50));
+    case "snap_reg_active": return Math.min(10, Math.max(1, years));
+    case "snap_time_habit": return Math.min(10, Math.max(1, Math.floor(Number(snap?.lateNightOpenCount || 0) / 50)));
     case "snap_reserve": return Math.min(10, Math.max(1, Math.floor(Number(snap?.reserveCount || 0) / 10)));
     case "snap_spend": return Math.min(10, Math.max(1, Math.floor(Number(snap?.spendTotal || 0) / 100)));
     case "snap_top3games": return Math.min(10, Math.max(1, Math.floor(Number(snap?.gamesPlayedTotal || 0) / 50)));
-    case "snap_playtime": return Math.min(8, Math.max(1, Math.floor(Number(snap?.playTimeHours || 0) / 200)));
+    case "snap_playtime": return Math.min(10, Math.max(1, Math.floor(Number(snap?.playTimeHours || 0) / 200)));
     case "snap_profile": {
       const dims = [snap?.radarAction, snap?.radarStrategy, snap?.radarRPG, snap?.radarAdventure, snap?.radarSim, snap?.radarCasual];
-      return Math.min(6, Math.max(1, dims.filter(v => Number(v || 0) > 0).length));
+      return Math.min(10, Math.max(1, dims.filter(v => Number(v || 0) > 0).length));
     }
     case "snap_achievements": {
       const base = Math.max(1, Math.floor(Number(snap?.achievementsTotal || 0) / 50));
-      return Math.min(15, base + Number(snap?.platinumAchievementsTotal || 0));
+      return Math.min(10, base + Number(snap?.platinumAchievementsTotal || 0));
     }
     case "snap_beloved": return 1;
-    case "snap_tapexclusive": return Math.min(8, Math.max(1, Math.floor(Number(snap?.exclusivePlayed || 0) / 10)));
-    case "snap_editorpick": return Math.min(8, Math.max(1, Math.floor(Number(snap?.editorPickPlayed || 0) / 10)));
+    case "snap_tapexclusive": return Math.min(10, Math.max(1, Math.floor(Number(snap?.exclusivePlayed || 0) / 10)));
+    case "snap_editorpick": return Math.min(10, Math.max(1, Math.floor(Number(snap?.editorPickPlayed || 0) / 10)));
     case "snap_review_voice": {
-      const base = Math.max(1, Math.floor(Number(snap?.reviewsCount || 0) / 10));
-      return Math.min(15, base + Number(snap?.zuitiReviewsCount || snap?.zuitiCount || 0));
+      const base = Math.max(1, Math.floor(Number(snap?.reviewsCount || 0) / 50));
+      return Math.min(10, base + Number(snap?.zuitiReviewsCount || snap?.zuitiCount || 0));
     }
-    case "snap_community_pub": return Math.min(10, Math.max(1, Math.floor(Number(snap?.communityPublished || 0) / 20)));
+    case "snap_community_pub": return Math.min(10, Math.max(1, Math.floor(Number(snap?.communityPublished || 0) / 100)));
     case "snap_community_likes": return Math.min(10, Math.max(1, Math.floor(Number(snap?.communityLikesReceived || 0) / 500)));
-    case "snap_night_community": return Math.min(8, Math.max(1, Math.floor(Number(snap?.nightSurfDays || 0) / 15)));
+    case "snap_night_community": return Math.min(10, Math.max(1, Math.floor(Number(snap?.nightSurfDays || 0) / 15)));
     case "snap_badges": {
       const base = Math.max(1, Math.floor(Number(snap?.platformBadgesTotal || 0) / 10));
-      return Math.min(15, base + Number(snap?.blackGoldBadgesCount || 0));
+      return Math.min(10, base + Number(snap?.blackGoldBadgesCount || 0));
     }
-    case "snap_friend_msgs": return Math.min(8, Math.max(1, Math.floor(Number(snap?.friendsCount || 0) / 10)));
+    case "snap_friend_msgs": {
+      const fc = Math.floor(Number(snap?.friendsCount || 0) / 50);
+      const fl = Math.floor(Number(snap?.followersCount || 0) / 500);
+      return Math.min(10, Math.max(1, fc + fl));
+    }
     case "snap_dev_create": {
       const cnt = (Array.isArray(snap?.devGames) ? snap.devGames : []).filter(g => String(g.name || "").trim()).length;
-      return Math.min(5, Math.max(1, cnt));
+      return Math.min(10, Math.max(1, cnt));
     }
     default: return 1;
   }
@@ -916,42 +897,15 @@ function addCoupons(s, delta) {
   s.walletCoupons = Math.max(0, (s.walletCoupons || 0) + delta);
 }
 
-const SNAP_REWARD_ALIASES = {
-  // merged snapshot cards
-  snap_review_voice: ["snap_reviews_count", "snap_review_likes_total", "snap_top_review", "snap_zuiti"],
-};
-
 function snapshotClaimGrant(s, rewardId) {
   const grants = s.careerSnapshot?.grants;
   const base = grants?.[rewardId];
-  // 如果没有配置奖励（空状态卡片），返回保底10纪念币
   if (!base) return { points: 10, coupons: 0 };
-  const aliases = SNAP_REWARD_ALIASES[rewardId];
-  if (!aliases?.length) return base;
-
-  // If already claimed by new id, no remaining grant
-  if ((s.claimedRewardIds || []).includes(rewardId)) return { points: 0, coupons: 0 };
-
-  let claimedPoints = 0;
-  let claimedCoupons = 0;
-  for (const a of aliases) {
-    if ((s.claimedRewardIds || []).includes(a)) {
-      const g = grants?.[a];
-      claimedPoints += Number(g?.points || 0);
-      claimedCoupons += Number(g?.coupons || 0);
-    }
-  }
-  return {
-    points: Math.max(0, Number(base.points || 0) - claimedPoints),
-    coupons: Math.max(0, Number(base.coupons || 0) - claimedCoupons),
-  };
+  return base;
 }
 
 function hasClaimed(s, rewardId) {
-  if ((s.claimedRewardIds || []).includes(rewardId)) return true;
-  const aliases = SNAP_REWARD_ALIASES[rewardId];
-  if (aliases?.length) return aliases.every((a) => (s.claimedRewardIds || []).includes(a));
-  return false;
+  return (s.claimedRewardIds || []).includes(rewardId);
 }
 
 function markClaimed(s, rewardId) {
@@ -1500,6 +1454,19 @@ function pillClass(type) {
 
 function fmt(n) {
   return String(n);
+}
+
+function fmtCap(n, max) {
+  return Number(n) > max ? max + "+" : fmt(Number(n));
+}
+
+function fmtWan(n) {
+  const v = Number(n || 0);
+  if (v <= 0) return "0";
+  if (v < 10000) return fmt(v);
+  if (v >= 99990000) return "999.9万+";
+  const w = v / 10000;
+  return (w >= 1 && w % 1 < 0.05) ? Math.floor(w) + "万" : w.toFixed(1) + "万";
 }
 
 // ---------- QR (pure JS, SVG output) ----------
@@ -2570,15 +2537,7 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
               <span class="mem-k mem-k--inline">ID</span>
               <span class="mem-v mem-v--grow">${escapeHtml(pid)}</span>
             </div>
-            ${title ? `
-              <div class="mem-field">
-                <span class="mem-k">身份</span>
-                <span class="mem-v">${escapeHtml(title)}</span>
-              </div>
-            ` : ""}
           </div>
-
-          ${bio ? `<div class="mem-slogan">${escapeHtml(bio)}</div>` : ""}
         </div>
       </div>
   `;
@@ -2863,15 +2822,7 @@ function memorialCardOnlyHtml(s, recap, { hideProfileFields = false } = {}) {
                 </div>
               `
           }
-          ${title ? `
-            <div class="mem-field">
-              <span class="mem-k">身份</span>
-              <span class="mem-v">${escapeHtml(title)}</span>
-            </div>
-          ` : ""}
         </div>
-
-        ${bio ? `<div class="mem-slogan">${escapeHtml(bio)}</div>` : ""}
       </div>
     </div>
   `;
@@ -3011,9 +2962,6 @@ function openShareMemorialModal({ onClose } = {}) {
         <text x="${cardX + 120}" y="${cardY + 580}" font-size="44" font-weight="900" fill="#0F172A">${escapeXml(nick)}</text>
         <text x="${cardX + 120}" y="${cardY + 670}" font-size="28" font-weight="800" fill="#0F172A">ID</text>
         <text x="${cardX + 120}" y="${cardY + 720}" font-size="36" font-weight="900" fill="#0F172A">${escapeXml(pid)}</text>
-        ${identity ? `<text x="${cardX + 120}" y="${cardY + 810}" font-size="28" font-weight="800" fill="#0F172A">身份</text>
-        <text x="${cardX + 120}" y="${cardY + 860}" font-size="34" font-weight="900" fill="#0F172A">${escapeXml(identity)}</text>` : ""}
-        ${bio ? `<text x="${cardX + 120}" y="${cardY + 920}" font-size="26" font-weight="700" fill="#334155">${escapeXml(bio).slice(0, 36)}</text>` : ""}
 
         <rect x="90" y="1240" width="900" height="600" rx="36" fill="#FFFFFF" stroke="rgba(15,23,42,0.10)" stroke-width="2"/>
         ${qrSized}
@@ -3763,18 +3711,16 @@ function shopModalView(s) {
   const poolHtml = LOTTERY_POOL.map((p) => lotteryPoolItemHtml(p, s)).join("");
   const exchangeHtml = EXCHANGE_ITEMS.map((item) => exchangeItemCard(item, s)).join("");
 
-  let lotteryBtnText, lotteryDisabled, lotteryHint = "";
+  let lotteryBtnText, lotteryDisabled;
   if (poolEmpty) {
     lotteryBtnText = "奖池已抽空";
     lotteryDisabled = true;
   } else if (!canAfford) {
-    lotteryBtnText = "参与抽奖";
+    lotteryBtnText = `抽奖 · ${LOTTERY_COST} 纪念币`;
     lotteryDisabled = true;
-    lotteryHint = `<span class="lottery-hint">${LOTTERY_COST} 纪念币/次</span>`;
   } else {
-    lotteryBtnText = "参与抽奖";
+    lotteryBtnText = `抽奖 · ${LOTTERY_COST} 纪念币`;
     lotteryDisabled = false;
-    lotteryHint = `<span class="lottery-hint">${LOTTERY_COST} 纪念币/次</span>`;
   }
 
   const winCount = (s.lotteryWins || []).length;
@@ -3841,7 +3787,6 @@ function shopModalView(s) {
         <div class="lottery-action">
           <button class="btn btn--brand lottery-action__btn" id="btnWelfareLottery"
             ${lotteryDisabled ? "disabled" : ""}>${lotteryBtnText}</button>
-          ${lotteryHint}
         </div>
         <div class="lottery-test-bar">
           <label class="lottery-test-bar__label">测试：指定必中类型</label>
@@ -4317,7 +4262,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         return `
           <div class="arrival-card arrival-card--v2">
             <div class="arrival-v2__title">冒险旅程</div>
-            <div class="arrival-v2__hero">玩过 <strong>${fmt(totalGames)}</strong> 款游戏</div>
+            <div class="arrival-v2__hero">玩过 <strong>${fmtCap(totalGames, 999)}</strong> 款游戏</div>
             <div class="arrival-v2__illust">
               <div class="arrival-v2__illust-img">插画·冒险旅程</div>
             </div>
@@ -4334,7 +4279,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
       value: (() => {
         const totalHours = Number(snap.playTimeHours || 0);
         if (totalHours <= 0) return "";
-        const fmtH = totalHours < 1 ? Math.max(0.1, totalHours).toFixed(1) : fmt(Math.floor(totalHours));
+        const fmtH = totalHours > 6000 ? "6000+" : totalHours < 1 ? Math.max(0.1, totalHours).toFixed(1) : fmt(Math.floor(totalHours));
         return `
           <div class="arrival-card arrival-card--v2">
             <div class="arrival-v2__title">游玩时光</div>
@@ -4496,7 +4441,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         return `
           <div class="arrival-card arrival-card--v2">
             <div class="arrival-v2__title">社区足迹</div>
-            <div class="arrival-v2__hero">发布了 <strong>${fmt(published)}</strong> 条帖子和回复</div>
+            <div class="arrival-v2__hero">发布了 <strong>${fmtCap(published, 9999)}</strong> 条帖子和回复</div>
             <div class="arrival-v2__illust">
               <div class="arrival-v2__illust-img">插画·社区足迹</div>
             </div>
@@ -4511,12 +4456,6 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
     {
       label: "社区点赞",
       value: (() => {
-        const fmtWan = (n) => {
-          if (n <= 0) return "0";
-          if (n < 10000) return fmt(n);
-          const w = n / 10000;
-          return (w >= 1 && w % 1 < 0.05) ? Math.floor(w) + "万" : w.toFixed(1) + "万";
-        };
         const likesReceived = Number(snap.communityLikesReceived || 0);
         if (likesReceived <= 0 && Number(snap.communityLikesGiven || 0) <= 0) return "";
         return `
@@ -4582,11 +4521,14 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
       label: "同行伙伴",
       value: (() => {
         const friends = Number(snap.friendsCount || 0);
-        if (friends <= 0 && Number(snap.followingCount || 0) <= 0 && Number(snap.followersCount || 0) <= 0) return "";
+        const followers = Number(snap.followersCount || 0);
+        if (friends <= 0 && followers <= 0) return "";
+        let heroHtml = `结交了 <strong>${fmt(friends)}</strong> 位好友`;
+        if (followers > 0) heroHtml += `，收获 <strong>${fmtWan(followers)}</strong> 位粉丝`;
         return `
           <div class="arrival-card arrival-card--v2">
             <div class="arrival-v2__title">同行伙伴</div>
-            <div class="arrival-v2__hero">结交了 <strong>${fmt(friends)}</strong> 位好友</div>
+            <div class="arrival-v2__hero">${heroHtml}</div>
             <div class="arrival-v2__illust">
               <div class="arrival-v2__illust-img">插画·同行伙伴</div>
             </div>
@@ -5240,8 +5182,6 @@ function wireRecapInline() {
         if (!grant) return;
         if (!grant.points && (!ENABLE_COUPONS || !grant.coupons)) return;
         markClaimed(state, id);
-        const aliases = SNAP_REWARD_ALIASES[id];
-        if (aliases?.length) aliases.forEach((a) => markClaimed(state, a));
         addPoints(state, grant.points || 0);
         addCoupons(state, grant.coupons || 0);
         saveState();
@@ -5693,8 +5633,6 @@ function wireFirstRecap() {
         if (!grant.points && (!ENABLE_COUPONS || !grant.coupons)) return;
         wireFirstRecap._claiming = true;
         markClaimed(state, id);
-        const aliases = SNAP_REWARD_ALIASES[id];
-        if (aliases?.length) aliases.forEach((a) => markClaimed(state, a));
         addPoints(state, grant.points || 0);
         addCoupons(state, grant.coupons || 0);
         saveState();
@@ -6440,23 +6378,7 @@ function wireDiscoverInline() {
       const key = el.dataset.related;
       const info = relatedInfo[key];
       if (!info) return;
-      const isPost = info.type === "post";
-      const typeLabel = isPost ? "论坛帖子" : "H5 活动页";
-      const btnLabel = isPost ? "查看帖子 →" : "前往活动 →";
-      openModal({
-        title: info.title,
-        bodyHtml: `<div style="text-align:center;padding:12px 0">
-          <p style="font-size:14px;color:rgba(15,23,42,.7);line-height:1.8;margin:0 0 16px">${escapeHtml(info.desc)}</p>
-          <div style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;background:rgba(15,23,42,.04);margin:0 0 14px">
-            <span style="font-size:12px;color:rgba(15,23,42,.45)">跳转类型：</span>
-            <span style="font-size:12px;font-weight:700;color:rgba(15,23,42,.65)">${typeLabel}</span>
-          </div>
-          <p style="font-size:11px;color:rgba(15,23,42,.35);margin:0 0 16px;line-height:1.5">
-            运营可配置跳转目标为 TapTap 论坛帖子链接 或 独立 H5 活动页链接
-          </p>
-          <button class="btn btn--brand" type="button" style="padding:8px 24px;font-size:14px" onclick="try{window.open('${info.url}','_blank','noopener,noreferrer')}catch(e){}">${btnLabel}</button>
-        </div>`,
-      });
+      window.open(info.url, "_blank", "noopener,noreferrer");
     }),
   );
 
