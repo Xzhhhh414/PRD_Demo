@@ -690,7 +690,7 @@ function loadState() {
     if (!Array.isArray(merged.memorialUnlocks.colors)) merged.memorialUnlocks.colors = [...fallback.memorialUnlocks.colors];
     if (!Array.isArray(merged.memorialUnlocks.stickers)) merged.memorialUnlocks.stickers = [...fallback.memorialUnlocks.stickers];
     if (!Array.isArray(merged.memorialUnlocks.avatars)) merged.memorialUnlocks.avatars = [...fallback.memorialUnlocks.avatars];
-    // 所有角色默认拥有，无需积分兑换
+    // 所有角色默认拥有，无需纪念币兑换
     MEM_AVATARS.forEach((av) => {
       if (!merged.memorialUnlocks.avatars.includes(av.id)) merged.memorialUnlocks.avatars.push(av.id);
     });
@@ -789,7 +789,7 @@ function calcSnapshotGrants(recap) {
   // Backward compatibility (older ids)
   const legacy = {
     snap_daysActive: { points: clamp(Math.floor(daysActive / 10) * 10, 10, 500), coupons: 0 },
-    // Example: 5 款 -> 50 积分 + 5 点券
+    // Example: 5 款 -> 50 纪念币 + 5 点券
     snap_gamesPlayed: { points: clamp(gamesPlayed * 10, 10, 800), coupons: ENABLE_COUPONS ? clamp(Math.floor(gamesPlayed / 5) * 5, 0, 50) : 0 },
     snap_reviewsHelpful: { points: clamp(reviewsHelpful * 5, 10, 800), coupons: 0 },
     snap_genre: fixed(10, 0),
@@ -803,7 +803,7 @@ function calcSnapshotGrants(recap) {
     snap_time_habit: fixed(10),
     snap_reserve: fixed(10),
     snap_streak: fixed(10),
-    // TapTap 消费：积分按原规则，点券=消费金额的10%（向下取整）
+    // TapTap 消费：纪念币按原规则，点券=消费金额的10%（向下取整）
     snap_spend: fixed(clamp(Math.floor(spendTotal / 100) * 10, 10, 300), ENABLE_COUPONS ? Math.max(0, Math.floor(spendTotal * 0.1)) : 0),
 
     // 玩游戏
@@ -864,7 +864,7 @@ const SNAP_REWARD_ALIASES = {
 function snapshotClaimGrant(s, rewardId) {
   const grants = s.careerSnapshot?.grants;
   const base = grants?.[rewardId];
-  // 如果没有配置奖励（空状态卡片），返回保底10积分
+  // 如果没有配置奖励（空状态卡片），返回保底10纪念币
   if (!base) return { points: 10, coupons: 0 };
   const aliases = SNAP_REWARD_ALIASES[rewardId];
   if (!aliases?.length) return base;
@@ -989,7 +989,7 @@ function openLotteryResultModal({ hit, add, cost } = {}) {
     <div class="small" style="line-height:1.6">
       <div class="hint">
         <b>${hit ? `恭喜你：点券 +${fmt(got || 1)}` : "很遗憾：没抽到点券"}</b>
-        ${spent ? `<div class="muted small" style="margin-top:6px">本次消耗 <b>${fmt(spent)}</b> 积分</div>` : ""}
+        ${spent ? `<div class="muted small" style="margin-top:6px">本次消耗 <b>${fmt(spent)}</b> 纪念币</div>` : ""}
       </div>
       <div class="divider"></div>
       <div class="muted small">当前点券：<b>${fmt(wallet)}</b></div>
@@ -1148,7 +1148,7 @@ async function flyGrantToSticky({ fromRect, grant }) {
       if (target) {
         const end = rectCenter(target.getBoundingClientRect());
         tasks.push(
-          flyChip({ label: `+${fmt(Number(grant.points || 0))} 积分`, start, end, kind: "points" }).then(() => pulsePill(target)),
+          flyChip({ label: `+${fmt(Number(grant.points || 0))} 纪念币`, start, end, kind: "points" }).then(() => pulsePill(target)),
         );
       }
     }
@@ -2047,13 +2047,13 @@ function stickyStatsView(s) {
           </div>
           <div class="sticky-hub__cards">
             <div class="sticky-hub__card sticky-hub__card--points">
-              <div class="sticky-hub__card-title">总积分 <b id="pillPoints">${fmt(s.points)}</b></div>
+              <div class="sticky-hub__card-title">纪念币 <b id="pillPoints">${fmt(s.points)}</b></div>
               <div class="sticky-hub__card-desc">兑换福利和名片装饰</div>
               <button class="btn btn--brand sticky-hub__card-btn" id="btnGoShop" type="button">福利兑换</button>
             </div>
             <div class="sticky-hub__card sticky-hub__card--checkin">
               <div class="sticky-hub__card-title">签到天数 <b>${checkinDays}</b> <span class="checkin-streak-tag">连签${streak}天</span></div>
-              <div class="sticky-hub__card-desc">${isDouble ? `每天可领 <b>${reward}</b> 积分（翻倍中）` : `每天可领 ${CHECKIN_BASE} 积分<br>连签${CHECKIN_STREAK_GOAL}天翻倍`}</div>
+              <div class="sticky-hub__card-desc">${isDouble ? `每天可领 <b>${reward}</b> 纪念币（翻倍中）` : `每天可领 ${CHECKIN_BASE} 纪念币<br>连签${CHECKIN_STREAK_GOAL}天翻倍`}</div>
               <button class="btn ${checkedToday ? "" : "btn--brand"} sticky-hub__card-btn" id="btnCheckin" type="button" ${checkedToday ? "disabled" : ""}>${checkedToday ? "今日已签" : "立即签到"}</button>
             </div>
           </div>
@@ -2070,7 +2070,7 @@ function stickyStatsView(s) {
           <div class="sticky-compact__avatar">${avatarDisplayHtml(avatar, String(s.profile?.nickname || ""), { size: "small" })}</div>
         </div>
         <div class="sticky-compact__info">
-          <span class="pill pill--brand">总积分 <b>${fmt(s.points)}</b></span>
+          <span class="pill pill--brand">纪念币 <b>${fmt(s.points)}</b></span>
           <span class="muted" style="font-size:12px">签到 ${checkinDays} 天</span>
         </div>
         <button class="sticky-compact__expand" id="btnStickyExpand" type="button" aria-label="展开">▼</button>
@@ -2085,7 +2085,7 @@ function stickyStatsLiteView(s) {
   return `
     <section class="card sticky-stats__card" style="border-radius:0; box-shadow:none;">
       <div class="row" style="gap:10px; justify-content:flex-start;">
-        <div class="pill pill--brand" id="pillPoints">积分 <b>${fmt(s.points)}</b></div>
+        <div class="pill pill--brand" id="pillPoints">纪念币 <b>${fmt(s.points)}</b></div>
         ${ENABLE_COUPONS ? `<div class="pill" id="pillCoupons">点券 <b>${fmt(s.walletCoupons || 0)}</b></div>` : ""}
       </div>
     </section>
@@ -2186,10 +2186,10 @@ function firstRecapView(s, recap) {
       </div>
 
       <div class="firstrecap-stage" aria-label="十年回顾舞台">
-        <div class="firstrecap-currency" aria-label="积分">
+        <div class="firstrecap-currency" aria-label="纪念币">
           <div class="pill pill--brand firstrecap-money firstrecap-money--points" id="pillPoints">
             <div class="firstrecap-money__top">
-              <div class="firstrecap-money__k">积分</div>
+              <div class="firstrecap-money__k">纪念币</div>
               <div class="firstrecap-money__v">${fmt(s.points)}</div>
             </div>
             <div class="firstrecap-money__d">活动内装扮十周年名片，兑换纪念装饰</div>
@@ -2318,8 +2318,8 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
       ${!compact && label ? `<span class="mem-opt__t">${escapeHtml(label)}</span>` : ""}
       ${
         compact && locked && cost
-          ? `<span class="mem-opt__price" aria-hidden="true">${fmt(cost)}积分</span>`
-          : (!compact && locked && cost ? `<span class="mem-opt__price" aria-hidden="true">${fmt(cost)}积分</span>` : "")
+          ? `<span class="mem-opt__price" aria-hidden="true">${fmt(cost)}纪念币</span>`
+          : (!compact && locked && cost ? `<span class="mem-opt__price" aria-hidden="true">${fmt(cost)}纪念币</span>` : "")
       }
       ${locked ? `<span class="mem-opt__lock" aria-hidden="true">🔒</span>` : ""}
       ${used ? `<span class="mem-opt__used" aria-hidden="true">✓</span>` : ""}
@@ -2391,17 +2391,17 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
 
   const frameBtn = frameOwned
     ? `<button class="btn ${frameEquipped ? "" : "btn--brand"}" data-mem-equip="frame">${frameEquipped ? "已装备" : "装备"}</button>`
-    : `<button class="btn btn--brand" data-mem-buy="frame">${fmt(MEM_SHOP.frame.cost)}积分兑换</button>`;
+    : `<button class="btn btn--brand" data-mem-buy="frame">${fmt(MEM_SHOP.frame.cost)}纪念币兑换</button>`;
 
   const badgeBtn = badgeOwned
     ? `<button class="btn ${badgeEquipped ? "" : "btn--brand"}" data-mem-equip="badge">${badgeEquipped ? "已装备" : "装备"}</button>`
-    : `<button class="btn btn--brand" data-mem-buy="badge">${fmt(MEM_SHOP.badge.cost)}积分兑换</button>`;
+    : `<button class="btn btn--brand" data-mem-buy="badge">${fmt(MEM_SHOP.badge.cost)}纪念币兑换</button>`;
 
   const todayKey = dayKeyLocal();
   const alreadyDrawn = String(s.daily?.lotteryDayKey || "") === todayKey;
   const lotBtn = alreadyDrawn
     ? `<button class="btn" id="btnMemLottery" disabled>今日已抽</button>`
-    : `<button class="btn btn--brand" id="btnMemLottery">${fmt(MEM_SHOP.lottery.cost)}积分抽</button>`;
+    : `<button class="btn btn--brand" id="btnMemLottery">${fmt(MEM_SHOP.lottery.cost)}纪念币抽</button>`;
 
   const cardHtml = `
       <div class="mem-card-shell" style="--mem-bg:${color.bg}; --mem-panel:${color.panel}; --mem-accent:${color.accent};">
@@ -2544,7 +2544,7 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
         <p class="h1 grow">十周年名片</p>
         <button class="btn btn--brand" id="btnShareMemorial" type="button" style="min-height:36px; padding:8px 10px">分享</button>
       </div>
-      <p class="muted small" style="margin:6px 0 0">用积分兑换装饰，DIY 一张属于你的纪念卡。</p>
+      <p class="muted small" style="margin:6px 0 0">用纪念币兑换装饰，DIY 一张属于你的纪念卡。</p>
 
       <div class="divider"></div>
       ${cardHtml}
@@ -3622,7 +3622,7 @@ function exchangeItemCard(item, s) {
   } else if (soldOut) {
     btnHtml = `<div class="exchange-card__status exchange-card__status--soldout">库存不足</div>`;
   } else {
-    btnHtml = `<button class="btn btn--brand exchange-card__btn" data-exchange="${item.id}" ${canBuy ? "" : "disabled"}>${fmt(item.cost)} 积分</button>`;
+    btnHtml = `<button class="btn btn--brand exchange-card__btn" data-exchange="${item.id}" ${canBuy ? "" : "disabled"}>${fmt(item.cost)} 纪念币</button>`;
   }
 
   return `
@@ -3657,11 +3657,11 @@ function shopModalView(s) {
   } else if (!canAfford) {
     lotteryBtnText = "参与抽奖";
     lotteryDisabled = true;
-    lotteryHint = `<span class="lottery-hint">每日 1 次 · ${LOTTERY_COST} 积分/次</span>`;
+    lotteryHint = `<span class="lottery-hint">每日 1 次 · ${LOTTERY_COST} 纪念币/次</span>`;
   } else {
     lotteryBtnText = "参与抽奖";
     lotteryDisabled = false;
-    lotteryHint = `<span class="lottery-hint">每日 1 次 · ${LOTTERY_COST} 积分/次</span>`;
+    lotteryHint = `<span class="lottery-hint">每日 1 次 · ${LOTTERY_COST} 纪念币/次</span>`;
   }
 
   const winCount = (s.lotteryWins || []).length;
@@ -3715,7 +3715,7 @@ function shopModalView(s) {
   return `
     <div>
       <div style="margin-bottom:16px">
-        <span class="pill pill--brand">当前积分：<b>${fmt(s.points)}</b></span>
+        <span class="pill pill--brand">当前纪念币：<b>${fmt(s.points)}</b></span>
       </div>
 
       ${prizesDrawerHtml}
@@ -3769,18 +3769,18 @@ function wireMemorialInline({ inModal = false } = {}) {
       <div class="small" style="line-height:1.6">
         <div class="hint">
           <b>${escapeHtml(title)}</b>
-          <div class="muted small" style="margin-top:6px">消耗 <b>${fmt(cost)}</b> 积分</div>
+          <div class="muted small" style="margin-top:6px">消耗 <b>${fmt(cost)}</b> 纪念币</div>
         </div>
         <div class="divider"></div>
-        <div class="muted small">当前积分：<b>${fmt(state.points || 0)}</b></div>
-        ${enough ? "" : `<div class="muted small" style="margin-top:6px">积分不足，去试玩/回顾领奖赚积分吧。</div>`}
+        <div class="muted small">当前纪念币：<b>${fmt(state.points || 0)}</b></div>
+        ${enough ? "" : `<div class="muted small" style="margin-top:6px">纪念币不足，去试玩/回顾领奖赚纪念币吧。</div>`}
       </div>
     `;
     const footer = enough
-      ? `<button class="btn" id="btnSpendCancel">取消</button><button class="btn btn--brand" id="btnSpendOk">${fmt(cost)}积分兑换</button>`
+      ? `<button class="btn" id="btnSpendCancel">取消</button><button class="btn btn--brand" id="btnSpendOk">${fmt(cost)}纪念币兑换</button>`
       : `<button class="btn btn--brand" id="btnSpendOk">知道了</button>`;
     if (inModal) _modalAfterClose.push(() => openMemorialEditModal());
-    openModal({ title: enough ? "确认兑换" : "积分不足", bodyHtml: body, footerHtml: footer });
+    openModal({ title: enough ? "确认兑换" : "纪念币不足", bodyHtml: body, footerHtml: footer });
     $("#btnSpendCancel")?.addEventListener("click", closeModal);
     $("#btnSpendOk")?.addEventListener("click", () => {
       if (!enough) return closeModal();
@@ -5295,7 +5295,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
           </div>
         `;
       })(),
-      desc: s.boundSteam ? "" : "绑定Steam账号可领取积分奖励。<br>快来绑定吧！",
+      desc: s.boundSteam ? "" : "绑定Steam账号可领取纪念币奖励。<br>快来绑定吧！",
       rewardId: "bind_steam",
       visible: true,
     },
@@ -5340,7 +5340,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         cards.push({
           label: "绑定角色",
           value: "",
-          desc: "绑定游戏角色即可领取积分奖励，快去绑定吧！",
+          desc: "绑定游戏角色即可领取纪念币奖励，快去绑定吧！",
           rewardId: "bind_roles",
           visible: true,
         });
@@ -5451,7 +5451,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
 
 function grantPillsHtml(grant) {
   const parts = [];
-  if (grant?.points) parts.push(`<span class="pill pill--brand">${fmt(grant.points)} 积分</span>`);
+  if (grant?.points) parts.push(`<span class="pill pill--brand">${fmt(grant.points)} 纪念币</span>`);
   if (ENABLE_COUPONS && grant?.coupons) parts.push(`<span class="pill">${fmt(grant.coupons)} 点券</span>`);
   return parts.join(" ");
 }
@@ -5462,7 +5462,7 @@ function rewardBlockHtml(rewardId, s, recap, isEmpty = false) {
   // Snapshot rewards: visible cards are always claimable (no “未达成”)
   if (String(rewardId).startsWith("snap_")) {
     const baseGrant = s.careerSnapshot?.grants?.[rewardId];
-    // 空状态卡片保底10积分
+    // 空状态卡片保底10纪念币
     const defaultGrant = isEmpty ? { points: 10, coupons: 0 } : null;
     const finalBaseGrant = baseGrant || defaultGrant;
     if (!finalBaseGrant) return "";
@@ -5565,7 +5565,7 @@ function rewardBlockHtml(rewardId, s, recap, isEmpty = false) {
         <div class="mini-card__rewardline">
           <div class="mini-card__rk">奖励</div>
           <div class="mini-card__grant">
-            <span class="pill pill--brand">每个角色可 ${fmt(per.points || 0)} 积分</span>
+            <span class="pill pill--brand">每个角色可 ${fmt(per.points || 0)} 纪念币</span>
           </div>
         </div>
       `;
@@ -6078,7 +6078,7 @@ function wireFirstRecap() {
           if (gained.points > 0) {
             parts.push(`
               <div class="celebrate-grant celebrate-grant--points">
-                <div class="celebrate-grant__k">积分</div>
+                <div class="celebrate-grant__k">纪念币</div>
                 <div class="celebrate-grant__v">+${fmt(gained.points)}</div>
                 <div class="celebrate-grant__d">在活动会场装扮十周年名片，兑换纪念装饰</div>
               </div>
@@ -6300,7 +6300,7 @@ function openBindSteamModal() {
         <b>绑定 Steam 账号</b>：这里会打开 Steam 绑定界面。
       </div>
       <div class="divider"></div>
-      <div class="muted small">绑定后可领取：<b>${BIND_REWARDS.find((x) => x.id === "bind_steam")?.grant?.points || 0} 积分</b></div>
+      <div class="muted small">绑定后可领取：<b>${BIND_REWARDS.find((x) => x.id === "bind_steam")?.grant?.points || 0} 纪念币</b></div>
     </div>
   `;
   const footer = `
@@ -6329,8 +6329,8 @@ function openBindSteamModal() {
 function openBindRolesModal({ autoClaim = false } = {}) {
   const isFirst = Math.max(0, Number(state.boundRolesCount || 0)) === 0;
   const hintText = isFirst
-    ? "正式环境下，点击后会跳转到<b>游戏角色绑定页面</b>。<br>绑定完成后返回活动页，即可在卡片上领取积分奖励。"
-    : "正式环境下，点击后会跳转到<b>游戏角色绑定页面</b>。<br>绑定完成后积分将自动发放。";
+    ? "正式环境下，点击后会跳转到<b>游戏角色绑定页面</b>。<br>绑定完成后返回活动页，即可在卡片上领取纪念币奖励。"
+    : "正式环境下，点击后会跳转到<b>游戏角色绑定页面</b>。<br>绑定完成后纪念币将自动发放。";
   const body = `
     <div class="small" style="line-height:1.55">
       <div class="hint">${hintText}</div>
@@ -6430,7 +6430,7 @@ function discoverInlineView(s) {
     const currentHtml = `
       <div class="playtime-task-current">
         <div class="playtime-task-current__encourage"><span>去游乐场里寻找自己喜欢的游戏吧~</span><button class="btn btn--sm" id="btnShuffleGames" type="button" style="margin-left:auto">🎲 换一换</button></div>
-        <div class="playtime-task-current__target">活动期间累计游玩 ${current.label}，自动领取 <b>${fmt(current.points)}</b> 积分</div>
+        <div class="playtime-task-current__target">活动期间累计游玩 ${current.label}，自动领取 <b>${fmt(current.points)}</b> 纪念币</div>
         <div class="playtime-task-current__bar">
           <div class="playtime-task-current__fill" style="width:${pct}%"></div>
         </div>
@@ -6453,7 +6453,7 @@ function discoverInlineView(s) {
     const allTiersRows = sortedTiers.map((t) => {
       const statusCls = t.isClaimed ? "playtime-tier--claimed" : t.done ? "playtime-tier--done" : "";
       const statusText = t.isClaimed ? "已领取" : t.done ? "已达成" : `${fmtTimeAs(mins, t.minutes)}/${t.label}`;
-      return `<div class="playtime-tier ${statusCls}"><span class="playtime-tier__label">累计 ${t.label}</span><span class="playtime-tier__reward">${fmt(t.points)} 积分</span><span class="playtime-tier__status">${statusText}</span></div>`;
+      return `<div class="playtime-tier ${statusCls}"><span class="playtime-tier__label">累计 ${t.label}</span><span class="playtime-tier__reward">${fmt(t.points)} 纪念币</span><span class="playtime-tier__status">${statusText}</span></div>`;
     }).join("");
 
     return `
@@ -6494,7 +6494,7 @@ function discoverInlineView(s) {
             </div>
             <div class="guess-card__right">
               <div class="guess-card__cta">听听它的故事</div>
-              <div class="guess-card__cta-points">${g.points} 积分</div>
+              <div class="guess-card__cta-points">${g.points} 纪念币</div>
             </div>
           </button>
         `;
@@ -6774,7 +6774,7 @@ function wireDiscoverInline() {
     }),
   );
 
-  // 已揭示卡片 - 听故事（首次自动领取积分）
+  // 已揭示卡片 - 听故事（首次自动领取纪念币）
   $$("[data-guess-story]").forEach((el) =>
     el.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -7032,9 +7032,9 @@ function shopView(s) {
         <div class="row">
           <div class="grow">
             <div class="item__title">${SHOP_ITEMS.lottery.title}</div>
-            <div class="item__desc">每日限 1 次，消耗 ${SHOP_ITEMS.lottery.cost} 积分抽取点券（可能抽不到）。</div>
+            <div class="item__desc">每日限 1 次，消耗 ${SHOP_ITEMS.lottery.cost} 纪念币抽取点券（可能抽不到）。</div>
           </div>
-          <span class="pill">-${SHOP_ITEMS.lottery.cost} 积分</span>
+          <span class="pill">-${SHOP_ITEMS.lottery.cost} 纪念币</span>
         </div>
         <div class="item__meta">
           <span class="tag">${already ? "今天已抽" : "今日可抽"}</span>
@@ -7049,9 +7049,9 @@ function shopView(s) {
       <div class="row">
         <div class="grow">
           <p class="h1">十周年福利</p>
-          <p class="muted small" style="margin:6px 0 0">用积分抽奖或兑换纪念装饰。</p>
+          <p class="muted small" style="margin:6px 0 0">用纪念币抽奖或兑换纪念装饰。</p>
         </div>
-        <span class="pill">当前积分：<b>${fmt(s.points)}</b></span>
+        <span class="pill">当前纪念币：<b>${fmt(s.points)}</b></span>
       </div>
       <div class="divider"></div>
       <div class="hint">
@@ -7078,7 +7078,7 @@ function shopItemCard(kind, item, s) {
 
   const rightBtn = owned
     ? `<button class="btn" disabled>已拥有</button>`
-    : `<button class="btn btn--brand" data-buy="${kind}:${item.id}" ${canBuy ? "" : "disabled"}>${canBuy ? `${fmt(item.cost)}积分兑换` : "积分不足"}</button>`;
+    : `<button class="btn btn--brand" data-buy="${kind}:${item.id}" ${canBuy ? "" : "disabled"}>${canBuy ? `${fmt(item.cost)}纪念币兑换` : "纪念币不足"}</button>`;
 
   return `
     <div class="item">
@@ -7098,7 +7098,7 @@ function wireShop({ inModal = false } = {}) {
   $("#btnWelfareLottery")?.addEventListener("click", () => {
     const today = dayKeyLocal();
     if (String(state.daily?.welfareLotteryDay || "") === today) return toast("今天已经抽过了");
-    if (state.points < LOTTERY_COST) return toast("积分不足");
+    if (state.points < LOTTERY_COST) return toast("纪念币不足");
     if (!state.daily || typeof state.daily !== "object") state.daily = { lotteryDayKey: "", checkinDays: 0, lastCheckinDay: "", welfareLotteryDay: "" };
     state.points -= LOTTERY_COST;
     state.daily.welfareLotteryDay = today;
@@ -7223,17 +7223,17 @@ function wireShop({ inModal = false } = {}) {
           <div class="hint">
             <div style="font-size:32px;text-align:center;margin-bottom:8px">${item.icon}</div>
             <b>${escapeHtml(item.title)}</b>
-            <div class="muted small" style="margin-top:6px">消耗 <b>${fmt(item.cost)}</b> 积分</div>
+            <div class="muted small" style="margin-top:6px">消耗 <b>${fmt(item.cost)}</b> 纪念币</div>
           </div>
           <div class="divider"></div>
-          <div class="muted small">当前积分：<b>${fmt(state.points || 0)}</b></div>
-          ${enough ? "" : `<div class="muted small" style="margin-top:6px">积分不足</div>`}
+          <div class="muted small">当前纪念币：<b>${fmt(state.points || 0)}</b></div>
+          ${enough ? "" : `<div class="muted small" style="margin-top:6px">纪念币不足</div>`}
         </div>
       `;
       const footer = enough
-        ? `<button class="btn" id="btnExCancel">取消</button><button class="btn btn--brand" id="btnExOk">${fmt(item.cost)} 积分兑换</button>`
+        ? `<button class="btn" id="btnExCancel">取消</button><button class="btn btn--brand" id="btnExOk">${fmt(item.cost)} 纪念币兑换</button>`
         : `<button class="btn btn--brand" id="btnExOk">知道了</button>`;
-      openModal({ title: enough ? "确认兑换" : "积分不足", bodyHtml: body, footerHtml: footer });
+      openModal({ title: enough ? "确认兑换" : "纪念币不足", bodyHtml: body, footerHtml: footer });
       $("#btnExCancel")?.addEventListener("click", () => {
         closeModal();
         if (inModal) openShopModal();
@@ -7346,7 +7346,7 @@ function debugModalHtml() {
 
       <div class="row">
         <div class="grow">
-          <div><b>积分（可编辑）</b></div>
+          <div><b>纪念币（可编辑）</b></div>
           <div class="muted small">方便演示“兑换/抽奖”。</div>
         </div>
         <input id="inpPoints" type="number" min="0" step="10" style="width:120px; border-radius:12px; border:1px solid var(--border); background: rgba(255,255,255,.02); color: var(--text); padding:10px" />

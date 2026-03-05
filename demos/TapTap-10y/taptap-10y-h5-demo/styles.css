@@ -1865,7 +1865,7 @@ html.is-firstrecap .firstrecap-body::before{
   transform: translateX(-50%);
   font-size: 11px;
   padding: 2px 6px;
-  /* Keep full text visible (e.g. "80积分") */
+  /* Keep full text visible (e.g. "80纪念币") */
   max-width: none;
   overflow: visible;
   text-overflow: clip;
