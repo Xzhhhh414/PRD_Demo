@@ -1065,6 +1065,8 @@ function openLotteryResultModal({ hit, add, cost } = {}) {
   $("#btnLotteryResultWallet")?.addEventListener("click", openWalletModal);
 }
 
+let _skipClaimModal = false;
+
 function openRegClaimModal({ coinsEarned, remaining, fromRect, onDone }) {
   const poolIcons = EXCHANGE_ITEMS.slice(0, 4).map(item =>
     `<div class="reg-reward-modal__pool-item"><span class="reg-reward-modal__pool-icon">${item.icon}</span><span class="reg-reward-modal__pool-name">${escapeHtml(item.title)}</span></div>`
@@ -1085,6 +1087,12 @@ function openRegClaimModal({ coinsEarned, remaining, fromRect, onDone }) {
   `;
   const leftBtnLabel = remaining > 0 ? "继续领奖" : "开心收下";
   const footer = `
+    <div style="width:100%;display:flex;justify-content:center;margin-bottom:8px">
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.6);cursor:pointer">
+        <input type="checkbox" id="chkSkipClaimModal" style="cursor:pointer" />
+        不再提示
+      </label>
+    </div>
     <button class="btn reg-reward-modal__btn reg-reward-modal__btn--continue" id="btnRegContinue">${leftBtnLabel}</button>
     <button class="btn btn--brand reg-reward-modal__btn reg-reward-modal__btn--exchange" id="btnRegExchange">\u53BB\u5151\u6362</button>
   `;
@@ -1097,6 +1105,7 @@ function openRegClaimModal({ coinsEarned, remaining, fromRect, onDone }) {
     lockClose: true,
   });
   $("#btnRegContinue")?.addEventListener("click", () => {
+    if ($("#chkSkipClaimModal")?.checked) _skipClaimModal = true;
     closeModal();
     flyGrantToSticky({ fromRect, grant: { points: coinsEarned, coupons: 0 } }).then(() => {
       render();
@@ -1104,6 +1113,7 @@ function openRegClaimModal({ coinsEarned, remaining, fromRect, onDone }) {
     });
   });
   $("#btnRegExchange")?.addEventListener("click", () => {
+    if ($("#chkSkipClaimModal")?.checked) _skipClaimModal = true;
     closeModal();
     render();
     if (onDone) onDone();
@@ -2029,7 +2039,10 @@ function render() {
   // Home recap auto-focus should only run once per entry.
   // Reset the flag when leaving home so re-entering can focus earliest claimable again.
   try {
-    if (route !== "home") wireRecapInline._didAutoFocus = false;
+    if (route !== "home") {
+      wireRecapInline._didAutoFocus = false;
+      _skipClaimModal = false;
+    }
   } catch {}
 
   ensureCareerSnapshot(state);
@@ -5207,10 +5220,18 @@ function wireRecapInline() {
       const trackId = b.closest?.(".carousel__track")?.id || "";
       const currentIdx = Number(b.closest?.(".mini-card")?.getAttribute("data-card-idx") || 0);
       requestCarouselInit(trackId, currentIdx);
-      openRegClaimModal({
-        coinsEarned: coins, remaining: newRem, fromRect,
-        onDone: allDone ? () => scheduleScrollToNextCard(trackId, currentIdx) : undefined,
-      });
+      const doneCallback = allDone ? () => scheduleScrollToNextCard(trackId, currentIdx) : undefined;
+      if (_skipClaimModal) {
+        flyGrantToSticky({ fromRect, grant: { points: coins, coupons: 0 } }).then(() => {
+          render();
+          if (doneCallback) doneCallback();
+        });
+      } else {
+        openRegClaimModal({
+          coinsEarned: coins, remaining: newRem, fromRect,
+          onDone: doneCallback,
+        });
+      }
     }),
   );
 
