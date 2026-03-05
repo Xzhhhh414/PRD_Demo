@@ -2174,7 +2174,6 @@ function wireStickyStats() {
     saveState();
     const fromRect = $("#btnCheckin")?.getBoundingClientRect();
     if (fromRect) flyGrantToSticky({ fromRect, grant: { points: reward, coupons: 0 } });
-    toast(isDouble ? `签到成功！连签翻倍，获得 ${reward} 积分 🔥` : `签到成功！获得 ${reward} 积分`);
     render();
   });
 }
@@ -6323,7 +6322,6 @@ function openBindSteamModal() {
     closeModal();
     if (lastBindClickCtx?.trackId) requestCarouselInit(lastBindClickCtx.trackId, lastBindClickCtx.currentIdx);
     render();
-    toast("Steam 绑定完成，可领取绑定奖励");
     lastBindClickCtx = null;
   });
 }
@@ -6365,7 +6363,6 @@ function openBindRolesModal({ autoClaim = false } = {}) {
       saveState();
       closeModal();
       render();
-      toast(`绑定成功，获得 ${per.points} 积分`);
     } else {
       saveState();
       closeModal();
@@ -6382,7 +6379,6 @@ function openBindRolesModal({ autoClaim = false } = {}) {
           }
         }
       }, 100);
-      toast("绑定成功，可在卡片上领取奖励");
     }
     lastBindClickCtx = null;
   });
@@ -6767,7 +6763,6 @@ function wireDiscoverInline() {
             state.capsule.claimed.push(g.id);
             addPoints(state, g.points);
             saveState();
-            toast(`听完故事，获得 ${g.points} 积分`);
             render();
             const stickyEl = document.querySelector(".sticky-hub");
             if (stickyEl) flyGrantToSticky({ fromRect: stickyEl.getBoundingClientRect(), grant: { points: g.points, coupons: 0 } });
@@ -6791,7 +6786,6 @@ function wireDiscoverInline() {
           state.capsule.claimed.push(g.id);
           addPoints(state, g.points);
           saveState();
-          toast(`听完故事，获得 ${g.points} 积分`);
           render();
           const stickyEl = document.querySelector(".sticky-hub");
           if (stickyEl) flyGrantToSticky({ fromRect: stickyEl.getBoundingClientRect(), grant: { points: g.points, coupons: 0 } });
@@ -6909,7 +6903,6 @@ function wireDiscoverInline() {
     if (totalGranted > 0) {
       saveState();
       render();
-      toast(`自动领取 ${totalGranted} 积分`);
     }
   }
 
