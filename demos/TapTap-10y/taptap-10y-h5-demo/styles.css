@@ -3606,10 +3606,11 @@ html.is-firstrecap .firstrecap-body::before{
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 6px;
   width: 80%;
   max-width: 260px;
-  padding: 14px 24px;
+  padding: 12px 24px;
   border: none;
   border-radius: 50px;
   background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
@@ -3629,6 +3630,15 @@ html.is-firstrecap .firstrecap-body::before{
 .arrival-v2__claim-icon{
   font-size: 20px;
   line-height: 1;
+}
+.arrival-v2__claim-hint{
+  display: block;
+  width: 100%;
+  font-size: 11px;
+  font-weight: 600;
+  opacity: .75;
+  margin-top: 2px;
+  letter-spacing: 0;
 }
 .arrival-v2__claim-badge{
   position: absolute;

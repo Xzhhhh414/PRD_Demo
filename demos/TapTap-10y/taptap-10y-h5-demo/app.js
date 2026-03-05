@@ -4422,7 +4422,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         return `
           <div class="arrival-card arrival-card--v2">
             <div class="arrival-v2__title">独家宝藏</div>
-            <div class="arrival-v2__hero">玩过 <strong>${fmt(exPlayed)}</strong> 款 Tap 独家</div>
+            <div class="arrival-v2__hero">玩过 <strong>${fmt(exPlayed)}</strong> 款 Tap 独家游戏</div>
             <div class="arrival-v2__illust">
               <div class="arrival-v2__illust-img">插画·独家宝藏</div>
             </div>
@@ -4441,10 +4441,10 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         if (edPlayed <= 0) return "";
         return `
           <div class="arrival-card arrival-card--v2">
-            <div class="arrival-v2__title">编辑之选</div>
-            <div class="arrival-v2__hero">玩过 <strong>${fmt(edPlayed)}</strong> 款编辑之选</div>
+            <div class="arrival-v2__title">编辑推荐游戏</div>
+            <div class="arrival-v2__hero">玩过 <strong>${fmt(edPlayed)}</strong> 款编辑推荐游戏</div>
             <div class="arrival-v2__illust">
-              <div class="arrival-v2__illust-img">插画·编辑之选</div>
+              <div class="arrival-v2__illust-img">插画·编辑推荐</div>
             </div>
           </div>
         `;
@@ -4485,7 +4485,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         return `
           <div class="arrival-card arrival-card--v2">
             <div class="arrival-v2__title">社区足迹</div>
-            <div class="arrival-v2__hero">发布了 <strong>${fmt(published)}</strong> 条内容</div>
+            <div class="arrival-v2__hero">发布了 <strong>${fmt(published)}</strong> 条帖子和回复</div>
             <div class="arrival-v2__illust">
               <div class="arrival-v2__illust-img">插画·社区足迹</div>
             </div>
@@ -4875,12 +4875,33 @@ function rewardBlockHtml(rewardId, s, recap, isEmpty = false) {
         </div>
       `;
     }
+    const claimHints = {
+      snap_reg_active:      "相伴年份可提升领奖次数",
+      snap_time_habit:      "打开次数可提升领奖次数",
+      snap_reserve:         "预约数量可提升领奖次数",
+      snap_spend:           "消费金额可提升领奖次数",
+      snap_top3games:       "游玩数量可提升领奖次数",
+      snap_playtime:        "游玩时长可提升领奖次数",
+      snap_profile:         "涉猎广度可提升领奖次数",
+      snap_achievements:    "成就数量可提升领奖次数",
+      snap_tapexclusive:    "游玩数量可提升领奖次数",
+      snap_editorpick:      "游玩数量可提升领奖次数",
+      snap_review_voice:    "评价数量可提升领奖次数",
+      snap_community_pub:   "发布数量可提升领奖次数",
+      snap_community_likes: "获赞数量可提升领奖次数",
+      snap_night_community: "冲浪天数可提升领奖次数",
+      snap_badges:          "徽章数量可提升领奖次数",
+      snap_friend_msgs:     "好友数量可提升领奖次数",
+      snap_dev_create:      "作品数量可提升领奖次数",
+    };
+    const hint = maxClaims > 1 ? (claimHints[rewardId] || "") : "";
     return `
       <div class="arrival-v2__reward">
         <button class="arrival-v2__claim-btn" data-claim-card="${rewardId}" type="button">
           <span class="arrival-v2__claim-icon">\u{1F4B0}</span>
-          <span class="arrival-v2__claim-text">\u9886\u53D6\u7EAA\u5FF5\u5E01</span>
-          ${maxClaims > 1 ? `<span class="arrival-v2__claim-badge">\u00D7${rem}</span>` : ""}
+          <span class="arrival-v2__claim-text">领取纪念币</span>
+          ${hint ? `<span class="arrival-v2__claim-hint">${hint}</span>` : ""}
+          ${maxClaims > 1 ? `<span class="arrival-v2__claim-badge">\u00D7${rem}次</span>` : ""}
         </button>
       </div>
     `;
@@ -4892,15 +4913,23 @@ function rewardBlockHtml(rewardId, s, recap, isEmpty = false) {
     const roleIdx = Number(roleMatch[1]);
     const claimedCount = Math.max(0, Number(s.claimedRoleRewardsCount || 0));
     const roleClaimed = roleIdx < claimedCount;
-    if (roleClaimed) {
-      return `<div class="arrival-v2__reward"><div class="arrival-v2__done">奖励已全部领取</div></div>`;
-    }
+    const per = BIND_REWARDS.find((x) => x.id === "bind_roles")?.perRole || { points: 20, coupons: 0 };
+    const btn = roleClaimed
+      ? `<button class="btn" disabled>已领</button>`
+      : `<button class="btn btn--brand" data-claim-role="${roleIdx}">领取</button>`;
     return `
-      <div class="arrival-v2__reward">
-        <button class="arrival-v2__claim-btn" data-claim-role="${roleIdx}" type="button">
-          <span class="arrival-v2__claim-icon">\u{1F4B0}</span>
-          <span class="arrival-v2__claim-text">领取纪念币</span>
-        </button>
+      <div class="mini-card__reward">
+        <div class="row" style="align-items:flex-start; justify-content:space-between">
+          <div class="grow">
+            <div class="mini-card__rewardline">
+              <div class="mini-card__rk">奖励</div>
+              <div class="mini-card__grant">${grantPillsHtml(per)}</div>
+            </div>
+          </div>
+          <div class="mini-card__reward-actions">
+            ${btn}
+          </div>
+        </div>
       </div>
     `;
   }
@@ -4911,24 +4940,24 @@ function rewardBlockHtml(rewardId, s, recap, isEmpty = false) {
   // Steam: one-time claim
   if (rewardId === "bind_steam") {
     const ready = !!r.isReady?.(s);
-    if (claimed) {
-      return `<div class="arrival-v2__reward"><div class="arrival-v2__done">奖励已全部领取</div></div>`;
-    }
-    if (ready) {
-      return `
-        <div class="arrival-v2__reward">
-          <button class="arrival-v2__claim-btn" data-claim="${r.id}" type="button">
-            <span class="arrival-v2__claim-icon">\u{1F4B0}</span>
-            <span class="arrival-v2__claim-text">领取纪念币</span>
-          </button>
-        </div>
-      `;
-    }
+    const btn = claimed
+      ? `<button class="btn" disabled>已领</button>`
+      : ready
+        ? `<button class="btn btn--brand" data-claim="${r.id}">领取</button>`
+        : `<button class="btn btn--brand" data-bind="${r.id}">去绑定</button>`;
     return `
-      <div class="arrival-v2__reward">
-        <button class="arrival-v2__claim-btn arrival-v2__claim-btn--bind" data-bind="${r.id}" type="button">
-          <span class="arrival-v2__claim-text">去绑定</span>
-        </button>
+      <div class="mini-card__reward">
+        <div class="row" style="align-items:flex-start; justify-content:space-between">
+          <div class="grow">
+            <div class="mini-card__rewardline">
+              <div class="mini-card__rk">奖励</div>
+              <div class="mini-card__grant">${grantPillsHtml(r.grant)}</div>
+            </div>
+          </div>
+          <div class="mini-card__reward-actions">
+            ${btn}
+          </div>
+        </div>
       </div>
     `;
   }
@@ -4938,26 +4967,37 @@ function rewardBlockHtml(rewardId, s, recap, isEmpty = false) {
     const bound = Math.max(0, Number(s.boundRolesCount || 0));
     const claimedCount = Math.max(0, Number(s.claimedRoleRewardsCount || 0));
     const pending = Math.max(0, bound - claimedCount);
-    const allBound = !!s.allRolesBound;
-    if (pending > 0) {
-      return `
-        <div class="arrival-v2__reward">
-          <button class="arrival-v2__claim-btn" data-claim="${r.id}" type="button">
-            <span class="arrival-v2__claim-icon">\u{1F4B0}</span>
-            <span class="arrival-v2__claim-text">领取纪念币</span>
-            ${pending > 1 ? `<span class="arrival-v2__claim-badge">\u00D7${pending}</span>` : ""}
-          </button>
+    const per = r.perRole || { points: 0, coupons: 0 };
+    const totalGrant = { points: (per.points || 0) * pending, coupons: (per.coupons || 0) * pending };
+    const leftHtml = pending > 0
+      ? `
+        <div class="mini-card__rewardline">
+          <div class="mini-card__rk">奖励</div>
+          <div class="mini-card__grant">${grantPillsHtml(totalGrant)}</div>
+          <div class="muted small">（新绑定 ${fmt(pending)} 个角色）</div>
+        </div>
+      `
+      : `
+        <div class="mini-card__rewardline">
+          <div class="mini-card__rk">奖励</div>
+          <div class="mini-card__grant">
+            <span class="pill pill--brand">每个角色可 ${fmt(per.points || 0)} 纪念币</span>
+          </div>
         </div>
       `;
-    }
-    if (allBound) {
-      return `<div class="arrival-v2__reward"><div class="arrival-v2__done">奖励已全部领取</div></div>`;
-    }
+    const allBound = !!s.allRolesBound;
+    const btns = pending > 0
+      ? `<button class="btn btn--brand" data-claim="${r.id}">领取</button>`
+      : allBound ? "" : `<button class="btn btn--brand" data-bind="${r.id}">去绑定</button>`;
+
     return `
-      <div class="arrival-v2__reward">
-        <button class="arrival-v2__claim-btn arrival-v2__claim-btn--bind" data-bind="${r.id}" type="button">
-          <span class="arrival-v2__claim-text">去绑定角色</span>
-        </button>
+      <div class="mini-card__reward">
+        <div class="row" style="align-items:flex-start; justify-content:space-between">
+          <div class="grow">
+            ${leftHtml}
+          </div>
+          ${btns ? `<div class="mini-card__reward-actions mini-card__reward-actions--stack">${btns}</div>` : ""}
+        </div>
       </div>
     `;
   }
@@ -6817,6 +6857,16 @@ function debugModalHtml() {
       </div>
 
       <div class="divider"></div>
+
+      <div>
+        <div><b>卡片预览</b></div>
+        <div class="muted small">平铺查看当前数据下所有生涯卡片的展示效果。</div>
+        <div style="margin-top:8px">
+          <button class="btn btn--ghost" id="btnPreviewCards" type="button">查看全部卡片</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
       <div class="muted small mono">State Key: ${STORAGE_KEY}</div>
     </div>
   `;
@@ -6958,6 +7008,51 @@ function openDebug() {
     render();
     toast("已应用演示状态");
   });
+
+  $("#btnPreviewCards")?.addEventListener("click", () => {
+    closeModal();
+    openCardsPreview();
+  });
+}
+
+function openCardsPreview() {
+  const existing = document.getElementById("cardsPreviewOverlay");
+  if (existing) existing.remove();
+
+  const recap = recapDataForState(state);
+  const viewHtml = recapInlineView(state, recap, { sortUnclaimedFirst: false });
+  const parser = document.createElement("div");
+  parser.innerHTML = viewHtml;
+  const cards = Array.from(parser.querySelectorAll('.mini-card[data-reward-id^="snap_"]'));
+  if (!cards.length) {
+    toast("没有可展示的卡片");
+    return;
+  }
+  const cardsHtml = cards.map(el => {
+    el.style.cssText = "height:auto;min-height:0;flex:0 0 auto;width:340px;min-width:340px;transform:none;opacity:1;scroll-snap-align:none";
+    el.querySelectorAll("button").forEach(btn => {
+      btn.disabled = true;
+      btn.style.pointerEvents = "none";
+      btn.style.opacity = ".85";
+    });
+    return el.outerHTML;
+  }).join("");
+
+  const overlay = document.createElement("div");
+  overlay.id = "cardsPreviewOverlay";
+  overlay.innerHTML = `
+    <div style="position:fixed;inset:0;z-index:9999;background:var(--bg,#f0f2f5);overflow-y:auto;display:flex;flex-direction:column">
+      <div style="position:sticky;top:0;z-index:1;background:var(--bg,#f0f2f5);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border,#e2e8f0)">
+        <div style="font-size:16px;font-weight:900">全部生涯卡片预览（${cards.length} 张）</div>
+        <button id="btnClosePreview" style="border:none;background:rgba(15,23,42,.08);border-radius:8px;padding:6px 16px;font-size:14px;font-weight:700;cursor:pointer;color:var(--text,#0f172a)">关闭</button>
+      </div>
+      <div style="flex:1;padding:16px;display:flex;flex-wrap:wrap;gap:16px;justify-content:center;align-content:flex-start">
+        ${cardsHtml}
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.querySelector("#btnClosePreview")?.addEventListener("click", () => overlay.remove());
 }
 
 function getGamePlatform() {
