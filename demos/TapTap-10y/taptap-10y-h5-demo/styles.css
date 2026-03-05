@@ -6237,3 +6237,69 @@ html.is-firstrecap .firstrecap-body::before{
   color: #0F172A;
   line-height: 1.2;
 }
+.sc2__coins-banner{
+  margin-top: 14px;
+  background: linear-gradient(135deg, rgba(0,184,148,.12) 0%, rgba(0,206,201,.08) 100%);
+  border: 1px solid rgba(0,184,148,.2);
+  border-radius: 14px;
+  padding: 14px 16px;
+  text-align: center;
+}
+.sc2__kpi--user{
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.sc2__kpi--user .sc2__kpi-label{
+  font-size: 15px;
+  font-weight: 950;
+}
+.sc2__kpi-value--id{
+  font-size: 11px;
+  font-weight: 400;
+  opacity: .55;
+}
+.sc2__coins-label{
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(15,23,42,.5);
+  margin-bottom: 4px;
+}
+.sc2__coins-row{
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+}
+.sc2__coins-icon{
+  font-size: 22px;
+  line-height: 1;
+}
+.sc2__coins-num{
+  font-size: 32px;
+  font-weight: 950;
+  color: #00b894;
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+.sc2__coins-unit{
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(15,23,42,.55);
+}
+.sc2__coins-desc{
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 900;
+  color: #00b894;
+  letter-spacing: .3px;
+}
+.sc2__cta{
+  margin-top: 14px;
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--sc2-accent, #00b894);
+  text-align: center;
+  letter-spacing: .3px;
+}
