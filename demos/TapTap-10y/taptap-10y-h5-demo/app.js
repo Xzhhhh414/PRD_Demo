@@ -4175,7 +4175,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
             <div class="arrival-v2__title">生涯挚爱</div>
             <div class="arrival-v2__hero beloved-hero">
               <span class="beloved-game"><span class="beloved-icon">${icon}</span>${escapeHtml(name)}</span>
-              ${fmtHours ? `<span class="beloved-hours">累计游玩 <strong>${fmtHours}</strong> 小时</span>` : ""}
+              ${fmtHours ? `<span class="beloved-hours">游玩 <strong>${fmtHours}</strong> 小时</span>` : ""}
             </div>
             <div class="arrival-v2__illust">
               <div class="arrival-v2__illust-img">插画·生涯挚爱</div>
