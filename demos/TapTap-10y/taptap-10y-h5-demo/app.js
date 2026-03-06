@@ -38,55 +38,15 @@ const PRESETS = {
     label: "测试用户",
     recap: {
       // 基础
-      regYear: 2018,
       regDate: "2018年3月6日",
-      streakMax: 46,
       spendTotal: 1288.5,
       spendGameCount: 12,
-      spendGames: [
-        "《哈迪斯》终极版",
-        "《戴森球计划》",
-        "《去月球》",
-        "《Miao屋》DLC·春日篇",
-        "《饥荒：联机版》",
-      ],
       platformBadgesTotal: 86,
       blackGoldBadgesCount: 3,
-      platformBadges: [
-        { icon: "🖤", name: "黑金·十年同行", owners: 82, category: "成就" },
-        { icon: "🏆", name: "年度 Top 1 评测", owners: 560, category: "成就" },
-        { icon: "⭐", name: "聚光灯精选", owners: 3200, category: "活动" },
-        { icon: "🎯", name: "百发百中", owners: 8600, category: "成就" },
-        { icon: "🎪", name: "2024嘉年华参与者", owners: 12800, category: "活动" },
-        { icon: "💎", name: "钻石评测", owners: 15000, category: "成就" },
-        { icon: "🔥", name: "连续签到30天", owners: 42000, category: "活动" },
-        { icon: "📝", name: "首次评价", owners: 86000, category: "成就" },
-        { icon: "🤝", name: "社区之友", owners: 120000, category: "活动" },
-        { icon: "👋", name: "新手报到", owners: 350000, category: "活动" },
-      ],
 
       // 玩游戏
       gamesPlayedTotal: 368,
       playTimeHours: 2680,
-      firstGameName: "《饥荒：联机版》",
-      firstGameIcon: "🔥",
-      platform: "android",
-      platformBreakdown: [
-        { platform: "手机", games: 285, hours: 1860, favName: "明日方舟", favIcon: "🏗️" },
-        { platform: "PC", games: 68, hours: 720, favName: "戴森球计划", favIcon: "🌐" },
-        { platform: "云游戏", games: 15, hours: 100, favName: "原神", favIcon: "🌍" },
-      ],
-      yearlyData: [
-        { year: 2018, games: 12, hours: 86 },
-        { year: 2019, games: 45, hours: 320 },
-        { year: 2020, games: 68, hours: 480 },
-        { year: 2021, games: 52, hours: 390 },
-        { year: 2022, games: 61, hours: 420 },
-        { year: 2023, games: 48, hours: 360 },
-        { year: 2024, games: 42, hours: 310 },
-        { year: 2025, games: 30, hours: 220 },
-        { year: 2026, games: 10, hours: 94 },
-      ],
       yearlyTopGames: [
         { year: 2018, gameName: "《饥荒：联机版》", gameIcon: "🔥", hours: 86 },
         { year: 2019, gameName: "《明日方舟》", gameIcon: "⚔️", hours: 245 },
@@ -98,198 +58,40 @@ const PRESETS = {
         { year: 2025, gameName: "《豆战异世界》", gameIcon: "🫘", hours: 156 },
         { year: 2026, gameName: "《哈迪斯 II》", gameIcon: "🔱", hours: 94 },
       ],
-      // 类别偏好 - 六边形雷达图维度 (0~100)
+      // 类别偏好雷达图 (0~100)
       radarAction: 85,
       radarStrategy: 62,
       radarRPG: 78,
       radarAdventure: 50,
       radarSim: 35,
       radarCasual: 70,
-      topGenreLabel: "动作",
-      topGenrePct: "32%",
-      topGenreSitePct: "站内占比 18%",
       // 游戏成就
       achievementGamesCount: 14,
       achievementsTotal: 326,
-      achievementsNormal: 308,
       platinumAchievementsTotal: 18,
-      rareAchievements: [
-        { game: "《戴森球计划》", name: "群星点亮", rate: "0.6%" },
-        { game: "《哈迪斯》", name: "不死者之王", rate: "1.2%" },
-        { game: "《去月球》", name: "最后的告别", rate: "2.8%" },
-      ],
-      nicheGame: "《无人之境：小镇来信》",
-      fiveStarNiche1Game: "《无人之境：小镇来信》",
-      fiveStarNiche1ReviewsCount: 32,
-      fiveStarNiche1Score: 9.1,
-      fiveStarNiche2Game: "《铃兰之剑》",
-      fiveStarNiche2ReviewsCount: 18,
-      fiveStarNiche2Score: 8.8,
-      fiveStarNiche3Game: "《雨中冒险：回响》",
-      fiveStarNiche3ReviewsCount: 46,
-      fiveStarNiche3Score: 9.0,
+      // 生涯挚爱
       belovedGameName: "《哈迪斯》",
       belovedGameIcon: "💀",
       belovedGameHours: 1280,
-      belovedGamePct: "28%",
-      belovedGameSamePct: "3%",
-      belovedTop10: [
-        { name: "《哈迪斯》", icon: "💀", banner: "" },
-        { name: "《戴森球计划》", icon: "🌐", banner: "" },
-        { name: "《明日方舟》", icon: "🏗️", banner: "" },
-        { name: "《集合啦！动物森友会》", icon: "🏝️", banner: "" },
-        { name: "《去月球》", icon: "🌙", banner: "" },
-        { name: "《极乐迪斯科》", icon: "🕵️", banner: "" },
-        { name: "《心动小镇》", icon: "🏘️", banner: "" },
-        { name: "《空洞骑士：丝之歌》", icon: "🦋", banner: "" },
-        { name: "《豆战异世界》", icon: "🫘", banner: "" },
-        { name: "《铃兰之剑》", icon: "⚔️", banner: "" },
-      ],
       exclusivePlayed: 12,
-      exclusiveTotal: 86,
-      exclusiveGames: [
-        { name: "《心动小镇》", icon: "🏘️" },
-        { name: "《铃兰之剑》", icon: "⚔️" },
-        { name: "《豆战异世界》", icon: "🫘" },
-        { name: "《火炬之光：无限》", icon: "🔥" },
-        { name: "《闪耀优俊少女》", icon: "🐴" },
-        { name: "《偶像大师》", icon: "🎤" },
-        { name: "《卡通农场》", icon: "🌾" },
-        { name: "《宝可梦大集结》", icon: "⚡" },
-        { name: "《Flash Party》", icon: "💥" },
-        { name: "《恋与深空》", icon: "💫" },
-        { name: "《猫之城》", icon: "🐱" },
-        { name: "《弹壳特攻队》", icon: "🔫" },
-      ],
       editorPickPlayed: 23,
-      editorPickTotal: 150,
-      editorPickGames: [
-        { name: "《哈迪斯》", icon: "💀" },
-        { name: "《戴森球计划》", icon: "🌐" },
-        { name: "《去月球》", icon: "🌙" },
-        { name: "《极乐迪斯科》", icon: "🕵️" },
-        { name: "《空洞骑士：丝之歌》", icon: "🦋" },
-        { name: "《明日方舟》", icon: "🏗️" },
-        { name: "《集合啦！动物森友会》", icon: "🏝️" },
-        { name: "《塞尔达传说：旷野之息》", icon: "🗡️" },
-        { name: "《星露谷物语》", icon: "🌱" },
-        { name: "《蔚蓝》", icon: "🏔️" },
-        { name: "《Dead Cells》", icon: "☠️" },
-        { name: "《风之旅人》", icon: "🧣" },
-      ],
+      // 夜行者
       peakTimeSlot: "6PM-12AM",
       lateNightOpenCount: 156,
-
-      nightSlot: "0:00–3:00",
-      nightTopGame: "《哈迪斯》",
-      nightPlayCount: 128,
-      nightRecent1Game: "《哈迪斯》",
-      nightRecent1Start: "2026年2月1日 02:13",
-      nightRecent2Game: "《戴森球计划》",
-      nightRecent2Start: "2026年1月28日 01:26",
-      nightRecent3Game: "《去月球》",
-      nightRecent3Start: "2026年1月22日 00:48",
 
       // 社区
       reviewsCount: 38,
       reviewLikesTotal: 560,
-      reviewCommentsTotal: 1280,
-      reviewAllLowStar: false,
-      reviewGameIcons: [
-        { name: "《戴森球计划》", icon: "🌐", likes: 128 },
-        { name: "《哈迪斯》", icon: "💀", likes: 96 },
-        { name: "《去月球》", icon: "🌙", likes: 72 },
-        { name: "《极乐迪斯科》", icon: "🕵️", likes: 54 },
-        { name: "《心动小镇》", icon: "🏘️", likes: 38 },
-        { name: "《空洞骑士：丝之歌》", icon: "🦋", likes: 21 },
-        { name: "《明日方舟》", icon: "🏗️", likes: 15 },
-      ],
       zuitiCount: 8,
       taptapCriticYears: [2018, 2019, 2020, 2021, 2022],
-      totalReviewsOnPlatform: 12000000,
       communityPublished: 156,
-      communityCommentsReceived: 1280,
-      communityPubPctRank: "72.3%",
-      communityTopForums: [
-        { game: "《派对之星》", count: 42 },
-        { game: "《戴森球计划》", count: 36 },
-        { game: "《哈迪斯》", count: 28 },
-        { game: "《明日方舟》", count: 21 },
-        { game: "《心动小镇》", count: 15 },
-      ],
-      communityTopEmojis: [
-        { emoji: "😂", count: 3260 },
-        { emoji: "👍", count: 1840 },
-        { emoji: "❤️", count: 960 },
-      ],
-      postsCount: 56,
-      repliesCount: 420,
-      forumInteractPlayers: 168,
-      topActiveForum1Game: "《派对之星》",
-      topActiveForum1Posts: 18,
-      topActiveForum2Game: "《戴森球计划》",
-      topActiveForum2Posts: 12,
-      topActiveForum3Game: "《哈迪斯》",
-      topActiveForum3Posts: 9,
       communityLikesGiven: 8600,
       communityLikesReceived: 12400,
-      communityLikePctRank: "78.5%",
-      communityTopLikedContent: [
-        { title: "这才是太空的浪漫，戴森球真香", likes: 246 },
-        { title: "哈迪斯全成就攻略分享", likes: 128 },
-        { title: "去月球通关后我哭了三天", likes: 96 },
-        { title: "空洞骑士丝之歌隐藏结局触发条件", likes: 72 },
-        { title: "心动小镇装修灵感合集", likes: 58 },
-      ],
-      likedPostsCount: 860,
-      receivedLikesCount: 1240,
-      favoritedPostsCount: 120,
-      receivedFavoritesCount: 420,
-      topEngagedPost1Title: "我做了一个关卡编辑器小工具，欢迎试试",
-      topEngagedPost1Game: "TapMaker",
-      topEngagedPost1Likes: 246,
-      topEngagedPost1Favs: 88,
-      topEngagedPost1Uri: "taptap://post/10001",
-      topEngagedPost2Title: "《戴森球计划》最实用的开荒路线",
-      topEngagedPost2Game: "《戴森球计划》",
-      topEngagedPost2Likes: 198,
-      topEngagedPost2Favs: 120,
-      topEngagedPost2Uri: "taptap://post/10002",
-      topEngagedPost3Title: "深夜推荐：三款剧情党必玩",
-      topEngagedPost3Game: "剧情向",
-      topEngagedPost3Likes: 156,
-      topEngagedPost3Favs: 96,
-      topEngagedPost3Uri: "taptap://post/10003",
-      likesCount: 1860,
-      favoritesCount: 360,
-      sharesCount: 72,
-      topForum1: "独立游戏",
-      topForum2: "PC 游戏",
-      topForum3: "TapMaker",
-      topLikedPostTitle: "我做了一个关卡编辑器小工具，欢迎试试",
-      topLikedPostLikes: 246,
-      friendsCount: 268,
-      followingCount: 186,
-      followersCount: 420,
-      closestFriends: [
-        { name: "阿星", msgs: 860, firstFollowTime: "2020年3月12日" },
-        { name: "咕咕", msgs: 620, firstFollowTime: "2021年7月5日" },
-        { name: "小盐", msgs: 410, firstFollowTime: "2019年11月28日" },
-        { name: "夜行者", msgs: 256, firstFollowTime: "2022年1月3日" },
-        { name: "蓝莓酱", msgs: 180, firstFollowTime: "2023年8月19日" },
-      ],
-      nightTopAction: "回帖 / 点赞",
       nightSurfDays: 46,
-      firstNightSurf: { time: "2019年8月16日 1:23", action: "在《明日方舟》发了一条帖子", content: "凌晨抽到了心心念念的银灰，太开心了必须来发个帖纪念一下！！" },
-      nightSurfLogs: [
-        { time: "2026年2月2日4点58分", game: "《派对之星》", action: "在《派对之星》发帖子", content: "有人凌晨还在线吗，组队打排位，三缺一速来" },
-        { time: "2026年1月29日3点42分", game: "《戴森球计划》", action: "在《戴森球计划》点赞帖子", content: "这个星际物流布局也太优雅了吧" },
-        { time: "2026年1月18日2点17分", game: "《哈迪斯》", action: "给《哈迪斯》写评价", content: "第一次通关，手都在抖。这游戏的剧情真的太好哭了，每一次对话都舍不得跳过" },
-        { time: "2025年12月31日1点06分", game: "《去月球》", action: "在《去月球》发评论", content: "跨年夜重温去月球，眼泪又没忍住" },
-        { time: "2025年11月15日0点33分", game: "《明日方舟》", action: "在《明日方舟》点赞评价", content: "写得太好了，每个角色的分析都很到位" },
-      ],
+      friendsCount: 268,
+      followersCount: 420,
 
-      // 开发者 — 游戏创作
+      // 开发者
       devGames: [
         { icon: "https://img.tapimg.net/market/images/e2b7259807d30e498a3008cbed6be542.png", name: "派对之星", followers: 12800 },
         { icon: "https://img.tapimg.net/market/images/e2b7259807d30e498a3008cbed6be542.png", name: "沙洛克", followers: 8600 },
@@ -301,25 +103,14 @@ const PRESETS = {
       gamejamGamesCount: 3,
       tapmakerGamesCount: 2,
 
-      // 游戏预约
+      // 预约
       reserveCount: 1280,
-      reserveGames: [
-        "明日方舟", "原神", "崩坏：星穹铁道", "鸣潮", "绝区零",
-        "少女前线2", "尘白禁区", "万龙觉醒", "代号鸢", "火力苏打",
-        "猫之城", "白荆回廊", "世界之外", "深空之眼", "星际旅人",
-        "幻塔", "逆水寒手游",
-      ],
-      reserveLaunchedCount: 8,
-      reserveLaunchedGames: [
-        "明日方舟", "原神", "崩坏：星穹铁道", "鸣潮", "绝区零",
-        "少女前线2", "尘白禁区", "万龙觉醒", "代号鸢",
-      ],
-      taptapReserveTotal: "88,888,888",
+      reserveGames: ["明日方舟", "原神", "崩坏：星穹铁道", "鸣潮", "绝区零"],
 
-      // legacy
+      // legacy (recapDataForState enrichment)
       gamesPlayed: 128,
       reviewsHelpful: 42,
-
+      likesCount: 1860,
     },
   },
 };
@@ -966,6 +757,45 @@ function closeModal() {
       // ignore
     }
   }
+}
+
+// ── 数据规则说明弹窗 ──
+function openDataRulesModal() {
+  const body = `
+    <div class="data-rules-modal">
+      <div class="data-rules-modal__section">
+        <div class="data-rules-modal__title">数据说明</div>
+        <ul class="data-rules-modal__list">
+          <li>消费包括买断制手游（含DLC）、买断制PC游戏（含DLC）、云玩等所有消费内容，不含 Steam CDKey</li>
+          <li>深夜定义为 22:00–4:59</li>
+        </ul>
+      </div>
+      <div class="data-rules-modal__section">
+        <div class="data-rules-modal__title">领奖次数规则</div>
+        <ul class="data-rules-modal__list">
+          <li><b>相伴时光</b>：每多 1 年相伴年数增加 1 次，最多 10 次</li>
+          <li><b>夜行者</b>：每 50 次深夜打开增加 1 次，最多 10 次</li>
+          <li><b>剁手记录</b>：每消费 100 元增加 1 次，最多 10 次</li>
+          <li><b>新作预约</b>：每预约 10 款增加 1 次，最多 10 次</li>
+          <li><b>冒险旅程</b>：每玩 50 款游戏增加 1 次，最多 10 次</li>
+          <li><b>游玩时光</b>：每游玩 200 小时增加 1 次，最多 10 次</li>
+          <li><b>喜爱类型</b>：每多涉猎 1 个类型增加 1 次，最多 10 次</li>
+          <li><b>游戏成就</b>：每 50 个成就增加 1 次，每个白金成就额外增加 1 次，最多 10 次</li>
+          <li><b>生涯挚爱</b>：固定 1 次</li>
+          <li><b>独家宝藏</b>：每玩 10 款独家游戏增加 1 次，最多 10 次</li>
+          <li><b>编辑之选</b>：每玩 10 款编辑推荐游戏增加 1 次，最多 10 次</li>
+          <li><b>玩家之声</b>：每 50 条评价增加 1 次，每条嘴替评价额外增加 1 次，最多 10 次</li>
+          <li><b>社区足迹</b>：每发布 100 条帖子或回复增加 1 次，最多 10 次</li>
+          <li><b>社区点赞</b>：每获得 500 个赞增加 1 次，最多 10 次</li>
+          <li><b>深夜冲浪</b>：每 15 天深夜冲浪增加 1 次，最多 10 次</li>
+          <li><b>徽章墙</b>：每 10 枚徽章增加 1 次，每枚黑金徽章额外增加 1 次，最多 10 次</li>
+          <li><b>同行伙伴</b>：每 50 位好友增加 1 次，每 500 位粉丝额外增加 1 次，最多 10 次</li>
+          <li><b>游戏创作</b>：每多 1 款作品增加 1 次，最多 10 次</li>
+        </ul>
+      </div>
+    </div>
+  `;
+  openModal({ title: "数据规则说明", bodyHtml: body, variant: "data-rules" });
 }
 
 // ── 登录弹窗 ──
@@ -3029,51 +2859,49 @@ function openShareRecapModal({ onClose } = {}) {
 
 function buildSharePosterSvg(s, recap, nick, pid, url, qr) {
   const W = 1080, H = 1920;
-  const color = MEM_CARD_COLORS.find((c) => c.id === s.memorial?.colorId) || MEM_CARD_COLORS[0];
-  const kw = calcShareKeyword(recap);
-  const genre = String(recap.topGenreLabel || "").trim();
-  const belovedName = String(recap.belovedGameName || "").trim() || "—";
-  const belovedIcon = String(recap.belovedGameIcon || "").trim() || "🎮";
-  const belovedHours = Number(recap.belovedGameHours || 0);
-  const fmtBH = (() => { if (belovedHours <= 0) return ""; if (belovedHours > 6000) return "6000+"; if (belovedHours < 1) return Math.max(0.1, belovedHours).toFixed(1); return String(Math.floor(belovedHours)); })();
+  const color = MEM_CARD_COLORS[0];
   const togetherDays = calcDaysSince(parseCnDateToTs(recap.regDate));
+  const years = Math.floor((togetherDays || 0) / 365);
+  const days = (togetherDays || 0) % 365;
+  const totalCoins = Math.max(0, Number(s.points || 0));
 
-  const fmtK = (n, max) => Number(n) > max ? max + "+" : fmt(Number(n));
-  const fmtH = (h) => { const v = Number(h || 0); if (v <= 0) return "—"; if (v > 6000) return "6000+"; if (v < 1) return Math.max(0.1, v).toFixed(1); return String(Math.floor(v)); };
-  const fmtW = (n) => { const v = Number(n || 0); if (v <= 0) return "0"; if (v < 10000) return fmt(v); const w = v / 10000; if (w >= 999.95) return "999.9万+"; return (w >= 1 && w % 1 < 0.05) ? Math.floor(w) + "万" : w.toFixed(1) + "万"; };
-  const fmtD = (d) => (d == null || d <= 0) ? "—" : (d > 9999 ? "9999" : String(d));
-
-  const top10 = Array.isArray(recap.belovedTop10) ? recap.belovedTop10.filter(g => String(g.name || "").trim()) : [];
-  const topShow = top10.slice(0, 5);
-  const cutN = (n) => { const t = String(n || ""); return t.length <= 6 ? t : t.slice(0, 5) + "…"; };
-
-  const topIconsSvg = topShow.map((g, i) => {
-    const x = 90 + i * 190;
-    const icon = String(g.icon || "🎮").trim();
-    const name = cutN(g.name);
-    return `
-      <rect x="${x}" y="0" width="160" height="160" rx="28" fill="rgba(255,255,255,.85)" stroke="rgba(15,23,42,.08)" stroke-width="2"/>
-      <text x="${x + 80}" y="95" text-anchor="middle" font-size="56">${escapeXml(icon)}</text>
-      <text x="${x + 80}" y="190" text-anchor="middle" font-size="22" font-weight="700" fill="#334155">${escapeXml(name)}</text>
-    `;
-  }).join("");
+  const fmtVal = (n) => fmt(Number(n || 0));
+  const fmtHours = (h) => { const v = Number(h || 0); if (v <= 0) return ""; if (v < 1) return Math.max(0.1, v).toFixed(1); return fmt(Math.floor(v)); };
+  const fmtWan = (n) => { const v = Number(n || 0); if (v <= 0) return "0"; if (v < 10000) return fmt(v); const w = v / 10000; return (w >= 1 && w % 1 < 0.05) ? Math.floor(w) + "万" : w.toFixed(1) + "万"; };
 
   const devGames = (Array.isArray(recap?.devGames) ? recap.devGames : []).filter(g => String(g.name || "").trim());
+  const dims = [
+    { label: "动作", val: Number(recap.radarAction || 0) },
+    { label: "策略", val: Number(recap.radarStrategy || 0) },
+    { label: "RPG", val: Number(recap.radarRPG || 0) },
+    { label: "冒险", val: Number(recap.radarAdventure || 0) },
+    { label: "模拟", val: Number(recap.radarSim || 0) },
+    { label: "休闲", val: Number(recap.radarCasual || 0) },
+  ];
+  const tagsCount = dims.filter(d => d.val > 0).length;
+  const topDim = dims.reduce((a, b) => b.val > a.val ? b : a, dims[0]);
+  const belovedName = String(recap.belovedGameName || "").trim();
+
   const allKpis = [
-    togetherDays > 0 && { dim: "days", label: "陪伴天数", value: fmtD(togetherDays) },
-    Number(recap.gamesPlayedTotal || 0) > 0 && { dim: "games", label: "游玩数量", value: fmtK(recap.gamesPlayedTotal, 999) },
-    Number(recap.playTimeHours || 0) > 0 && { dim: "hours", label: "冒险时长", value: fmtH(recap.playTimeHours) },
-    genre && { dim: "genre", label: "冒险偏好", value: genre },
-    Number(recap.achievementsTotal || 0) + Number(recap.platformBadgesTotal || 0) > 0 && { dim: "achieve", label: "成就与徽章", value: fmtK(Number(recap.achievementsTotal || 0) + Number(recap.platformBadgesTotal || 0), 9999) },
-    Number(recap.reviewsCount || 0) > 0 && { dim: "reviews", label: "评价数", value: fmtK(recap.reviewsCount, 999) },
-    Number(recap.communityPublished || 0) > 0 && { dim: "published", label: "社区发布", value: fmtK(recap.communityPublished, 9999) },
-    Number(recap.communityLikesReceived || 0) > 0 && { dim: "likes", label: "获赞数", value: fmtW(recap.communityLikesReceived) },
-    (Number(recap.friendsCount || 0) + Number(recap.followersCount || 0)) > 0 && { dim: "social", label: "好友与粉丝", value: fmtK(Number(recap.friendsCount || 0) + Number(recap.followersCount || 0), 9999) },
-    devGames.length > 0 && { dim: "dev", label: "我的作品", value: String(devGames.length) },
+    togetherDays > 0 && { label: "相伴时光", value: years >= 1 ? `${years}年${days}天` : `${togetherDays}天` },
+    Number(recap.gamesPlayedTotal || 0) > 0 && { label: "游玩游戏", value: fmtVal(recap.gamesPlayedTotal) },
+    fmtHours(recap.playTimeHours) && { label: "游玩时长", value: fmtHours(recap.playTimeHours) + "h" },
+    Number(recap.lateNightOpenCount || 0) > 0 && { label: "深夜探索", value: fmtVal(recap.lateNightOpenCount) + "次" },
+    Number(recap.reserveCount || 0) > 0 && { label: "预约新作", value: fmtVal(recap.reserveCount) },
+    Number(recap.spendTotal || 0) > 0 && { label: "累计消费", value: fmtVal(Math.floor(recap.spendTotal)) + "元" },
+    tagsCount > 0 && { label: "喜爱类型", value: topDim.label + "类" },
+    Number(recap.achievementsTotal || 0) > 0 && { label: "游戏成就", value: fmtVal(recap.achievementsTotal) },
+    belovedName && { label: "生涯挚爱", value: escapeXml(belovedName.length > 6 ? belovedName.slice(0, 5) + "…" : belovedName) },
+    Number(recap.exclusivePlayed || 0) > 0 && { label: "独家宝藏", value: fmtVal(recap.exclusivePlayed) },
+    Number(recap.editorPickPlayed || 0) > 0 && { label: "编辑之选", value: fmtVal(recap.editorPickPlayed) },
+    Number(recap.reviewsCount || 0) > 0 && { label: "玩家评价", value: fmtVal(recap.reviewsCount) },
+    Number(recap.communityPublished || 0) > 0 && { label: "社区足迹", value: fmtVal(recap.communityPublished) },
+    Number(recap.communityLikesReceived || 0) > 0 && { label: "获赞数", value: fmtWan(recap.communityLikesReceived) },
+    Number(recap.nightSurfDays || 0) > 0 && { label: "深夜冲浪", value: fmtVal(recap.nightSurfDays) + "天" },
+    Number(recap.platformBadgesTotal || 0) > 0 && { label: "徽章收藏", value: fmtVal(recap.platformBadgesTotal) },
+    Number(recap.friendsCount || 0) > 0 && { label: "同行伙伴", value: fmtVal(recap.friendsCount) },
+    devGames.length > 0 && { label: "游戏创作", value: String(devGames.length) },
   ].filter(Boolean);
-  const hlDim = kw.dim;
-  const hlIdx = allKpis.findIndex(k => k.dim === hlDim);
-  if (hlIdx > 0) { const [item] = allKpis.splice(hlIdx, 1); allKpis.unshift(item); }
 
   const kpiCols = 4;
   const kpiCellW = Math.floor(900 / kpiCols);
@@ -3081,29 +2909,22 @@ function buildSharePosterSvg(s, recap, nick, pid, url, qr) {
     const col = i % kpiCols;
     const row = Math.floor(i / kpiCols);
     const cx = 130 + col * kpiCellW + kpiCellW / 2;
-    const cy = row * 110;
-    const isHl = i === 0 && hlDim;
-    const labelColor = isHl ? escapeXml(color.accent) : "rgba(15,23,42,.45)";
-    const valueColor = isHl ? escapeXml(color.accent) : "#0F172A";
-    const valueFz = isHl ? 48 : 38;
+    const cy = row * 120;
     return `
-      ${isHl ? `<rect x="${cx - kpiCellW / 2 + 8}" y="${cy - 22}" width="${kpiCellW - 16}" height="90" rx="14" fill="${escapeXml(color.accent)}" opacity="0.08"/>` : ""}
-      <text x="${cx}" y="${cy}" text-anchor="middle" font-size="22" font-weight="600" fill="${labelColor}">${escapeXml(k.label)}</text>
-      <text x="${cx}" y="${cy + 48}" text-anchor="middle" font-size="${valueFz}" font-weight="900" fill="${valueColor}">${escapeXml(k.value)}</text>
+      <text x="${cx}" y="${cy}" text-anchor="middle" font-size="22" font-weight="600" fill="rgba(15,23,42,.45)">${escapeXml(k.label)}</text>
+      <text x="${cx}" y="${cy + 48}" text-anchor="middle" font-size="38" font-weight="900" fill="#0F172A">${escapeXml(k.value)}</text>
     `;
   }).join("");
 
   const qrSized = String(qr).replace("<svg ", `<svg x="390" y="0" width="300" height="300" `);
 
-  const heroY = 240;
-  const heroH = 360;
-  const topListY = heroY + heroH + 40;
-  const topListH = 210;
-  const kwY = topListY + topListH + 30;
-  const kpiY = kwY + 130;
+  const kpiY = 280;
   const kpiRows = Math.ceil(allKpis.length / kpiCols);
-  const kpiH = kpiRows * 110 + 20;
-  const qrY = kpiY + kpiH + 50;
+  const kpiH = kpiRows * 120 + 20;
+  const coinY = kpiY + kpiH + 60;
+  const coinH = 200;
+  const ctaY = coinY + coinH + 50;
+  const qrY = ctaY + 80;
 
   return `
     <svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
@@ -3117,30 +2938,24 @@ function buildSharePosterSvg(s, recap, nick, pid, url, qr) {
       <circle cx="160" cy="180" r="280" fill="${escapeXml(color.accent)}" opacity="0.08"/>
       <circle cx="920" cy="240" r="320" fill="${escapeXml(color.accent)}" opacity="0.06"/>
 
-      <text x="90" y="120" font-size="32" font-weight="700" fill="#334155">${escapeXml(nick)}</text>
-      <text x="90" y="165" font-size="24" font-weight="600" fill="#64748B">ID ${escapeXml(pid)}</text>
-      <text x="990" y="120" text-anchor="end" font-size="48" font-weight="900" fill="#0F172A">TapTap 十周年</text>
-      <rect x="900" y="135" width="90" height="32" rx="10" fill="${escapeXml(color.accent)}"/>
-      <text x="945" y="158" text-anchor="middle" font-size="18" font-weight="800" fill="#FFFFFF">TapTap</text>
+      <text x="90" y="100" font-size="32" font-weight="700" fill="#334155">${escapeXml(nick)}</text>
+      <text x="90" y="145" font-size="24" font-weight="600" fill="#64748B">ID ${escapeXml(pid)}</text>
+      <text x="990" y="100" text-anchor="end" font-size="48" font-weight="900" fill="#0F172A">TapTap 十周年</text>
+      <rect x="900" y="115" width="90" height="32" rx="10" fill="${escapeXml(color.accent)}"/>
+      <text x="945" y="138" text-anchor="middle" font-size="18" font-weight="800" fill="#FFFFFF">TapTap</text>
 
-      <rect x="90" y="${heroY}" width="900" height="${heroH}" rx="36" fill="rgba(255,255,255,.85)" stroke="rgba(15,23,42,.08)" stroke-width="2"/>
-      <text x="540" y="${heroY + 120}" text-anchor="middle" font-size="100">${escapeXml(belovedIcon)}</text>
-      <text x="540" y="${heroY + 200}" text-anchor="middle" font-size="32" font-weight="800" fill="#0F172A">我的十年挚爱「${escapeXml(belovedName)}」</text>
-      ${fmtBH ? `
-        <rect x="420" y="${heroY + 230}" width="240" height="60" rx="30" fill="${escapeXml(color.accent)}"/>
-        <text x="540" y="${heroY + 270}" text-anchor="middle" font-size="32" font-weight="900" fill="#FFFFFF">${escapeXml(fmtBH)} 小时</text>
-      ` : ""}
+      <line x1="90" y1="200" x2="990" y2="200" stroke="rgba(15,23,42,.08)" stroke-width="2"/>
 
-      ${topShow.length > 0 ? `
-        <text x="90" y="${topListY}" font-size="28" font-weight="800" fill="#0F172A">我的十年挚爱Top榜</text>
-        <g transform="translate(0 ${topListY + 20})">${topIconsSvg}</g>
-      ` : ""}
+      <rect x="90" y="${kpiY - 30}" width="900" height="${kpiH + 50}" rx="28" fill="rgba(255,255,255,.7)" stroke="rgba(15,23,42,.05)" stroke-width="2"/>
+      <g transform="translate(0 ${kpiY + 20})">${kpisSvg}</g>
 
-      <text x="90" y="${kwY}" font-size="24" font-weight="600" fill="rgba(15,23,42,.45)">十年关键词</text>
-      <text x="90" y="${kwY + 60}" font-size="56" font-weight="950" fill="#0F172A">${escapeXml(kw.keyword)}</text>
+      <rect x="90" y="${coinY}" width="900" height="${coinH}" rx="36" fill="rgba(255,255,255,.85)" stroke="rgba(15,23,42,.08)" stroke-width="2"/>
+      <text x="540" y="${coinY + 55}" text-anchor="middle" font-size="28" font-weight="700" fill="#334155">领取纪念币</text>
+      <text x="540" y="${coinY + 120}" text-anchor="middle" font-size="72" font-weight="900" fill="${escapeXml(color.accent)}">${fmt(totalCoins)}</text>
+      <text x="590" y="${coinY + 120}" font-size="28" font-weight="700" fill="${escapeXml(color.accent)}">枚</text>
+      <text x="540" y="${coinY + 170}" text-anchor="middle" font-size="22" font-weight="600" fill="#64748B">可兑换游戏及 TapTap 专属福利</text>
 
-      <rect x="90" y="${kpiY}" width="900" height="${kpiH + 30}" rx="28" fill="rgba(255,255,255,.7)" stroke="rgba(15,23,42,.05)" stroke-width="2"/>
-      <g transform="translate(0 ${kpiY + 40})">${kpisSvg}</g>
+      <text x="540" y="${ctaY}" text-anchor="middle" font-size="28" font-weight="800" fill="${escapeXml(color.accent)}">快来 TapTap 参与十周年活动，领取你的专属福利吧 →</text>
 
       <rect x="90" y="${qrY}" width="900" height="420" rx="36" fill="rgba(255,255,255,.85)" stroke="rgba(15,23,42,.06)" stroke-width="2"/>
       <g transform="translate(0 ${qrY + 30})">${qrSized}</g>
@@ -4353,10 +4168,15 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         const name = String(snap.belovedGameName || "").trim();
         if (!name) return "";
         const icon = String(snap.belovedGameIcon || "").trim() || "🎮";
+        const hours = Number(snap.belovedGameHours || 0);
+        const fmtHours = hours <= 0 ? "" : hours > 6000 ? "6000+" : hours < 1 ? Math.max(0.1, hours).toFixed(1) : String(Math.floor(hours));
         return `
           <div class="arrival-card arrival-card--v2">
             <div class="arrival-v2__title">生涯挚爱</div>
-            <div class="arrival-v2__hero"><span style="font-size:28px;vertical-align:middle;margin-right:4px">${icon}</span> <strong>${escapeHtml(name)}</strong></div>
+            <div class="arrival-v2__hero beloved-hero">
+              <span class="beloved-game"><span class="beloved-icon">${icon}</span>${escapeHtml(name)}</span>
+              ${fmtHours ? `<span class="beloved-hours">累计游玩 <strong>${fmtHours}</strong> 小时</span>` : ""}
+            </div>
             <div class="arrival-v2__illust">
               <div class="arrival-v2__illust-img">插画·生涯挚爱</div>
             </div>
@@ -4784,14 +4604,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
           <div class="home-hero__title">🎉 回顾你与 TapTap 走过的十年时光</div>
           <div class="home-hero__note">
             数据统计截止到 2026年4月1日
-            <span class="home-hero__info-btn" onclick="this.closest('.home-hero__note').querySelector('.home-hero__info-popup').classList.toggle('is-visible')">!</span>
-            <div class="home-hero__info-popup">
-              <ul>
-                <li>累计消费包括买断制手游、买断制PC游戏、云玩等所有消费内容</li>
-                <li>类别偏好/挚爱游戏的数据由预约下载、冒险时长、内容浏览等综合行为产生</li>
-                <li>手机和PC平台的游玩时长也包含云游戏的时长</li>
-              </ul>
-            </div>
+            <span class="home-hero__info-btn" onclick="openDataRulesModal()">!</span>
           </div>
         </div>
         <button class="btn btn--brand recap-card__share" id="btnToggleShare" type="button">分享</button>
@@ -5004,7 +4817,7 @@ function miniCardHtml(card, idx, s, recap) {
 }
 
 function shareCardHtml(s, recap, { variant, nick, pid } = {}) {
-  const color = MEM_CARD_COLORS.find((c) => c.id === s.memorial?.colorId) || MEM_CARD_COLORS[0];
+  const color = MEM_CARD_COLORS[0];
 
   const totalCoins = Math.max(0, Number(s.points || 0));
 
@@ -5728,10 +5541,11 @@ function openBindSteamModal() {
   const body = `
     <div class="small" style="line-height:1.55">
       <div class="hint">
-        <b>绑定 Steam 账号</b>：这里会打开 Steam 绑定界面。
+        <b>绑定 Steam 账号</b>：实际场景中，点击绑定会跳转至 Steam 绑定页面，完成绑定后自动返回活动页。
       </div>
       <div class="divider"></div>
-      <div class="muted small">绑定后可领取：<b>${BIND_REWARDS.find((x) => x.id === "bind_steam")?.grant?.points || 0} 纪念币</b></div>
+      <div class="muted small">此处为 Demo 模拟流程，点击下方按钮直接模拟绑定成功。</div>
+      <div class="muted small" style="margin-top:4px">绑定后可领取：<b>${BIND_REWARDS.find((x) => x.id === "bind_steam")?.grant?.points || 0} 纪念币</b></div>
     </div>
   `;
   const footer = `
@@ -6864,7 +6678,6 @@ function openDebug() {
       platformBreakdown: [],
       yearlyData: [],
       radarAction: 0, radarStrategy: 0, radarRPG: 0, radarAdventure: 0, radarSim: 0, radarCasual: 0,
-      topGenreLabel: "", topGenrePct: "", topGenreSitePct: "",
       achievementGamesCount: 0,
       achievementsTotal: 0,
       achievementsNormal: 0,
