@@ -4647,7 +4647,7 @@ function rewardBlockHtml(rewardId, s, recap, isEmpty = false) {
       snap_community_likes: "获赞数量决定领奖次数",
       snap_night_community: "冲浪天数决定领奖次数",
       snap_badges:          "徽章数量决定领奖次数",
-      snap_friend_msgs:     "好友数量决定领奖次数",
+      snap_friend_msgs:     "好友和粉丝数量决定领奖次数",
       snap_dev_create:      "作品数量决定领奖次数",
     };
     const hint = maxClaims > 1 ? (claimHints[rewardId] || "") : "";
