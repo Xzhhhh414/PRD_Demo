@@ -280,7 +280,7 @@ const LOTTERY_POOL = [
   { id: "lp_cloud30",      icon: "🌤️", title: "云玩时长 30 分钟",   kind: "cloud",   qty: 1200, minutes: 30 },
   // CDKey
   { id: "lp_cdkey_a",      icon: "🔑", title: "游戏A CDKey",          kind: "cdkey",   qty: 200, cdkey: "TAPTAP-10Y-XXXX-AAAA" },
-  { id: "lp_cdkey_b",      icon: "🗝️", title: "游戏B CDKey",        kind: "cdkey",   qty: 150, cdkey: "TAPTAP-10Y-XXXX-BBBB" },
+  { id: "lp_cdkey_b",      icon: "🗝️", title: "游戏B CDKey",        kind: "cdkey",   qty: 0, cdkey: "TAPTAP-10Y-XXXX-BBBB" },
 ];
 
 const EXCHANGE_ITEMS = [
@@ -323,7 +323,6 @@ const MEM_STICKERS = [
 ];
 
 const MEM_AVATARS = [
-  { id: "ma_me", icon: "👤", label: "Tap头像", isProfileAvatar: true, img: "default.png" },
   { id: "ma_bunny", icon: "🐰", game: "TapTap", label: "嗒啦啦", img: "tarara01.png" },
   { id: "ma_cat", icon: "🐱", game: "TapTap", label: "嗒啦啦", img: "tarara02.png" },
   { id: "ma_robot", icon: "🤖", game: "游戏名字", label: "角色名字", isGameRole: true },
@@ -397,9 +396,9 @@ function loadState() {
       activeStickerIdx: 0,
       // Legacy field (kept for migration)
       stickerId: "ms_star",
-      avatarId: "ma_me",
+      avatarId: "ma_bunny",
     },
-    memorialUnlocks: { colors: ["mc_cream"], stickers: ["ms_star"], avatars: ["ma_me", "ma_bunny", "ma_cat", "ma_robot", "ma_fox", "ma_panda", "ma_penguin"] },
+    memorialUnlocks: { colors: ["mc_cream"], stickers: ["ms_star"], avatars: ["ma_bunny", "ma_cat", "ma_robot", "ma_fox", "ma_panda", "ma_penguin"] },
     daily: { lotteryDayKey: "", checkinDays: 0, checkinStreak: 0, lastCheckinDay: "", welfareLotteryDay: "" },
     lotteryWins: [],
     exchangeOwned: [],
@@ -686,6 +685,17 @@ function addPoints(s, delta) {
 function addCoupons(s, delta) {
   if (!ENABLE_COUPONS) return;
   s.walletCoupons = Math.max(0, (s.walletCoupons || 0) + delta);
+}
+
+function calcCareerCoinsTotal(s) {
+  const grants = s.careerSnapshot?.grants;
+  const snap = s.careerSnapshot?.recap;
+  if (!grants || !snap) return 0;
+  let total = 0;
+  for (const id of Object.keys(grants)) {
+    total += (grants[id].points || 0) * getMaxClaims(id, snap);
+  }
+  return total;
 }
 
 function snapshotClaimGrant(s, rewardId) {
@@ -2324,7 +2334,6 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
         <div class="mem-card">
           <div class="mem-stickers" aria-label="贴纸">
             ${(Array.isArray(s.memorial?.stickers) ? s.memorial.stickers : [])
-              .slice(0, 10)
               .map((st, idx) => {
                 const id = String(st?.id || "").trim();
                 const def = MEM_STICKERS.find((x) => x.id === id) || MEM_STICKERS[0];
@@ -2348,10 +2357,6 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
           </div>
           <div class="mem-top">
             <div class="mem-brand"></div>
-            <div class="mem-mini">
-              ${frameEquipped ? `<span class="tag">🟩 头像框</span>` : ""}
-              ${badgeEquipped ? `<span class="tag">🛠️ 徽章</span>` : ""}
-            </div>
           </div>
 
           <div class="mem-photo">
@@ -2596,15 +2601,11 @@ function memorialCardOnlyHtml(s, recap, { hideProfileFields = false } = {}) {
   const color = MEM_CARD_COLORS.find((c) => c.id === s.memorial?.colorId) || MEM_CARD_COLORS[0];
   const avatar = MEM_AVATARS.find((x) => x.id === s.memorial?.avatarId) || MEM_AVATARS[0];
 
-  const frameEquipped = s.equipped.frame === MEM_SHOP.frame.id;
-  const badgeEquipped = s.equipped.badge === MEM_SHOP.badge.id;
-
   return `
     <div class="mem-card-shell" style="--mem-bg:${color.bg}; --mem-panel:${color.panel}; --mem-accent:${color.accent};">
       <div class="mem-card">
         <div class="mem-stickers" aria-label="贴纸">
           ${(Array.isArray(s.memorial?.stickers) ? s.memorial.stickers : [])
-            .slice(0, 10)
             .map((st, idx) => {
               const id = String(st?.id || "").trim();
               const def = MEM_STICKERS.find((x) => x.id === id) || MEM_STICKERS[0];
@@ -2627,10 +2628,6 @@ function memorialCardOnlyHtml(s, recap, { hideProfileFields = false } = {}) {
         </div>
         <div class="mem-top">
           <div class="mem-brand"></div>
-          <div class="mem-mini">
-            ${frameEquipped ? `<span class="tag">🟩 头像框</span>` : ""}
-            ${badgeEquipped ? `<span class="tag">🛠️ 徽章</span>` : ""}
-          </div>
         </div>
 
         <div class="mem-photo">
@@ -2744,7 +2741,7 @@ function openShareMemorialModal({ onClose } = {}) {
     const cardW = 900;
     const cardH = 940;
 
-    const stickers = (Array.isArray(state.memorial?.stickers) ? state.memorial.stickers : []).slice(0, 10).map((st) => {
+    const stickers = (Array.isArray(state.memorial?.stickers) ? state.memorial.stickers : []).map((st) => {
       const id = String(st?.id || "").trim();
       const def = MEM_STICKERS.find((x) => x.id === id) || MEM_STICKERS[0];
       const x = Math.max(0, Math.min(100, Number(st?.x ?? 50)));
@@ -2863,7 +2860,7 @@ function buildSharePosterSvg(s, recap, nick, pid, url, qr) {
   const togetherDays = calcDaysSince(parseCnDateToTs(recap.regDate));
   const years = Math.floor((togetherDays || 0) / 365);
   const days = (togetherDays || 0) % 365;
-  const totalCoins = Math.max(0, Number(s.points || 0));
+  const totalCoins = calcCareerCoinsTotal(s);
 
   const fmtVal = (n) => fmt(Number(n || 0));
   const fmtHours = (h) => { const v = Number(h || 0); if (v <= 0) return ""; if (v < 1) return Math.max(0.1, v).toFixed(1); return fmt(Math.floor(v)); };
@@ -2895,20 +2892,25 @@ function buildSharePosterSvg(s, recap, nick, pid, url, qr) {
     Number(recap.exclusivePlayed || 0) > 0 && { label: "独家宝藏", value: fmtVal(recap.exclusivePlayed) },
     Number(recap.editorPickPlayed || 0) > 0 && { label: "编辑之选", value: fmtVal(recap.editorPickPlayed) },
     Number(recap.reviewsCount || 0) > 0 && { label: "玩家评价", value: fmtVal(recap.reviewsCount) },
-    Number(recap.communityPublished || 0) > 0 && { label: "社区足迹", value: fmtVal(recap.communityPublished) },
-    Number(recap.communityLikesReceived || 0) > 0 && { label: "获赞数", value: fmtWan(recap.communityLikesReceived) },
+    Number(recap.communityPublished || 0) > 0 && { label: "发布内容", value: fmtVal(recap.communityPublished) },
+    Number(recap.communityLikesReceived || 0) > 0 && { label: "获赞", value: fmtWan(recap.communityLikesReceived) },
     Number(recap.nightSurfDays || 0) > 0 && { label: "深夜冲浪", value: fmtVal(recap.nightSurfDays) + "天" },
     Number(recap.platformBadgesTotal || 0) > 0 && { label: "徽章收藏", value: fmtVal(recap.platformBadgesTotal) },
-    Number(recap.friendsCount || 0) > 0 && { label: "同行伙伴", value: fmtVal(recap.friendsCount) },
+    Number(recap.friendsCount || 0) > 0 && { label: "好友", value: fmtVal(recap.friendsCount) },
+    Number(recap.followersCount || 0) > 0 && { label: "粉丝", value: fmtWan(recap.followersCount) },
     devGames.length > 0 && { label: "游戏创作", value: String(devGames.length) },
   ].filter(Boolean);
 
   const kpiCols = 4;
   const kpiCellW = Math.floor(900 / kpiCols);
+  const totalRows = Math.ceil(allKpis.length / kpiCols);
   const kpisSvg = allKpis.map((k, i) => {
-    const col = i % kpiCols;
     const row = Math.floor(i / kpiCols);
-    const cx = 130 + col * kpiCellW + kpiCellW / 2;
+    const isLastRow = row === totalRows - 1;
+    const itemsInRow = isLastRow ? allKpis.length - row * kpiCols : kpiCols;
+    const colInRow = i - row * kpiCols;
+    const rowOffset = isLastRow ? (kpiCols - itemsInRow) * kpiCellW / 2 : 0;
+    const cx = 130 + rowOffset + colInRow * kpiCellW + kpiCellW / 2;
     const cy = row * 120;
     return `
       <text x="${cx}" y="${cy}" text-anchor="middle" font-size="22" font-weight="600" fill="rgba(15,23,42,.45)">${escapeXml(k.label)}</text>
@@ -3109,9 +3111,7 @@ function openSaveImageModal() {
   const bio = String(prof.bio || "").trim();
   const color = MEM_CARD_COLORS.find((c) => c.id === s.memorial?.colorId) || MEM_CARD_COLORS[0];
   const avatar = MEM_AVATARS.find((x) => x.id === s.memorial?.avatarId) || MEM_AVATARS[0];
-  const frameEquipped = s.equipped.frame === MEM_SHOP.frame.id;
-  const badgeEquipped = s.equipped.badge === MEM_SHOP.badge.id;
-  const stickerList = (Array.isArray(s.memorial?.stickers) ? s.memorial.stickers : []).slice(0, 10);
+  const stickerList = Array.isArray(s.memorial?.stickers) ? s.memorial.stickers : [];
 
   // 从 CSS 渐变字符串中提取可用的纯色
   const bgSolid = extractSolidColor(color.bg);
@@ -3608,6 +3608,7 @@ function shopModalView(s) {
           <select id="selTestForceKind" class="lottery-test-bar__select">
             <option value="">随机</option>
             ${testKindOptions}
+            <option value="__none__" ${currentForceKind === "__none__" ? "selected" : ""}>未中奖</option>
           </select>
           <button class="btn btn--sm" id="btnTestResetLottery" type="button" ${drawnToday ? "" : "disabled"}>重置今日机会</button>
         </div>
@@ -3677,7 +3678,7 @@ function wireMemorialInline({ inModal = false } = {}) {
     return state.memorialUnlocks[k];
   };
   const ensureStickers = () => {
-    if (!state.memorial || typeof state.memorial !== "object") state.memorial = { tab: "color", colorId: "mc_cream", stickers: [], activeStickerIdx: 0, stickerId: "", avatarId: "ma_me" };
+    if (!state.memorial || typeof state.memorial !== "object") state.memorial = { tab: "color", colorId: "mc_cream", stickers: [], activeStickerIdx: 0, stickerId: "", avatarId: "ma_bunny" };
     if (!Array.isArray(state.memorial.stickers)) state.memorial.stickers = [];
     return state.memorial.stickers;
   };
@@ -3690,10 +3691,6 @@ function wireMemorialInline({ inModal = false } = {}) {
       state.memorial.activeStickerIdx = idx;
       // Keep legacy field updated for debug compatibility
       state.memorial.stickerId = sid;
-      return false;
-    }
-    if (stickers.length >= 10) {
-      toast("贴纸太多啦，先调整一下再添加");
       return false;
     }
     stickers.push({ id: sid, x: 76, y: 26, s: 1, r: 0 });
@@ -3742,13 +3739,8 @@ function wireMemorialInline({ inModal = false } = {}) {
         if ((state.points || 0) < cost) return;
         state.points -= cost;
         list.push(id);
-        if (kind === "color") state.memorial.colorId = id;
-        if (kind === "sticker") {
-          applyStickerOnce(id);
-        }
-        if (kind === "avatar") state.memorial.avatarId = id;
         saveState();
-        toast("已解锁并应用");
+        toast("已解锁");
         closeModal();
       },
     });
@@ -3870,7 +3862,6 @@ function wireMemorialInline({ inModal = false } = {}) {
           onConfirm: () => {
             state.points -= item.cost;
             state.inventory.frames.push(item.id);
-            state.equipped.frame = item.id;
             saveState();
             toast(`已兑换：${item.title}`);
             closeModal();
@@ -3886,7 +3877,6 @@ function wireMemorialInline({ inModal = false } = {}) {
           onConfirm: () => {
             state.points -= item.cost;
             state.inventory.badges.push(item.id);
-            state.equipped.badge = item.id;
             saveState();
             toast(`已兑换：${item.title}`);
             closeModal();
@@ -4819,7 +4809,7 @@ function miniCardHtml(card, idx, s, recap) {
 function shareCardHtml(s, recap, { variant, nick, pid } = {}) {
   const color = MEM_CARD_COLORS[0];
 
-  const totalCoins = Math.max(0, Number(s.points || 0));
+  const totalCoins = calcCareerCoinsTotal(s);
 
   const togetherDays = calcDaysSince(parseCnDateToTs(recap.regDate));
   const years = Math.floor((togetherDays || 0) / 365);
@@ -4863,7 +4853,8 @@ function shareCardHtml(s, recap, { variant, nick, pid } = {}) {
     Number(recap.communityLikesReceived || 0) > 0 && { label: "获赞数", value: fmtWan(recap.communityLikesReceived) },
     Number(recap.nightSurfDays || 0) > 0 && { label: "深夜冲浪", value: fmtVal(recap.nightSurfDays) + "天" },
     Number(recap.platformBadgesTotal || 0) > 0 && { label: "徽章收藏", value: fmtVal(recap.platformBadgesTotal) },
-    Number(recap.friendsCount || 0) > 0 && { label: "同行伙伴", value: fmtVal(recap.friendsCount) },
+    Number(recap.friendsCount || 0) > 0 && { label: "好友", value: fmtVal(recap.friendsCount) },
+    Number(recap.followersCount || 0) > 0 && { label: "粉丝", value: fmtWan(recap.followersCount) },
     devGames.length > 0 && { label: "游戏创作", value: String(devGames.length) },
   ].filter(Boolean);
 
@@ -4880,7 +4871,7 @@ function shareCardHtml(s, recap, { variant, nick, pid } = {}) {
       </div>
 
       <div class="sc2__coins-banner">
-        <div class="sc2__coins-label">领取纪念币</div>
+        <div class="sc2__coins-label">可领取纪念币</div>
         <div class="sc2__coins-row">
           <span class="sc2__coins-icon">\u{1F4B0}</span>
           <span class="sc2__coins-num">${fmt(totalCoins)}</span>
@@ -5650,7 +5641,7 @@ function discoverInlineView(s) {
       .slice()
       .filter((m) => String(m?.text || "").trim())
       .sort((a, b) => Number(b.likes || 0) - Number(a.likes || 0))
-      .slice(0, 6);
+      .slice(0, 5);
   };
   const cut24 = (str) => {
     const arr = Array.from(String(str || "").trim());
@@ -5675,7 +5666,7 @@ function discoverInlineView(s) {
 
     const currentHtml = `
       <div class="playtime-task-current">
-        <div class="playtime-task-current__encourage"><span>去游乐场里寻找自己喜欢的游戏吧~</span><button class="btn btn--sm" id="btnShuffleGames" type="button" style="margin-left:auto">🎲 换一换</button></div>
+        <div class="playtime-task-current__encourage"><span>去游乐场里寻找自己喜欢的游戏吧~</span><button class="btn btn--sm" id="btnShuffleGames" type="button" style="margin-left:auto">🎲 换一批</button></div>
         <div class="playtime-task-current__target">活动期间累计游玩 ${current.label}，自动领取 <b>${fmt(current.points)}</b> 纪念币</div>
         <div class="playtime-task-current__bar">
           <div class="playtime-task-current__fill" style="width:${pct}%"></div>
@@ -5750,7 +5741,7 @@ function discoverInlineView(s) {
       const top = getTopLiked(g.id);
       const marqueeItems = top.length
         ? top.map((m) => `<span class="marquee__item">👍 ${Number(m.likes || 0)} ${escapeHtml(cut24(m.text))}</span>`).join("")
-        : `<span class="marquee__item">还没有热评，快来留言做第一个上墙的人吧</span>`;
+        : "";
       const marqueeTrackClass = top.length ? "marquee__track" : "marquee__track marquee__track--static";
 
       const mainBtn = isClaimed
@@ -5768,11 +5759,11 @@ function discoverInlineView(s) {
             </div>
           </div>
           <div class="guess-card__body">
-            <div class="guess-card__marquee marquee" aria-label="热门评论">
+            ${top.length ? `<div class="guess-card__marquee marquee" aria-label="热门评论">
               <div class="${marqueeTrackClass}">
-                ${marqueeItems}${top.length ? marqueeItems : ""}
+                ${marqueeItems}${marqueeItems}
               </div>
-            </div>
+            </div>` : ""}
           </div>
           <div class="guess-card__right">
             ${mainBtn}
@@ -6331,15 +6322,20 @@ function wireShop({ inModal = false } = {}) {
     if (!Array.isArray(state.lotteryWins)) state.lotteryWins = [];
 
     const forceKind = state._testForceKind || null;
-    let available = LOTTERY_POOL.filter((p) => {
-      const wonCount = state.lotteryWins.filter((w) => w.id === p.id).length;
-      return wonCount < p.qty;
-    });
-    if (forceKind) {
-      const kindPool = available.filter((p) => p.kind === forceKind);
-      if (kindPool.length > 0) available = kindPool;
+    let prize = null;
+    if (forceKind === "__none__") {
+      prize = null;
+    } else {
+      let available = LOTTERY_POOL.filter((p) => {
+        const wonCount = state.lotteryWins.filter((w) => w.id === p.id).length;
+        return wonCount < p.qty;
+      });
+      if (forceKind) {
+        const kindPool = available.filter((p) => p.kind === forceKind);
+        if (kindPool.length > 0) available = kindPool;
+      }
+      prize = available.length > 0 ? available[Math.floor(Math.random() * available.length)] : null;
     }
-    const prize = available.length > 0 ? available[Math.floor(Math.random() * available.length)] : null;
     if (prize) state.lotteryWins.push({ id: prize.id, kind: prize.kind, title: prize.title, icon: prize.icon, time: new Date().toISOString() });
     saveState();
 
@@ -6348,7 +6344,10 @@ function wireShop({ inModal = false } = {}) {
 
     const items = $$(".pool-grid .pool-item");
     const prizeIdx = prize ? LOTTERY_POOL.findIndex((p) => p.id === prize.id) : -1;
-    const totalSteps = items.length * 3 + (prizeIdx >= 0 ? prizeIdx : Math.floor(Math.random() * items.length));
+    const noPrize = !prize;
+    const totalSteps = noPrize
+      ? items.length * 3 + Math.floor(Math.random() * items.length)
+      : items.length * 3 + (prizeIdx >= 0 ? prizeIdx : 0);
     let step = 0;
 
     function runHighlight() {
@@ -6361,6 +6360,9 @@ function wireShop({ inModal = false } = {}) {
         const progress = step / totalSteps;
         const delay = 60 + 260 * progress * progress;
         setTimeout(runHighlight, delay);
+      } else if (noPrize) {
+        items.forEach((el) => el.classList.remove("pool-item--highlight"));
+        setTimeout(() => { render(); showLotteryResult(prize); }, 800);
       } else {
         setTimeout(() => {
           items.forEach((el) => el.classList.remove("pool-item--highlight"));
@@ -6391,7 +6393,7 @@ function wireShop({ inModal = false } = {}) {
     }
     const body = prize
       ? `<div style="text-align:center;padding:16px 0"><div style="font-size:48px;margin-bottom:12px">${prize.icon}</div><div style="font-size:16px;font-weight:800;color:#0F172A">${escapeHtml(prize.title)}</div>${extraHtml}</div>`
-      : `<div style="text-align:center;padding:16px 0"><div style="font-size:48px;margin-bottom:12px">😢</div><div style="font-size:16px;font-weight:800;color:#0F172A">很遗憾，没有抽到</div></div>`;
+      : `<div style="text-align:center;padding:16px 0"><div style="font-size:48px;margin-bottom:12px"></div><div style="font-size:16px;font-weight:800;color:#0F172A">很遗憾没抽到，再试一次吧~</div></div>`;
     const footerBtns = `${footerExtra}<button class="btn btn--brand" id="btnLotteryOk">知道了</button>`;
     openModal({
       title: "抽奖结果",
@@ -6480,10 +6482,10 @@ function wireShop({ inModal = false } = {}) {
           openModal({ title: "兑换成功", bodyHtml: giftBody, footerHtml: `<button class="btn btn--brand" id="btnGiftOk">知道了</button>` });
           $("#btnGiftOk")?.addEventListener("click", () => { closeModal(); render(); if (inModal) openShopModal(); });
         } else {
-          closeModal();
-          render();
-          toast(`已兑换：${item.title}`);
-          if (inModal) openShopModal();
+          const hintText = item.id.includes("frame") ? "恭喜获得头像框，可在个人主页使用" : "恭喜获得徽章，可在个人主页使用";
+          const successBody = `<div style="text-align:center;padding:16px 0"><div style="font-size:48px;margin-bottom:12px">${item.icon}</div><div style="font-size:16px;font-weight:800;color:#0F172A">${escapeHtml(item.title)}</div><div style="margin-top:12px"><span style="font-size:13px;color:rgba(15,23,42,.55)">${hintText}</span></div></div>`;
+          openModal({ title: "兑换成功", bodyHtml: successBody, footerHtml: `<button class="btn btn--brand" id="btnExSuccessOk">知道了</button>` });
+          $("#btnExSuccessOk")?.addEventListener("click", () => { closeModal(); render(); if (inModal) openShopModal(); });
         }
       });
     }),

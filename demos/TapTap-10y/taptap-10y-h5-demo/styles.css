@@ -6237,9 +6237,10 @@ html.is-firstrecap .firstrecap-body::before{
 }
 
 .sc2__kpis{
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px 4px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 0;
   margin-top: 18px;
   background: var(--sc2-panel, rgba(255,255,255,.7));
   border-radius: 14px;
@@ -6247,6 +6248,8 @@ html.is-firstrecap .firstrecap-body::before{
   border: 1px solid rgba(15,23,42,.05);
 }
 .sc2__kpi{
+  width: 25%;
+  box-sizing: border-box;
   text-align: center;
   min-width: 0;
 }
@@ -6274,7 +6277,7 @@ html.is-firstrecap .firstrecap-body::before{
   text-align: center;
 }
 .sc2__kpi--user{
-  grid-column: 1 / -1;
+  width: 100%;
   display: flex;
   align-items: baseline;
   gap: 8px;
