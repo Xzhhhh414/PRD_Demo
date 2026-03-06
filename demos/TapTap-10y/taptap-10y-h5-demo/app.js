@@ -69,7 +69,7 @@ const PRESETS = {
       achievementGamesCount: 14,
       achievementsTotal: 326,
       platinumAchievementsTotal: 18,
-      // 生涯挚爱
+      // 我的挚爱
       belovedGameName: "《哈迪斯》",
       belovedGameIcon: "💀",
       belovedGameHours: 1280,
@@ -781,7 +781,7 @@ function openDataRulesModal() {
           <li><b>游玩时光</b>：每游玩 200 小时增加 1 次，最多 10 次</li>
           <li><b>喜爱类型</b>：每多涉猎 1 个类型增加 1 次，最多 10 次</li>
           <li><b>游戏成就</b>：每 50 个成就增加 1 次，每个白金成就额外增加 1 次，最多 10 次</li>
-          <li><b>生涯挚爱</b>：固定 1 次</li>
+          <li><b>我的挚爱</b>：固定 1 次</li>
           <li><b>独家宝藏</b>：每玩 10 款独家游戏增加 1 次，最多 10 次</li>
           <li><b>编辑之选</b>：每玩 10 款编辑推荐游戏增加 1 次，最多 10 次</li>
           <li><b>玩家之声</b>：每 50 条评价增加 1 次，每条嘴替评价额外增加 1 次，最多 10 次</li>
@@ -2891,7 +2891,7 @@ function buildSharePosterSvg(s, recap, nick, pid, url, qr) {
     Number(recap.spendTotal || 0) > 0 && { label: "累计消费", value: fmtVal(Math.floor(recap.spendTotal)) + "元" },
     tagsCount > 0 && { label: "喜爱类型", value: topDim.label + "类" },
     Number(recap.achievementsTotal || 0) > 0 && { label: "游戏成就", value: fmtVal(recap.achievementsTotal) },
-    belovedName && { label: "生涯挚爱", value: escapeXml(belovedName.length > 6 ? belovedName.slice(0, 5) + "…" : belovedName) },
+    belovedName && { label: "我的挚爱", value: escapeXml(belovedName.length > 6 ? belovedName.slice(0, 5) + "…" : belovedName) },
     Number(recap.exclusivePlayed || 0) > 0 && { label: "独家宝藏", value: fmtVal(recap.exclusivePlayed) },
     Number(recap.editorPickPlayed || 0) > 0 && { label: "编辑之选", value: fmtVal(recap.editorPickPlayed) },
     Number(recap.reviewsCount || 0) > 0 && { label: "玩家评价", value: fmtVal(recap.reviewsCount) },
@@ -4161,9 +4161,9 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
       rewardId: "snap_achievements",
       visible: Number(snap.achievementsTotal || 0) > 0 || Number(snap.achievementGamesCount || 0) > 0,
     },
-    // 生涯挚爱
+    // 我的挚爱
     {
-      label: "生涯挚爱",
+      label: "我的挚爱",
       value: (() => {
         const name = String(snap.belovedGameName || "").trim();
         if (!name) return "";
@@ -4172,13 +4172,13 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         const fmtHours = hours <= 0 ? "" : hours > 6000 ? "6000+" : hours < 1 ? Math.max(0.1, hours).toFixed(1) : String(Math.floor(hours));
         return `
           <div class="arrival-card arrival-card--v2">
-            <div class="arrival-v2__title">生涯挚爱</div>
+            <div class="arrival-v2__title">我的挚爱</div>
             <div class="arrival-v2__hero beloved-hero">
               <span class="beloved-game"><span class="beloved-icon">${icon}</span>${escapeHtml(name)}</span>
               ${fmtHours ? `<span class="beloved-hours">游玩 <strong>${fmtHours}</strong> 小时</span>` : ""}
             </div>
             <div class="arrival-v2__illust">
-              <div class="arrival-v2__illust-img">插画·生涯挚爱</div>
+              <div class="arrival-v2__illust-img">插画·我的挚爱</div>
             </div>
           </div>
         `;
@@ -4436,7 +4436,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         if (games <= 0) {
           return `
             <div class="steamcard steamcard--empty">
-              <div class="steamcard__empty-text">你的 Steam 旅程还未开始。<br>第一款佳作，也许正在等你启动。</div>
+              <div class="steamcard__empty-steamtext" style="font-size: 16px;">你的 Steam 旅程还未开始。<br>第一款佳作，也许正在等你启动。</div>
             </div>
           `;
         }
@@ -4520,7 +4520,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         cards.push({
           label: "绑定角色",
           value: "",
-          desc: "绑定游戏角色即可领取纪念币奖励，快去绑定吧！",
+          desc: '<span style="font-size:14px">绑定游戏角色即可领取纪念币奖励，<br>快去绑定吧！</span>',
           rewardId: "bind_roles",
           visible: true,
         });
@@ -4855,7 +4855,7 @@ function shareCardHtml(s, recap, { variant, nick, pid } = {}) {
     Number(recap.spendTotal || 0) > 0 && { label: "累计消费", value: fmtVal(Math.floor(recap.spendTotal)) + "元" },
     tagsCount > 0 && { label: "喜爱类型", value: topDim.label + "类" },
     Number(recap.achievementsTotal || 0) > 0 && { label: "游戏成就", value: fmtVal(recap.achievementsTotal) },
-    belovedName && { label: "生涯挚爱", value: escapeHtml(belovedName.length > 6 ? belovedName.slice(0, 5) + "…" : belovedName) },
+    belovedName && { label: "我的挚爱", value: escapeHtml(belovedName.length > 6 ? belovedName.slice(0, 5) + "…" : belovedName) },
     Number(recap.exclusivePlayed || 0) > 0 && { label: "独家宝藏", value: fmtVal(recap.exclusivePlayed) },
     Number(recap.editorPickPlayed || 0) > 0 && { label: "编辑之选", value: fmtVal(recap.editorPickPlayed) },
     Number(recap.reviewsCount || 0) > 0 && { label: "玩家评价", value: fmtVal(recap.reviewsCount) },
@@ -5556,13 +5556,14 @@ function openBindSteamModal() {
   $("#btnCancelSteam")?.addEventListener("click", closeModal);
   $("#btnConfirmSteam")?.addEventListener("click", () => {
     state.boundSteam = true;
-    if (!state.steamGamesCount) {
+    if (!state.steamGamesCount && !state._steamEmptyTest) {
       state.steamFavGame = "ELDEN RING";
       state.steamFavGameIcon = "https://img.tapimg.net/market/images/e2b7259807d30e498a3008cbed6be542.png";
       state.steamAccountValue = 12680.5;
       state.steamGamesCount = 286;
       state.steamPlayHours = 4236;
     }
+    delete state._steamEmptyTest;
     saveState();
     closeModal();
     if (lastBindClickCtx?.trackId) requestCarouselInit(lastBindClickCtx.trackId, lastBindClickCtx.currentIdx);
@@ -6709,7 +6710,14 @@ function openDebug() {
       tapmakerGamesCount: 0
     };
     txt.value = JSON.stringify(emptyRecap, null, 2);
-    toast("已切换为新注册玩家数据（未应用）");
+    chkSteam.checked = false;
+    state.steamFavGame = "";
+    state.steamFavGameIcon = "";
+    state.steamAccountValue = 0;
+    state.steamGamesCount = 0;
+    state.steamPlayHours = 0;
+    state._steamEmptyTest = true;
+    toast("已切换为新注册玩家数据（含 Steam 清空，未应用）");
   });
 
   $("#btnResetRecapJson")?.addEventListener("click", () => {
