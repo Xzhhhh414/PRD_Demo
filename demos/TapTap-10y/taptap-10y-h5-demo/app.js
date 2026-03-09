@@ -154,14 +154,7 @@ const PLAYTEST_GAMES = [
   { id: "p14", title: "《时光邮局》", desc: "10 分钟试玩 · 叙事 · 治愈", tags: ["叙事", "治愈", "文字", "10分钟"], heat: 220, url: "https://www.taptap.cn/app/300014" },
 ];
 
-const PLAY_TIME_TIERS = [
-  { id: "pt_10m",  minutes: 10,   points: 100, label: "10 分钟" },
-  { id: "pt_1h",   minutes: 60,   points: 200, label: "1 小时" },
-  { id: "pt_5h",   minutes: 300,  points: 300, label: "5 小时" },
-  { id: "pt_10h",  minutes: 600,  points: 400, label: "10 小时" },
-  { id: "pt_25h",  minutes: 1500, points: 500, label: "25 小时" },
-  { id: "pt_50h",  minutes: 3000, points: 600, label: "50 小时" },
-];
+const CHECKIN_COINS_PER_GAME = 50;
 
 const MUTUAL_GAMES = [
   {
@@ -386,7 +379,7 @@ function loadState() {
     claimedRewardIds: [],
     inventory: { frames: [], badges: [] },
     equipped: {},
-    playtest: { completed: [], feedback: {}, claimed: [], playMinutes: 0, tiersClaimed: [] },
+    playtest: { completed: [], feedback: {}, claimed: [], checkedInGames: [] },
     memorial: {
       tab: "avatar",
       // `colorId` now represents background theme (with patterns)
@@ -438,8 +431,7 @@ function loadState() {
     if (!Array.isArray(merged.playtest.completed)) merged.playtest.completed = [];
     if (!merged.playtest.feedback || typeof merged.playtest.feedback !== "object") merged.playtest.feedback = {};
     if (!Array.isArray(merged.playtest.claimed)) merged.playtest.claimed = [];
-    if (!Number.isFinite(merged.playtest.playMinutes)) merged.playtest.playMinutes = 0;
-    if (!Array.isArray(merged.playtest.tiersClaimed)) merged.playtest.tiersClaimed = [];
+    if (!Array.isArray(merged.playtest.checkedInGames)) merged.playtest.checkedInGames = [];
 
     merged.profile = { ...fallback.profile, ...(parsed?.profile || {}) };
     if (!merged.profile || typeof merged.profile !== "object") merged.profile = { ...fallback.profile };
@@ -1959,52 +1951,31 @@ function stickyStatsView(s) {
   const isDouble = streak >= CHECKIN_STREAK_GOAL;
   const reward = isDouble ? CHECKIN_BASE * 2 : CHECKIN_BASE;
 
-  // ── 展开态 ──
-  const expandedHtml = `
-    <div class="sticky-stats__expanded">
-      <section class="card sticky-stats__card" style="border-radius:0; box-shadow:none;">
-        <div class="sticky-hub">
-          <div class="sticky-hub__left">
-            <div class="sticky-hub__thumb" id="btnOpenMemorial" role="button" tabindex="0" aria-label="编辑十周年名片" style="--mem-bg:${color.bg};">
-              <div class="sticky-hub__avatar">${avatarDisplayHtml(avatar, String(s.profile?.nickname || ""), { size: "small" })}</div>
-              ${stickersHtml}
-            </div>
-            <button class="link-btn" id="btnEditMemorial" type="button" style="font-size:11px; margin-top:4px">开始装扮吧</button>
+  return `
+    <section class="card sticky-stats__card" style="border-radius:0; box-shadow:none;">
+      <div class="sticky-hub">
+        <div class="sticky-hub__left">
+          <div class="sticky-hub__thumb" id="btnOpenMemorial" role="button" tabindex="0" aria-label="编辑十周年名片" style="--mem-bg:${color.bg};">
+            <div class="sticky-hub__avatar">${avatarDisplayHtml(avatar, String(s.profile?.nickname || ""), { size: "small" })}</div>
+            ${stickersHtml}
           </div>
-          <div class="sticky-hub__cards">
-            <div class="sticky-hub__card sticky-hub__card--points">
-              <div class="sticky-hub__card-title">纪念币 <b id="pillPoints">${fmt(s.points)}</b></div>
-              <div class="sticky-hub__card-desc">兑换福利和名片装饰</div>
-              <button class="btn btn--brand sticky-hub__card-btn" id="btnGoShop" type="button">福利兑换</button>
-            </div>
-            <div class="sticky-hub__card sticky-hub__card--checkin">
-              <div class="sticky-hub__card-title">签到天数 <b>${checkinDays}</b> <span class="checkin-streak-tag">连签${streak}天</span></div>
-              <div class="sticky-hub__card-desc">${isDouble ? `每天可领 <b>${reward}</b> 纪念币（翻倍中）` : `每天可领 ${CHECKIN_BASE} 纪念币<br>连签${CHECKIN_STREAK_GOAL}天翻倍`}</div>
-              <button class="btn ${checkedToday ? "" : "btn--brand"} sticky-hub__card-btn" id="btnCheckin" type="button" ${checkedToday ? "disabled" : ""}>${checkedToday ? "今日已签" : "立即签到"}</button>
-            </div>
+          <button class="link-btn" id="btnEditMemorial" type="button" style="font-size:11px; margin-top:4px">开始装扮吧</button>
+        </div>
+        <div class="sticky-hub__cards">
+          <div class="sticky-hub__card sticky-hub__card--points">
+            <div class="sticky-hub__card-title">纪念币 <b id="pillPoints">${fmt(s.points)}</b></div>
+            <div class="sticky-hub__card-desc">兑换福利和名片装饰</div>
+            <button class="btn btn--brand sticky-hub__card-btn" id="btnGoShop" type="button">福利兑换</button>
+          </div>
+          <div class="sticky-hub__card sticky-hub__card--checkin">
+            <div class="sticky-hub__card-title">签到天数 <b>${checkinDays}</b> <span class="checkin-streak-tag">连签${streak}天</span></div>
+            <div class="sticky-hub__card-desc">${isDouble ? `每天可领 <b>${reward}</b> 纪念币（翻倍中）` : `每天可领 ${CHECKIN_BASE} 纪念币<br>连签${CHECKIN_STREAK_GOAL}天翻倍`}</div>
+            <button class="btn ${checkedToday ? "" : "btn--brand"} sticky-hub__card-btn" id="btnCheckin" type="button" ${checkedToday ? "disabled" : ""}>${checkedToday ? "今日已签" : "立即签到"}</button>
           </div>
         </div>
-      </section>
-    </div>
-  `;
-
-  // ── 收起态 ──
-  const collapsedHtml = `
-    <div class="sticky-stats__collapsed">
-      <div class="sticky-compact">
-        <div class="sticky-compact__thumb" id="btnCompactMemorial" role="button" tabindex="0" aria-label="编辑十周年名片" style="--mem-bg:${color.bg};">
-          <div class="sticky-compact__avatar">${avatarDisplayHtml(avatar, String(s.profile?.nickname || ""), { size: "small" })}</div>
-        </div>
-        <div class="sticky-compact__info">
-          <span class="pill pill--brand">纪念币 <b>${fmt(s.points)}</b></span>
-          <span class="muted" style="font-size:12px">签到 ${checkinDays} 天</span>
-        </div>
-        <button class="sticky-compact__expand" id="btnStickyExpand" type="button" aria-label="展开">▼</button>
       </div>
-    </div>
+    </section>
   `;
-
-  return expandedHtml + collapsedHtml;
 }
 
 function stickyStatsLiteView(s) {
@@ -2023,53 +1994,23 @@ function wireStickyStats() {
   if (ENABLE_COUPONS) $("#btnWallet")?.addEventListener("click", openWalletModal);
   $("#btnOpenMemorial")?.addEventListener("click", () => openMemorialEditModal());
   $("#btnEditMemorial")?.addEventListener("click", () => openMemorialEditModal());
-  $("#btnCompactMemorial")?.addEventListener("click", () => openMemorialEditModal());
 
-  // ── 置顶栏折叠/展开 ──
+  // ── 置顶栏滚动隐藏/停止显示 ──
   const stickyEl = document.getElementById("stickyStats");
   if (stickyEl) {
-    const SCROLL_THRESHOLD = 40;
     let scrollTimer = null;
-    let anchorY = window.scrollY;
-    let ignoreUntil = 0;
+    let lastY = window.scrollY;
 
-    const isCollapsed = () => stickyEl.classList.contains("is-collapsed");
-    const collapse = () => {
-      if (isCollapsed()) return;
-      stickyEl.classList.add("is-collapsed");
-      ignoreUntil = Date.now() + 400;
-      setTimeout(() => { anchorY = window.scrollY; }, 380);
-    };
-    const expand = () => {
-      if (!isCollapsed()) return;
-      stickyEl.classList.remove("is-collapsed");
-      ignoreUntil = Date.now() + 400;
-      setTimeout(() => { anchorY = window.scrollY; }, 380);
-    };
-
-    // 展开按钮
-    $("#btnStickyExpand")?.addEventListener("click", () => {
-      expand();
-    });
+    const hide = () => { if (!stickyEl.classList.contains("is-hidden")) stickyEl.classList.add("is-hidden"); };
+    const show = () => { stickyEl.classList.remove("is-hidden"); };
 
     const onScroll = () => {
-      if (Date.now() < ignoreUntil) return;
-
       const y = window.scrollY;
-
-      if (y <= 10) {
-        expand();
-        return;
-      }
-
-      const delta = y - anchorY;
-      if (delta > SCROLL_THRESHOLD) {
-        collapse();
-        return;
-      }
-
+      if (y <= 10) { show(); lastY = y; return; }
+      if (y !== lastY) hide();
+      lastY = y;
       clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(() => { anchorY = window.scrollY; }, 150);
+      scrollTimer = setTimeout(show, 300);
     };
 
     if (wireStickyStats._scrollHandler) {
@@ -5649,67 +5590,20 @@ function discoverInlineView(s) {
     return `${arr.slice(0, 24).join("")}…`;
   };
 
-  const playTimeTiersHtml = (s) => {
-    const mins = s.playtest?.playMinutes || 0;
-    const claimed = s.playtest?.tiersClaimed || [];
-    const fmtTime = (m) => m < 60 ? `${m} 分钟` : `${Math.floor(m / 60)} 小时${m % 60 ? ` ${m % 60} 分钟` : ""}`;
-    const fmtTimeAs = (m, targetMinutes) => targetMinutes < 60 ? `${m} 分钟` : `${(m / 60).toFixed(1).replace(/\.0$/, "")} 小时`;
-
-    let currentIdx = PLAY_TIME_TIERS.findIndex((t) => !claimed.includes(t.id));
-    if (currentIdx === -1) currentIdx = PLAY_TIME_TIERS.length - 1;
-
-    const current = PLAY_TIME_TIERS[currentIdx];
-    const currentClaimed = claimed.includes(current.id);
-    const currentDone = mins >= current.minutes;
-    const progress = Math.min(1, mins / current.minutes);
-    const pct = Math.round(progress * 100);
-
-    const currentHtml = `
-      <div class="playtime-task-current">
-        <div class="playtime-task-current__encourage"><span>去游乐场里寻找自己喜欢的游戏吧~</span><button class="btn btn--sm" id="btnShuffleGames" type="button" style="margin-left:auto">🎲 换一批</button></div>
-        <div class="playtime-task-current__target">活动期间累计游玩 ${current.label}，自动领取 <b>${fmt(current.points)}</b> 纪念币</div>
-        <div class="playtime-task-current__bar">
-          <div class="playtime-task-current__fill" style="width:${pct}%"></div>
-        </div>
-        <div class="playtime-task-current__status" id="btnToggleTiers" role="button" tabindex="0">
-          <span>${fmtTimeAs(mins, current.minutes)} / ${current.label}</span>
-          <span class="playtime-task__arrow" id="tiersArrow">▼</span>
-        </div>
-      </div>`;
-
-    const sortedTiers = PLAY_TIME_TIERS.map((t, i) => {
-      const done = mins >= t.minutes;
-      const isClaimed = claimed.includes(t.id);
-      return { ...t, done, isClaimed, origIdx: i };
-    }).sort((a, b) => {
-      const aWeight = a.isClaimed ? 2 : a.done ? 0 : 1;
-      const bWeight = b.isClaimed ? 2 : b.done ? 0 : 1;
-      return (aWeight - bWeight) || (a.origIdx - b.origIdx);
-    });
-
-    const allTiersRows = sortedTiers.map((t) => {
-      const statusCls = t.isClaimed ? "playtime-tier--claimed" : t.done ? "playtime-tier--done" : "";
-      const statusText = t.isClaimed ? "已领取" : t.done ? "已达成" : `${fmtTimeAs(mins, t.minutes)}/${t.label}`;
-      return `<div class="playtime-tier ${statusCls}"><span class="playtime-tier__label">累计 ${t.label}</span><span class="playtime-tier__reward">${fmt(t.points)} 纪念币</span><span class="playtime-tier__status">${statusText}</span></div>`;
-    }).join("");
+  const playCheckinHtml = (s) => {
+    const checked = s.playtest?.checkedInGames || [];
+    const count = checked.length;
 
     return `
       <div class="playtime-task" style="margin-top:12px">
-        ${currentHtml}
-        <div class="playtime-task__drawer" id="tiersDrawer">
-          ${allTiersRows}
-          <div class="lottery-test-bar" style="margin-top:10px">
-            <label class="lottery-test-bar__label">测试：增加游玩时长</label>
-            <select id="selAddPlayTime" class="lottery-test-bar__select">
-              <option value="10">+10 分钟</option>
-              <option value="30">+30 分钟</option>
-              <option value="60">+1 小时</option>
-              <option value="300">+5 小时</option>
-              <option value="600">+10 小时</option>
-            </select>
-            <button class="btn btn--sm" id="btnAddPlayTime" type="button">增加</button>
-            <button class="btn btn--sm" id="btnResetPlayTime" type="button">重置</button>
-          </div>
+        <div class="playtime-task-current">
+          <div class="playtime-task-current__encourage"><span>去游乐场里寻找自己喜欢的游戏吧~</span><button class="btn btn--sm" id="btnShuffleGames" type="button" style="margin-left:auto">🎲 换一换</button></div>
+          <div class="playtime-task-current__target">游玩打卡新游戏，每款可获得 <b>${fmt(CHECKIN_COINS_PER_GAME)}</b> 纪念币｜已打卡 <b>${count}</b> 款</div>
+        </div>
+        <div class="lottery-test-bar" style="margin-top:10px">
+          <label class="lottery-test-bar__label">测试：模拟打卡</label>
+          <button class="btn btn--sm" id="btnAddCheckin" type="button">+1 打卡</button>
+          <button class="btn btn--sm" id="btnResetCheckin" type="button">重置</button>
         </div>
       </div>`;
   };
@@ -5752,9 +5646,9 @@ function discoverInlineView(s) {
       return `
         <div class="guess-card guess-card--open guess-card--col" style="--layer-color:${g.layerColor}">
           <div class="guess-card__top">
-            <div class="guess-card__icon">${g.icon}</div>
+            <div class="guess-card__icon" data-discover-game="${escapeHtml(g.title)}" role="button" style="cursor:pointer">${g.icon}</div>
             <div class="guess-card__info">
-              <div class="guess-card__name">${escapeHtml(g.title)}</div>
+              <div class="guess-card__name" data-discover-game="${escapeHtml(g.title)}" role="button" style="cursor:pointer">${escapeHtml(g.title)}</div>
               ${tagsHtml ? `<div class="guess-card__tags">${tagsHtml}</div>` : ""}
             </div>
           </div>
@@ -5776,11 +5670,18 @@ function discoverInlineView(s) {
     return `<div class="guess-list">${cards}</div>`;
   })();
 
-  const allByHeat = PLAYTEST_GAMES.map((p) => ({ p, heat: Math.max(0, Number(p.heat || 0)) }))
-    .sort((a, b) => b.heat - a.heat);
-  const mid = Math.ceil(allByHeat.length / 2);
-  const hotGroup = allByHeat.slice(0, mid);
-  const freshGroup = allByHeat.slice(mid);
+  const checkedSet = new Set(s.playtest?.checkedInGames || []);
+  const PAGE_SIZE = 6;
+  const allByHeat = PLAYTEST_GAMES.map((p) => ({ p, heat: Math.max(0, Number(p.heat || 0)), checked: checkedSet.has(p.id) }))
+    .sort((a, b) => {
+      if (a.checked !== b.checked) return a.checked ? 1 : -1;
+      return b.heat - a.heat;
+    });
+  const uncheckedGames = allByHeat.filter((g) => !g.checked);
+  const checkedGames = allByHeat.filter((g) => g.checked);
+  const mid = Math.ceil(uncheckedGames.length / 2);
+  const hotGroup = uncheckedGames.slice(0, mid);
+  const freshGroup = uncheckedGames.slice(mid);
 
   function pickFromGroup(group, count, excludeIds) {
     const preferred = group.filter((g) => !excludeIds.includes(g.p.id));
@@ -5801,16 +5702,21 @@ function discoverInlineView(s) {
 
   if (!state._lastPlayIds) state._lastPlayIds = [];
   const PICK_PER_GROUP = 4;
-  const firstPage = [
+  let firstPage = [
     ...pickFromGroup(hotGroup, PICK_PER_GROUP, state._lastPlayIds),
     ...pickFromGroup(freshGroup, PICK_PER_GROUP, state._lastPlayIds),
   ].sort(() => Math.random() - 0.5);
+  if (firstPage.length < PAGE_SIZE) {
+    const needed = PAGE_SIZE - firstPage.length;
+    const fpIds = new Set(firstPage.map((g) => g.p.id));
+    const fill = checkedGames.filter((g) => !fpIds.has(g.p.id)).slice(0, needed);
+    firstPage = [...firstPage, ...fill];
+  }
   state._lastPlayIds = firstPage.map((g) => g.p.id);
   const firstPageIds = new Set(state._lastPlayIds);
   const restPages = allByHeat.filter((g) => !firstPageIds.has(g.p.id));
   const playItems = [...firstPage, ...restPages];
 
-  const PAGE_SIZE = 6;
   const playCardHtml = ({ p }) => {
     const icon = iconChar(p.title);
     const tags = (p.tags || [])
@@ -5819,11 +5725,13 @@ function discoverInlineView(s) {
       .map((t) => escapeHtml(t))
       .join(" · ");
     const heat = Math.max(0, Number(p.heat || 0));
+    const isChecked = checkedSet.has(p.id);
     return `
-      <div class="play-card2">
+      <div class="play-card2${isChecked ? " play-card2--checked" : ""}">
         <div class="play-card2__cover">
           <span class="play-card2__cover-icon">${escapeHtml(icon)}</span>
           <span class="play-card2__heat">🔥 ${fmt(heat)}</span>
+          ${isChecked ? `<span class="play-card2__checkin-badge">✅ 已打卡</span>` : ""}
         </div>
         <div class="play-card2__body">
           <div class="play-card2__name">${escapeHtml(p.title)}</div>
@@ -5867,7 +5775,7 @@ function discoverInlineView(s) {
           <p class="h1 grow">游戏游乐场<br><span style="font-weight:400;font-size:13px;color:rgba(15,23,42,.35)">Game Playground</span></p>
           <span class="muted small">游戏来源：TapTap制造 聚光灯GameJam</span>
         </div>
-        ${playTimeTiersHtml(s)}
+        ${playCheckinHtml(s)}
         <div class="carousel" style="margin-top:10px">
           <div class="hscroll carousel__track play-carousel-track" id="playCarousel" role="list">
             ${playPagesHtml}
@@ -6047,6 +5955,20 @@ function wireDiscoverInline() {
     }),
   );
 
+  // 发现好游戏 - 点击图标/游戏名跳转详情页
+  $$("[data-discover-game]").forEach((el) =>
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const title = el.dataset.discoverGame || "";
+      openModal({
+        title: "跳转游戏详情页",
+        bodyHtml: `<div style="text-align:center;padding:12px 0">
+          <p style="font-size:14px;color:rgba(15,23,42,.7);line-height:1.8;margin:0">点击图标或游戏名后，将跳转至 <b>${escapeHtml(title)}</b> 的游戏详情页。</p>
+        </div>`,
+      });
+    }),
+  );
+
   // 跑马灯逐条滚动
   (() => {
     const prefersReduce = !!window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
@@ -6125,16 +6047,16 @@ function wireDiscoverInline() {
     })
   );
 
-  // ── 游玩时长任务 ──
-  function autoClaimTiers() {
-    const mins = state.playtest.playMinutes || 0;
-    if (!Array.isArray(state.playtest.tiersClaimed)) state.playtest.tiersClaimed = [];
+  // ── 初体验打卡 ──
+  function autoClaimCheckins() {
+    if (!Array.isArray(state.playtest.checkedInGames)) state.playtest.checkedInGames = [];
     let totalGranted = 0;
-    PLAY_TIME_TIERS.forEach((t) => {
-      if (mins >= t.minutes && !state.playtest.tiersClaimed.includes(t.id)) {
-        state.playtest.tiersClaimed.push(t.id);
-        addPoints(state, t.points);
-        totalGranted += t.points;
+    PLAYTEST_GAMES.forEach((g) => {
+      const playTime = Number(state.playtest.feedback?.[g.id] || 0);
+      if (playTime > 0 && !state.playtest.checkedInGames.includes(g.id)) {
+        state.playtest.checkedInGames.push(g.id);
+        addPoints(state, CHECKIN_COINS_PER_GAME);
+        totalGranted += CHECKIN_COINS_PER_GAME;
       }
     });
     if (totalGranted > 0) {
@@ -6142,35 +6064,29 @@ function wireDiscoverInline() {
       render();
     }
   }
+  autoClaimCheckins();
 
-  $("#btnToggleTiers")?.addEventListener("click", () => {
-    const drawer = $("#tiersDrawer");
-    const arrow = $("#tiersArrow");
-    if (!drawer) return;
-    const open = drawer.classList.toggle("is-open");
-    if (arrow) arrow.textContent = open ? "▲" : "▼";
-  });
-
-  $("#btnAddPlayTime")?.addEventListener("click", () => {
-    const sel = $("#selAddPlayTime");
-    const add = Number(sel?.value || 10);
-    if (!Number.isFinite(state.playtest.playMinutes)) state.playtest.playMinutes = 0;
-    state.playtest.playMinutes += add;
-    saveState();
-    autoClaimTiers();
-    render();
-    const drawer = $("#tiersDrawer");
-    const arrow = $("#tiersArrow");
-    if (drawer) { drawer.classList.add("is-open"); }
-    if (arrow) { arrow.textContent = "▲"; }
-  });
-
-  $("#btnResetPlayTime")?.addEventListener("click", () => {
-    state.playtest.playMinutes = 0;
-    state.playtest.tiersClaimed = [];
+  $("#btnAddCheckin")?.addEventListener("click", () => {
+    if (!Array.isArray(state.playtest.checkedInGames)) state.playtest.checkedInGames = [];
+    const unchecked = PLAYTEST_GAMES.filter((g) => !state.playtest.checkedInGames.includes(g.id));
+    if (unchecked.length === 0) return toast("所有游戏已打卡");
+    const g = unchecked[0];
+    if (!state.playtest.feedback) state.playtest.feedback = {};
+    state.playtest.feedback[g.id] = 1;
+    state.playtest.checkedInGames.push(g.id);
+    addPoints(state, CHECKIN_COINS_PER_GAME);
     saveState();
     render();
-    toast("已重置游玩时长和任务进度");
+  });
+
+  $("#btnResetCheckin")?.addEventListener("click", () => {
+    const earned = (state.playtest.checkedInGames || []).length * CHECKIN_COINS_PER_GAME;
+    state.playtest.checkedInGames = [];
+    state.playtest.feedback = {};
+    state.points = Math.max(0, (state.points || 0) - earned);
+    saveState();
+    render();
+    toast("已重置打卡进度");
   });
 
   // ── 相关活动 banner 点击 ──
