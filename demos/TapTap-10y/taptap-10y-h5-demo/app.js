@@ -5773,7 +5773,7 @@ function discoverInlineView(s) {
       <section class="card">
         <div class="row" style="align-items:baseline">
           <p class="h1 grow">游戏游乐场<br><span style="font-weight:400;font-size:13px;color:rgba(15,23,42,.35)">Game Playground</span></p>
-          <span class="muted small">游戏来源：TapTap制造 聚光灯GameJam</span>
+          <span class="muted small">游戏来源：TapTap制造</span>
         </div>
         ${playCheckinHtml(s)}
         <div class="carousel" style="margin-top:10px">
