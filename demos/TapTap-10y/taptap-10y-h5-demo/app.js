@@ -5639,7 +5639,7 @@ function discoverInlineView(s) {
       const marqueeTrackClass = top.length ? "marquee__track" : "marquee__track marquee__track--static";
 
       const mainBtn = isClaimed
-        ? `<button class="btn guess-card__story-btn" type="button" data-guess-story="${g.id}">再听听它的故事</button>`
+        ? `<button class="btn guess-card__story-btn" type="button" data-guess-story="${g.id}">再听一次</button>`
         : `<button class="btn guess-card__story-btn" type="button" data-guess-story="${g.id}">听听它的故事</button>`;
 
       const tagsHtml = (g.tags || []).slice(0, 2).map(t => `<span class="guess-card__tag">${escapeHtml(t)}</span>`).join("");
@@ -5661,7 +5661,7 @@ function discoverInlineView(s) {
           </div>
           <div class="guess-card__right">
             ${mainBtn}
-            <button class="btn guess-card__action" type="button" data-guess-post="${g.id}">留言板</button>
+            <button class="btn guess-card__action" type="button" data-guess-post="${g.id}">留言参与抽奖</button>
           </div>
         </div>
       `;
