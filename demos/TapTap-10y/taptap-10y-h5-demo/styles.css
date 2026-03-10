@@ -3663,6 +3663,7 @@ html.is-firstrecap .firstrecap-body::before{
   align-items: center;
   padding: 4px 0 0;
   margin-top: auto;
+  margin-bottom: 8px;
 }
 .arrival-v2__claim-btn{
   position: relative;
@@ -3724,6 +3725,50 @@ html.is-firstrecap .firstrecap-body::before{
 @keyframes bindPulse{
   0%,100%{ transform: scale(1); box-shadow: 0 4px 24px rgba(116,185,255,.4); }
   50%{ transform: scale(1.07); box-shadow: 0 8px 32px rgba(116,185,255,.55); }
+}
+.arrival-v2__claim-btn--redpacket{
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+  box-shadow: 0 4px 24px rgba(255,107,107,.45);
+  animation: rpPulse 1.8s ease-in-out infinite;
+  font-size: 16px;
+}
+@keyframes rpPulse{
+  0%,100%{ transform: scale(1); box-shadow: 0 4px 24px rgba(255,107,107,.45); }
+  50%{ transform: scale(1.08); box-shadow: 0 8px 36px rgba(255,107,107,.6); }
+}
+.arrival-v2__rp-progress{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(15,23,42,.5);
+}
+.arrival-v2__rp-progress b{
+  color: #ff6b6b;
+}
+.redpacket-stock-banner{
+  margin-top: 10px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255,68,68,.15) 0%, rgba(255,142,83,.12) 100%);
+  border: 1px solid rgba(255,107,107,.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  color: rgba(15,23,42,.75);
+  text-align: center;
+}
+.redpacket-stock-banner__icon{
+  font-size: 22px;
+  line-height: 1;
+}
+.redpacket-stock-banner__count{
+  font-weight: 800;
+  color: #ff6b6b;
 }
 .arrival-v2__done{
   font-size: 14px;

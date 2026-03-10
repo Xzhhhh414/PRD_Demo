@@ -423,6 +423,7 @@ function loadState() {
     firstRecapFlow: { phase: "snap", idx: 0 },
     firstRecapRun: { startPoints: 0, startCoupons: 0, doneModalShown: false },
     capsule: { revealed: [], claimed: [] },
+    redPacket: { stock: 100, claimed: 0, cardClaims: {} },
   };
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -514,6 +515,13 @@ function loadState() {
     merged.firstRecapRun.startPoints = Math.max(0, Number(merged.firstRecapRun.startPoints || 0));
     merged.firstRecapRun.startCoupons = Math.max(0, Number(merged.firstRecapRun.startCoupons || 0));
     merged.firstRecapRun.doneModalShown = !!merged.firstRecapRun.doneModalShown;
+
+    // 点券红包库存
+    merged.redPacket = { ...fallback.redPacket, ...(parsed?.redPacket || {}) };
+    if (!merged.redPacket || typeof merged.redPacket !== "object") merged.redPacket = { ...fallback.redPacket };
+    merged.redPacket.stock = Math.max(0, Number(merged.redPacket.stock || 0));
+    merged.redPacket.claimed = Math.max(0, Number(merged.redPacket.claimed || 0));
+    if (!merged.redPacket.cardClaims || typeof merged.redPacket.cardClaims !== "object") merged.redPacket.cardClaims = {};
 
     // 发现好游戏状态
     if (!merged.capsule || typeof merged.capsule !== "object") merged.capsule = { ...fallback.capsule };
@@ -682,6 +690,41 @@ function addCoupons(s, delta) {
   s.walletCoupons = Math.max(0, (s.walletCoupons || 0) + delta);
 }
 
+const RED_PACKET_TRIGGER = 5;
+
+function getRedPacketRemaining(s) {
+  const rp = s.redPacket || { stock: 0, claimed: 0 };
+  return Math.max(0, rp.stock - rp.claimed);
+}
+
+function getCardRedPacketEarned(s, rewardId) {
+  return Math.floor(getCardClaimedTimes(s, rewardId) / RED_PACKET_TRIGGER);
+}
+
+function getCardRedPacketClaimed(s, rewardId) {
+  return Number((s.redPacket?.cardClaims || {})[rewardId] || 0);
+}
+
+function getCardPendingRedPackets(s, rewardId) {
+  return Math.max(0, getCardRedPacketEarned(s, rewardId) - getCardRedPacketClaimed(s, rewardId));
+}
+
+function getNextRedPacketIn(s, rewardId) {
+  const ct = getCardClaimedTimes(s, rewardId);
+  return RED_PACKET_TRIGGER - (ct % RED_PACKET_TRIGGER);
+}
+
+function claimCardRedPacket(s, rewardId) {
+  if (getCardPendingRedPackets(s, rewardId) <= 0) return null;
+  if (getRedPacketRemaining(s) <= 0) return null;
+  const amount = Math.round((5 + Math.random() * 5) * 100) / 100;
+  if (!s.redPacket.cardClaims) s.redPacket.cardClaims = {};
+  s.redPacket.cardClaims[rewardId] = (s.redPacket.cardClaims[rewardId] || 0) + 1;
+  s.redPacket.claimed = (s.redPacket.claimed || 0) + 1;
+  s.walletCoupons = Math.round(((s.walletCoupons || 0) + amount) * 100) / 100;
+  return amount;
+}
+
 function calcCareerCoinsTotal(s) {
   const grants = s.careerSnapshot?.grants;
   const snap = s.careerSnapshot?.recap;
@@ -706,6 +749,13 @@ function hasClaimed(s, rewardId) {
 
 function markClaimed(s, rewardId) {
   if (!s.claimedRewardIds.includes(rewardId)) s.claimedRewardIds.push(rewardId);
+}
+
+function isCardFullyDone(s, rewardId) {
+  if (!hasClaimed(s, rewardId)) return false;
+  const pendingRP = getCardPendingRedPackets(s, rewardId);
+  const hasRPStock = getRedPacketRemaining(s) > 0;
+  return !(pendingRP > 0 && hasRPStock);
 }
 
 function toast(msg) {
@@ -803,6 +853,22 @@ function openDataRulesModal() {
   openModal({ title: "数据规则说明", bodyHtml: body, variant: "data-rules" });
 }
 
+function openRedPacketRulesModal() {
+  const body = `
+    <div class="data-rules-modal">
+      <div class="data-rules-modal__section">
+        <div class="data-rules-modal__title">点券红包规则</div>
+        <ul class="data-rules-modal__list">
+          <li>单张卡片每领取 <b>${RED_PACKET_TRIGGER} 次</b>纪念币，可开启 1 个点券红包</li>
+          <li>点券红包有活动总数量限制，领完即止</li>
+          <li>红包不占用纪念币领取次数，两者独立</li>
+        </ul>
+      </div>
+    </div>
+  `;
+  openModal({ title: "点券红包规则", bodyHtml: body, variant: "data-rules" });
+}
+
 // ── 登录弹窗 ──
 function openLoginModal(onSuccess) {
   openModal({
@@ -874,7 +940,7 @@ function openRegClaimModal({ coinsEarned, remaining, fromRect, onDone }) {
       </div>
     </div>
   `;
-  const leftBtnLabel = remaining > 0 ? "继续领奖" : "开心收下";
+  const leftBtnLabel = remaining > 0 ? "开心收下" : "开心收下";
   const footer = `
     <div style="width:100%;display:flex;justify-content:center;margin-bottom:8px">
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.6);cursor:pointer">
@@ -907,6 +973,41 @@ function openRegClaimModal({ coinsEarned, remaining, fromRect, onDone }) {
     render();
     if (onDone) onDone();
     openShopModal();
+  });
+}
+
+function openRedPacketModal({ redPacketAmount, fromRect, onDone }) {
+  const body = `
+    <div class="reg-reward-modal">
+      <div style="margin:12px 0;padding:18px 20px;border-radius:14px;background:linear-gradient(135deg,rgba(255,68,68,.12),rgba(255,160,60,.10));border:1px solid rgba(255,68,68,.25);text-align:center">
+        <div style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:8px">\u{1F9E7} 恭喜开出点券红包！</div>
+        <div style="font-size:32px;font-weight:700;color:#ff6b6b;text-shadow:0 0 12px rgba(255,107,107,.4)">${redPacketAmount.toFixed(2)} <span style="font-size:15px;font-weight:400">元</span></div>
+        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:8px">点券已存入账户，可在「我的钱包」中查看</div>
+      </div>
+    </div>
+  `;
+  const footer = `
+    <button class="btn reg-reward-modal__btn reg-reward-modal__btn--continue" id="btnRegContinue">开心收下</button>
+    <button class="btn btn--brand reg-reward-modal__btn reg-reward-modal__btn--exchange" id="btnRegExchange">查看钱包</button>
+  `;
+  openModal({
+    title: "\u{1F9E7} 红包来啦",
+    bodyHtml: body,
+    footerHtml: footer,
+    variant: "reg-reward",
+    hideClose: true,
+    lockClose: true,
+  });
+  $("#btnRegContinue")?.addEventListener("click", () => {
+    closeModal();
+    render();
+    if (onDone) onDone();
+  });
+  $("#btnRegExchange")?.addEventListener("click", () => {
+    closeModal();
+    render();
+    if (onDone) onDone();
+    openWalletModal();
   });
 }
 
@@ -4474,8 +4575,8 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
       .map((c, i) => ({ c, i }))
       // Sort: unclaimed first, claimed last; keep original order within group.
       .sort((a, b) => {
-        const ac = !!hasClaimed(s, a.c.rewardId);
-        const bc = !!hasClaimed(s, b.c.rewardId);
+        const ac = !!isCardFullyDone(s, a.c.rewardId);
+        const bc = !!isCardFullyDone(s, b.c.rewardId);
         if (ac !== bc) return Number(ac) - Number(bc);
         return a.i - b.i;
       })
@@ -4667,6 +4768,10 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
             数据统计截止到 2026年4月1日
             <span class="home-hero__info-btn" onclick="openDataRulesModal()">!</span>
           </div>
+          ${getRedPacketRemaining(s) > 0 ? `<div class="redpacket-stock-banner">
+            <span class="redpacket-stock-banner__icon">\u{1F9E7}</span>
+            <span>十周年点券福利持续进行中！<br>单张卡片领取${RED_PACKET_TRIGGER}次可开启红包~</span>
+          </div>` : ""}
         </div>
         <button class="btn btn--brand recap-card__share" id="btnToggleShare" type="button">分享</button>
       </div>
@@ -4695,13 +4800,19 @@ function rewardBlockHtml(rewardId, s, recap, isEmpty = false) {
     const oldClaimed = (s.claimedRewardIds || []).includes(rewardId) && ct === 0;
     const eff = oldClaimed ? maxClaims : ct;
     const rem = Math.max(0, maxClaims - eff);
-    if (rem <= 0) {
+
+    const pendingRP = getCardPendingRedPackets(s, rewardId);
+    const hasRPStock = getRedPacketRemaining(s) > 0;
+    const showRPBtn = pendingRP > 0 && hasRPStock;
+    const nextRPIn = getNextRedPacketIn(s, rewardId);
+    if (rem <= 0 && !showRPBtn) {
       return `
         <div class="arrival-v2__reward">
           <div class="arrival-v2__done">奖励已全部领取</div>
         </div>
       `;
     }
+
     const claimHints = {
       snap_reg_active:      "相伴年份决定领奖次数",
       snap_time_habit:      "打开次数决定领奖次数",
@@ -4722,6 +4833,26 @@ function rewardBlockHtml(rewardId, s, recap, isEmpty = false) {
       snap_dev_create:      "作品数量决定领奖次数",
     };
     const hint = maxClaims > 1 ? (claimHints[rewardId] || "") : "";
+
+    if (showRPBtn) {
+      return `
+        <div class="arrival-v2__reward">
+          <button class="arrival-v2__claim-btn arrival-v2__claim-btn--redpacket" data-claim-redpacket="${rewardId}" type="button">
+            <span class="arrival-v2__claim-icon">\u{1F9E7}</span>
+            <span class="arrival-v2__claim-text">开点券红包</span>
+            ${pendingRP > 1 ? `<span class="arrival-v2__claim-badge">\u00D7${pendingRP}</span>` : ""}
+          </button>
+          ${rem > 0 ? `<div class="arrival-v2__rp-progress">还有 <b>${rem}</b> 次纪念币可领</div>` : ""}
+        </div>
+      `;
+    }
+
+    let rpProgressHtml = "";
+    const canEarnMoreRP = Math.floor((ct + rem) / RED_PACKET_TRIGGER) > Math.floor(ct / RED_PACKET_TRIGGER);
+    if (hasRPStock && canEarnMoreRP) {
+      rpProgressHtml = `<div class="arrival-v2__rp-progress">\u{1F9E7} 再领 <b>${nextRPIn}</b> 次可开点券红包</div>`;
+    }
+
     return `
       <div class="arrival-v2__reward">
         <button class="arrival-v2__claim-btn" data-claim-card="${rewardId}" type="button">
@@ -4730,6 +4861,7 @@ function rewardBlockHtml(rewardId, s, recap, isEmpty = false) {
           ${hint ? `<span class="arrival-v2__claim-hint">${hint}</span>` : ""}
           ${maxClaims > 1 ? `<span class="arrival-v2__claim-badge">\u00D7${rem}次</span>` : ""}
         </button>
+        ${rpProgressHtml}
       </div>
     `;
   }
@@ -4970,7 +5102,7 @@ function wireRecapInline() {
         const idx = cards.findIndex((el) => {
           const id = String(el.getAttribute("data-reward-id") || "");
           if (!id || !id.startsWith("snap_")) return false;
-          return !hasClaimed(state, id);
+          return !isCardFullyDone(state, id);
         });
         if (idx >= 0) requestCarouselInit("recapCarouselSnap", idx);
       }
@@ -5017,15 +5149,16 @@ function wireRecapInline() {
       const coins = 10 + Math.floor(Math.random() * 21);
       incrCardClaimedTimes(state, rewardId);
       addPoints(state, coins);
-      const allDone = getCardClaimedTimes(state, rewardId) >= maxClaims;
-      if (allDone) markClaimed(state, rewardId);
+      const coinsDone = getCardClaimedTimes(state, rewardId) >= maxClaims;
+      if (coinsDone) markClaimed(state, rewardId);
       saveState();
       const newRem = Math.max(0, maxClaims - getCardClaimedTimes(state, rewardId));
       const fromRect = b.getBoundingClientRect();
       const trackId = b.closest?.(".carousel__track")?.id || "";
       const currentIdx = Number(b.closest?.(".mini-card")?.getAttribute("data-card-idx") || 0);
       requestCarouselInit(trackId, currentIdx);
-      const doneCallback = allDone ? () => scheduleScrollToNextCard(trackId, currentIdx) : undefined;
+      const fullyDone = coinsDone && isCardFullyDone(state, rewardId);
+      const doneCallback = fullyDone ? () => scheduleScrollToNextCard(trackId, currentIdx) : undefined;
       if (_skipClaimModal) {
         flyGrantToSticky({ fromRect, grant: { points: coins, coupons: 0 } }).then(() => {
           render();
@@ -5037,6 +5170,22 @@ function wireRecapInline() {
           onDone: doneCallback,
         });
       }
+    }),
+  );
+
+  // Red packet claim (separate button)
+  $$("[data-claim-redpacket]").forEach((b) =>
+    b.addEventListener("click", () => {
+      const rewardId = b.getAttribute("data-claim-redpacket");
+      if (!rewardId) return;
+      const amount = claimCardRedPacket(state, rewardId);
+      if (amount === null) return;
+      saveState();
+      const fromRect = b.getBoundingClientRect();
+      const trackId = b.closest?.(".carousel__track")?.id || "";
+      const currentIdx = Number(b.closest?.(".mini-card")?.getAttribute("data-card-idx") || 0);
+      requestCarouselInit(trackId, currentIdx);
+      openRedPacketModal({ redPacketAmount: amount, fromRect });
     }),
   );
 
@@ -5437,10 +5586,45 @@ function wireFirstRecap() {
       return;
     }
 
-    const btn = t?.closest?.("[data-claim], [data-claim-card], [data-bind], [data-deeplink]");
+    const btn = t?.closest?.("[data-claim], [data-claim-card], [data-claim-redpacket], [data-bind], [data-deeplink]");
     if (!btn) return;
     const card = btn.closest?.(".mini-card");
     if (!card || !card.classList.contains("firstrecap-card--active")) return;
+
+    // Red packet claim (separate button)
+    if (btn.hasAttribute("data-claim-redpacket")) {
+      if (wireFirstRecap._claiming) return;
+      const rewardId = btn.getAttribute("data-claim-redpacket");
+      if (!rewardId) return;
+      wireFirstRecap._claiming = true;
+      const amount = claimCardRedPacket(state, rewardId);
+      if (amount === null) { wireFirstRecap._claiming = false; return; }
+      saveState();
+      updateFirstRecapCurrencyDom();
+      const fromRect = btn.getBoundingClientRect();
+      openRedPacketModal({ redPacketAmount: amount, fromRect });
+      const origContinue = $("#btnRegContinue");
+      if (origContinue) {
+        origContinue.replaceWith(origContinue.cloneNode(true));
+        $("#btnRegContinue")?.addEventListener("click", () => {
+          closeModal();
+          wireFirstRecap._claiming = false;
+          render();
+        });
+      }
+      const origExchange = $("#btnRegExchange");
+      if (origExchange) {
+        origExchange.replaceWith(origExchange.cloneNode(true));
+        $("#btnRegExchange")?.addEventListener("click", () => {
+          closeModal();
+          wireFirstRecap._claiming = false;
+          render();
+          openShopModal();
+        });
+      }
+      setTimeout(() => (wireFirstRecap._claiming = false), 5000);
+      return;
+    }
 
     // Multi-claim for all snapshot cards
     if (btn.hasAttribute("data-claim-card")) {
@@ -5456,17 +5640,19 @@ function wireFirstRecap() {
       const coins = 10 + Math.floor(Math.random() * 21);
       incrCardClaimedTimes(state, rewardId);
       addPoints(state, coins);
-      if (getCardClaimedTimes(state, rewardId) >= maxClaims) markClaimed(state, rewardId);
+      const coinsDone = getCardClaimedTimes(state, rewardId) >= maxClaims;
+      if (coinsDone) markClaimed(state, rewardId);
       saveState();
       updateFirstRecapCurrencyDom();
       const newRem = Math.max(0, maxClaims - getCardClaimedTimes(state, rewardId));
+      const cardFullyDone = coinsDone && isCardFullyDone(state, rewardId);
       const fromRect = btn.getBoundingClientRect();
       openRegClaimModal({ coinsEarned: coins, remaining: newRem, fromRect });
       const origContinue = $("#btnRegContinue");
       const origExchange = $("#btnRegExchange");
       const advanceIfDone = () => {
         wireFirstRecap._claiming = false;
-        if (newRem <= 0) queueMicrotask(() => advanceAfterClaim());
+        if (cardFullyDone) queueMicrotask(() => advanceAfterClaim());
       };
       if (origContinue) {
         origContinue.replaceWith(origContinue.cloneNode(true));
@@ -6661,6 +6847,24 @@ function debugModalHtml() {
       <div class="divider"></div>
 
       <div>
+        <div><b>点券红包库存</b></div>
+        <div class="muted small">模拟服务器后台增加红包库存。当前已领 <b>${state.redPacket?.claimed || 0}</b> 个。</div>
+        <div class="row" style="margin-top:8px;gap:8px;align-items:center">
+          <div class="grow">
+            <div class="muted small">当前库存总量</div>
+          </div>
+          <input id="inpRedPacketStock" type="number" min="0" step="10" style="width:120px; border-radius:12px; border:1px solid var(--border); background: rgba(255,255,255,.02); color: var(--text); padding:10px" />
+        </div>
+        <div class="row" style="margin-top:8px;gap:8px">
+          <button class="btn btn--ghost" id="btnRedPacketAdd50" type="button">+50</button>
+          <button class="btn btn--ghost" id="btnRedPacketAdd100" type="button">+100</button>
+          <button class="btn btn--ghost" id="btnRedPacketReset" type="button">重置已领取数</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div>
         <div><b>卡片预览</b></div>
         <div class="muted small">平铺查看当前数据下所有生涯卡片的展示效果。</div>
         <div style="margin-top:8px">
@@ -6693,6 +6897,7 @@ function openDebug() {
   const inpPid = $("#inpPid");
   const inpIdentity = $("#inpIdentity");
   const txtBio = $("#txtBio");
+  const inpRedPacketStock = $("#inpRedPacketStock");
 
   // 登录状态切换
   $("#btnToggleLogin")?.addEventListener("click", () => {
@@ -6716,10 +6921,28 @@ function openDebug() {
   chkSteam.checked = !!state.boundSteam;
   inpRoles.value = String(state.boundRolesCount ?? 0);
   inpRolesClaimed.value = String(state.claimedRoleRewardsCount ?? 0);
+  if (inpRedPacketStock) inpRedPacketStock.value = String(state.redPacket?.stock ?? 100);
   if (inpNick) inpNick.value = String(state.profile?.nickname || "");
   if (inpPid) inpPid.value = String(state.profile?.id || "");
   if (inpIdentity) inpIdentity.value = String(state.profile?.identity || "");
   if (txtBio) txtBio.value = String(state.profile?.bio || "");
+
+  $("#btnRedPacketAdd50")?.addEventListener("click", () => {
+    if (inpRedPacketStock) inpRedPacketStock.value = String(Number(inpRedPacketStock.value || 0) + 50);
+    toast("库存 +50（点应用生效）");
+  });
+  $("#btnRedPacketAdd100")?.addEventListener("click", () => {
+    if (inpRedPacketStock) inpRedPacketStock.value = String(Number(inpRedPacketStock.value || 0) + 100);
+    toast("库存 +100（点应用生效）");
+  });
+  $("#btnRedPacketReset")?.addEventListener("click", () => {
+    state.redPacket.claimed = 0;
+    state.redPacket.cardClaims = {};
+    saveState();
+    toast("已领取数和各卡片红包记录已重置");
+    closeModal();
+    render();
+  });
 
   $("#btnNewPlayerRecapJson")?.addEventListener("click", () => {
     const emptyRecap = {
@@ -6798,6 +7021,10 @@ function openDebug() {
     state.profile.id = String(inpPid?.value || "").trim();
     state.profile.identity = String(inpIdentity?.value || "").trim();
     state.profile.bio = String(txtBio?.value || "").trim();
+
+    // 点券红包库存
+    if (!state.redPacket) state.redPacket = { stock: 100, claimed: 0 };
+    state.redPacket.stock = Math.max(0, Number(inpRedPacketStock?.value || state.redPacket.stock));
 
     // Apply recap JSON as career snapshot (freeze)
     try {
