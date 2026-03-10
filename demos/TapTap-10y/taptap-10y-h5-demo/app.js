@@ -5870,7 +5870,7 @@ function discoverInlineView(s) {
       <section class="card">
         <div class="row" style="align-items:baseline">
           <p class="h1 grow">游戏游乐场<br><span style="font-weight:400;font-size:13px;color:rgba(15,23,42,.35)">Game Playground</span></p>
-          <a href="https://www.taptap.cn/app-tag/made-by-taptap" target="_blank" rel="noopener" class="muted small" style="text-decoration:underline;cursor:pointer">游戏来源：TapTap制造</a>
+          <span class="muted small" id="btnTaptapMade" role="button" style="text-decoration:underline;cursor:pointer">游戏来源：TapTap制造</span>
         </div>
         ${playCheckinHtml(s)}
         <div class="carousel" style="margin-top:10px">
@@ -5928,6 +5928,13 @@ function discoverInlineView(s) {
 function wireDiscoverInline() {
   // ── 试玩轮播 ──
   wireCarousel("playCarousel", "playDots", { cardSelector: ".play-page2", activeCardClass: "" });
+
+  $("#btnTaptapMade")?.addEventListener("click", () => {
+    openModal({
+      title: "跳转 TapTap 制造",
+      bodyHtml: `<div style="text-align:center;padding:12px 0"><p style="font-size:14px;color:rgba(15,23,42,.7);line-height:1.8;margin:0">点击后将跳转至 <b>TapTap 制造</b> 页面，展示所有 TapTap 制造的游戏列表。</p></div>`,
+    });
+  });
 
   // ── 猜猜是什么游戏 交互 ──
 
