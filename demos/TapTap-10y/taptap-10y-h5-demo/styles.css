@@ -1436,9 +1436,35 @@ html.is-firstrecap .firstrecap-body::before{
   user-select: none;
 }
 .mem-sticker.mem-sticker--placed:active{ cursor: grabbing; }
-.mem-sticker.mem-sticker--placed.is-active{
-  border-color: rgba(0,184,148,.38);
-  box-shadow: 0 16px 30px rgba(0,184,148,.12), 0 12px 22px rgba(15,23,42,.10);
+.mem-sticker-wrap{
+  position: absolute;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+}
+.mem-sticker-wrap.is-active{
+  outline: 2px dashed rgba(0,184,148,.6);
+  outline-offset: 4px;
+  border-radius: 14px;
+}
+.mem-sticker-remove{
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(239,68,68,.85);
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  padding: 0;
 }
 .mem-top{
   display:flex;
@@ -1480,8 +1506,9 @@ html.is-firstrecap .firstrecap-body::before{
 }
 .mem-avatar-wrap:active{ cursor: grabbing; }
 .mem-avatar-wrap.is-active{
-  border-color: rgba(0,184,148,.45);
-  box-shadow: 0 0 0 3px rgba(0,184,148,.12);
+  outline: 2px dashed rgba(0,184,148,.6);
+  outline-offset: 4px;
+  border-color: transparent;
 }
 .mem-avatar{
   position: relative;
@@ -1731,6 +1758,23 @@ html.is-firstrecap .firstrecap-body::before{
   color: rgba(15,23,42,.7);
   min-width: 40px;
   text-align: right;
+}
+.mem-scale-bar__close{
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid rgba(15,23,42,.15);
+  background: rgba(15,23,42,.06);
+  color: rgba(15,23,42,.5);
+  font-size: 13px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 2px;
 }
 .mem-diy{
   margin-top: 12px;

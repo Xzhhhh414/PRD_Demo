@@ -2288,13 +2288,15 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
                 const activeIdx = Math.max(0, Number(s.memorial?.activeStickerIdx ?? 0));
                 const active = idx === activeIdx && s._memSelected === "sticker";
                 return `
-                  <button
-                    type="button"
-                    class="mem-sticker mem-sticker--placed ${active ? "is-active" : ""}"
-                    data-mem-sticker-idx="${idx}"
-                    aria-label="贴纸：${escapeHtml(def.label)}"
-                    style="left:${x}%; top:${y}%; transform: translate(-50%,-50%) rotate(${r}deg) scale(${sc});"
-                  >${escapeHtml(def.icon)}</button>
+                  <div class="mem-sticker-wrap ${active ? "is-active" : ""}" style="left:${x}%; top:${y}%; transform: translate(-50%,-50%) rotate(${r}deg) scale(${sc});">
+                    <button
+                      type="button"
+                      class="mem-sticker mem-sticker--placed"
+                      data-mem-sticker-idx="${idx}"
+                      aria-label="贴纸：${escapeHtml(def.label)}"
+                    >${escapeHtml(def.icon)}</button>
+                    ${active ? `<button type="button" class="mem-sticker-remove" data-mem-remove-idx="${idx}" aria-label="卸下贴纸">✕</button>` : ""}
+                  </div>
                 `;
               })
               .join("")}
@@ -2324,11 +2326,12 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
       </div>
 
       <div class="mem-scale-bar${(s._memSelected) ? "" : " hidden"}" id="memScaleBar">
-        <span class="mem-scale-bar__label">缩放</span>
+        <span class="mem-scale-bar__label">调整大小</span>
         <input type="range" class="mem-scale-bar__slider" id="memScaleSlider"
           min="20" max="200" step="1"
           value="${Math.round((s._memSelected === "avatar" ? Number(s.memorial?.avatarScale ?? 1) : Number((s.memorial?.stickers || [])[Number(s.memorial?.activeStickerIdx ?? 0)]?.s ?? 1)) * 100)}">
         <span class="mem-scale-bar__value" id="memScaleValue">${Math.round((s._memSelected === "avatar" ? Number(s.memorial?.avatarScale ?? 1) : Number((s.memorial?.stickers || [])[Number(s.memorial?.activeStickerIdx ?? 0)]?.s ?? 1)) * 100)}%</span>
+        <button type="button" class="mem-scale-bar__close" id="memScaleClose" aria-label="取消选中">✕</button>
       </div>
   `;
 
@@ -3750,7 +3753,7 @@ function wireMemorialInline({ inModal = false } = {}) {
       const shell = card.closest(".mem-card-shell") || card;
       shell.addEventListener("click", (e) => {
         e.stopPropagation();
-        if (!e.target.closest("[data-mem-avatar-drag]") && !e.target.closest("[data-mem-sticker-idx]") && !e.target.closest(".mem-scale-bar")) {
+        if (!e.target.closest("[data-mem-avatar-drag]") && !e.target.closest("[data-mem-sticker-idx]") && !e.target.closest(".mem-scale-bar") && !e.target.closest("[data-mem-remove-idx]")) {
           deselectAll();
         }
       });
@@ -3769,10 +3772,11 @@ function wireMemorialInline({ inModal = false } = {}) {
             const idx = state.memorial.activeStickerIdx || 0;
             if (Array.isArray(state.memorial.stickers) && state.memorial.stickers[idx]) {
               state.memorial.stickers[idx].s = clamp(v, 0.2, 2);
-              const el = stickersWrap?.querySelector(`[data-mem-sticker-idx="${idx}"]`);
-              if (el) {
+              const btn = stickersWrap?.querySelector(`[data-mem-sticker-idx="${idx}"]`);
+              const wrap = btn?.closest(".mem-sticker-wrap") || btn;
+              if (wrap) {
                 const r = Number(state.memorial.stickers[idx].r ?? 0);
-                el.style.transform = `translate(-50%,-50%) rotate(${r}deg) scale(${v})`;
+                wrap.style.transform = `translate(-50%,-50%) rotate(${r}deg) scale(${v})`;
               }
             }
           }
@@ -3871,8 +3875,37 @@ function wireMemorialInline({ inModal = false } = {}) {
           btn.addEventListener("pointerdown", (e) => {
             const idx = Number(btn.getAttribute("data-mem-sticker-idx") || 0);
             if (!Number.isFinite(idx)) return;
-            startDrag("sticker", clamp(idx, 0, Math.max(0, (state.memorial?.stickers || []).length - 1)), btn, e);
+            const wrap = btn.closest(".mem-sticker-wrap") || btn;
+            startDrag("sticker", clamp(idx, 0, Math.max(0, (state.memorial?.stickers || []).length - 1)), wrap, e);
           });
+        });
+      }
+
+      // Sticker remove (卸下贴纸)
+      if (stickersWrap) {
+        stickersWrap.querySelectorAll("[data-mem-remove-idx]").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const idx = Number(btn.getAttribute("data-mem-remove-idx") || 0);
+            if (Array.isArray(state.memorial.stickers) && state.memorial.stickers[idx]) {
+              state.memorial.stickers.splice(idx, 1);
+              state._memSelected = null;
+              if (state.memorial.activeStickerIdx >= state.memorial.stickers.length) {
+                state.memorial.activeStickerIdx = Math.max(0, state.memorial.stickers.length - 1);
+              }
+              saveState();
+              refreshUI();
+            }
+          });
+        });
+      }
+
+      // Scale bar close (取消选中)
+      const scaleClose = document.getElementById("memScaleClose");
+      if (scaleClose) {
+        scaleClose.addEventListener("click", (e) => {
+          e.stopPropagation();
+          deselectAll();
         });
       }
 
@@ -5870,7 +5903,8 @@ function discoverInlineView(s) {
       <section class="card">
         <div class="row" style="align-items:baseline">
           <p class="h1 grow">游戏游乐场<br><span style="font-weight:400;font-size:13px;color:rgba(15,23,42,.35)">Game Playground</span></p>
-          <span class="muted small" id="btnTaptapMade" role="button" style="text-decoration:underline;cursor:pointer">游戏来源：TapTap制造</span>
+          <span class="muted small" style="margin-right:6px">游戏来源：TapTap制造</span>
+          <button class="btn btn--brand btn--sm" id="btnTaptapMade" type="button" style="padding:3px 10px;font-size:12px;line-height:1.4">更多好游戏</button>
         </div>
         ${playCheckinHtml(s)}
         <div class="carousel" style="margin-top:10px">
