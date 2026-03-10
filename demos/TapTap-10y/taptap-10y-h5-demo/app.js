@@ -5949,7 +5949,7 @@ function wireDiscoverInline() {
       openModal({
         title: `${g.icon} ${g.title} 留言板`,
         bodyHtml: `<div style="text-align:center;padding:12px 0">
-          <p style="font-size:14px;color:rgba(15,23,42,.7);line-height:1.8;margin:0 0 8px">提前创建好的帖子详情页，请大家来评论盖楼。</p>
+          <p style="font-size:14px;color:rgba(15,23,42,.7);line-height:1.8;margin:0 0 8px">提前创建好的帖子详情页，请大家来评论盖楼，参与抽奖。</p>
         </div>`,
       });
     }),
