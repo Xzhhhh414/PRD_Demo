@@ -390,6 +390,9 @@ function loadState() {
       // Legacy field (kept for migration)
       stickerId: "ms_star",
       avatarId: "ma_bunny",
+      avatarX: 50,
+      avatarY: 48,
+      avatarScale: 1,
     },
     memorialUnlocks: { colors: ["mc_cream"], stickers: ["ms_star"], avatars: ["ma_bunny", "ma_cat", "ma_robot", "ma_fox", "ma_panda", "ma_penguin"] },
     daily: { lotteryDayKey: "", checkinDays: 0, checkinStreak: 0, lastCheckinDay: "", welfareLotteryDay: "" },
@@ -2278,12 +2281,12 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
               .map((st, idx) => {
                 const id = String(st?.id || "").trim();
                 const def = MEM_STICKERS.find((x) => x.id === id) || MEM_STICKERS[0];
-                const x = Math.max(0, Math.min(100, Number(st?.x ?? 50)));
-                const y = Math.max(0, Math.min(100, Number(st?.y ?? 22)));
-                const sc = Math.max(0.6, Math.min(1.8, Number(st?.s ?? 1)));
+                const x = Math.max(-30, Math.min(130, Number(st?.x ?? 50)));
+                const y = Math.max(-30, Math.min(130, Number(st?.y ?? 22)));
+                const sc = Math.max(0.2, Math.min(2, Number(st?.s ?? 1)));
                 const r = Math.max(-45, Math.min(45, Number(st?.r ?? 0)));
                 const activeIdx = Math.max(0, Number(s.memorial?.activeStickerIdx ?? 0));
-                const active = idx === activeIdx;
+                const active = idx === activeIdx && s._memSelected === "sticker";
                 return `
                   <button
                     type="button"
@@ -2300,21 +2303,32 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
             <div class="mem-brand"></div>
           </div>
 
-          <div class="mem-photo">
-            <div class="mem-avatar" aria-label="角色">${avatarDisplayHtml(avatar, nickname)}</div>
-          </div>
+          <div class="mem-photo-spacer"></div>
 
-          <div class="mem-fields">
-            <div class="mem-field">
-              <span class="mem-k mem-k--inline">昵称</span>
-              <span class="mem-v mem-v--grow">${escapeHtml(nickname)}</span>
-            </div>
-            <div class="mem-field">
-              <span class="mem-k mem-k--inline">ID</span>
-              <span class="mem-v mem-v--grow">${escapeHtml(pid)}</span>
-            </div>
-          </div>
+          <button type="button" class="mem-avatar-wrap${(s._memSelected === "avatar") ? " is-active" : ""}"
+            data-mem-avatar-drag
+            aria-label="角色"
+            style="left:${Math.max(-30, Math.min(130, Number(s.memorial?.avatarX ?? 50)))}%; top:${Math.max(-30, Math.min(130, Number(s.memorial?.avatarY ?? 48)))}%; transform: translate(-50%,-50%) scale(${Math.max(0.2, Math.min(2, Number(s.memorial?.avatarScale ?? 1)))});">
+            <div class="mem-avatar">${avatarDisplayHtml(avatar, nickname)}</div>
+          </button>
+
         </div>
+      </div>
+
+      <div class="mem-fields-outer">
+        <span class="mem-k mem-k--inline">昵称</span>
+        <span class="mem-v">${escapeHtml(nickname)}</span>
+        <span class="mem-fields-sep">|</span>
+        <span class="mem-k mem-k--inline">ID</span>
+        <span class="mem-v">${escapeHtml(pid)}</span>
+      </div>
+
+      <div class="mem-scale-bar${(s._memSelected) ? "" : " hidden"}" id="memScaleBar">
+        <span class="mem-scale-bar__label">缩放</span>
+        <input type="range" class="mem-scale-bar__slider" id="memScaleSlider"
+          min="20" max="200" step="1"
+          value="${Math.round((s._memSelected === "avatar" ? Number(s.memorial?.avatarScale ?? 1) : Number((s.memorial?.stickers || [])[Number(s.memorial?.activeStickerIdx ?? 0)]?.s ?? 1)) * 100)}">
+        <span class="mem-scale-bar__value" id="memScaleValue">${Math.round((s._memSelected === "avatar" ? Number(s.memorial?.avatarScale ?? 1) : Number((s.memorial?.stickers || [])[Number(s.memorial?.activeStickerIdx ?? 0)]?.s ?? 1)) * 100)}%</span>
       </div>
   `;
 
@@ -2335,7 +2349,7 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
           <div class="mem-swatches" style="margin-top:10px">${colorOpts}</div>
         </div>
         <div class="mem-panel ${tab === "sticker" ? "" : "hidden"}" data-mem-panel="sticker">
-          <div class="muted small" style="margin-top:2px">点选添加贴纸；拖动贴纸可调整位置。</div>
+          <div class="muted small" style="margin-top:2px">点选添加贴纸；拖动调整位置，点击后可缩放。</div>
           <div class="mem-grid" style="margin-top:10px">${stickerOpts}</div>
         </div>
       </div>
@@ -2550,13 +2564,12 @@ function memorialCardOnlyHtml(s, recap, { hideProfileFields = false } = {}) {
             .map((st, idx) => {
               const id = String(st?.id || "").trim();
               const def = MEM_STICKERS.find((x) => x.id === id) || MEM_STICKERS[0];
-              const x = Math.max(0, Math.min(100, Number(st?.x ?? 50)));
-              const y = Math.max(0, Math.min(100, Number(st?.y ?? 22)));
-              const sc = Math.max(0.6, Math.min(1.8, Number(st?.s ?? 1)));
+              const x = Math.max(-30, Math.min(130, Number(st?.x ?? 50)));
+              const y = Math.max(-30, Math.min(130, Number(st?.y ?? 22)));
+              const sc = Math.max(0.2, Math.min(2, Number(st?.s ?? 1)));
               const r = Math.max(-45, Math.min(45, Number(st?.r ?? 0)));
               const activeIdx = Math.max(0, Number(s.memorial?.activeStickerIdx ?? 0));
-              const active = idx === activeIdx;
-              // In share modal, stickers are only for display (no drag/select)
+              const active = false;
               return `
                 <span
                   class="mem-sticker mem-sticker--placed ${active ? "is-active" : ""}"
@@ -2571,28 +2584,22 @@ function memorialCardOnlyHtml(s, recap, { hideProfileFields = false } = {}) {
           <div class="mem-brand"></div>
         </div>
 
-        <div class="mem-photo">
-          <div class="mem-avatar" aria-label="角色">${avatarDisplayHtml(avatar, nickname)}</div>
+        <div class="mem-photo-spacer"></div>
+        <div class="mem-avatar-wrap" style="left:${Math.max(-30, Math.min(130, Number(s.memorial?.avatarX ?? 50)))}%; top:${Math.max(-30, Math.min(130, Number(s.memorial?.avatarY ?? 48)))}%; transform: translate(-50%,-50%) scale(${Math.max(0.2, Math.min(2, Number(s.memorial?.avatarScale ?? 1)))});">
+          <div class="mem-avatar">${avatarDisplayHtml(avatar, nickname)}</div>
         </div>
 
-        <div class="mem-fields">
-          ${
-            hideProfileFields
-              ? ""
-              : `
-                <div class="mem-field">
-                  <span class="mem-k mem-k--inline">昵称</span>
-                  <span class="mem-v mem-v--grow">${escapeHtml(nickname)}</span>
-                </div>
-                <div class="mem-field">
-                  <span class="mem-k mem-k--inline">ID</span>
-                  <span class="mem-v mem-v--grow">${escapeHtml(pid)}</span>
-                </div>
-              `
-          }
-        </div>
       </div>
     </div>
+    ${hideProfileFields ? "" : `
+      <div class="mem-fields-outer">
+        <span class="mem-k mem-k--inline">昵称</span>
+        <span class="mem-v">${escapeHtml(nickname)}</span>
+        <span class="mem-fields-sep">|</span>
+        <span class="mem-k mem-k--inline">ID</span>
+        <span class="mem-v">${escapeHtml(pid)}</span>
+      </div>
+    `}
   `;
 }
 
@@ -3139,7 +3146,7 @@ function openSaveImageModal() {
   if (!canvas || !ctx || !canvasWrap) return;
 
   const CARD_W = 600;
-  const CARD_H = 600;
+  const CARD_H = 400;
   canvas.width = CARD_W;
   canvas.height = CARD_H;
 
@@ -3154,6 +3161,9 @@ function openSaveImageModal() {
   // ── 绘制名片到 canvas ──
   function drawCard() {
     ctx.clearRect(0, 0, CARD_W, CARD_H);
+    ctx.save();
+    roundRect(ctx, 0, 0, CARD_W, CARD_H, 0);
+    ctx.clip();
 
     // 背景
     if (showBg) {
@@ -3178,35 +3188,42 @@ function openSaveImageModal() {
       ctx.fillRect(0, 0, CARD_W, CARD_H);
     }
 
-    // 角色（居中显示）
+    // 角色（按用户位置 + 缩放绘制）
     if (showAvatar) {
-      const avX = CARD_W / 2, avY = CARD_H / 2;
+      const avPctX = Number(s.memorial?.avatarX ?? 50);
+      const avPctY = Number(s.memorial?.avatarY ?? 48);
+      const avScale = Math.max(0.2, Math.min(2, Number(s.memorial?.avatarScale ?? 1)));
+      const avX = (avPctX / 100) * CARD_W;
+      const avY = (avPctY / 100) * CARD_H;
+      const avBaseImg = Math.round(CARD_W * 0.33);
+      const avBaseBox = Math.round(CARD_W * 0.33);
+      const avBaseFont = Math.round(CARD_W * 0.24);
       if (avatar.img && _avatarImg && _avatarImg.complete && _avatarImg.naturalWidth > 0) {
-        const imgS = 120;
+        const imgS = Math.round(avBaseImg * avScale);
         ctx.save();
-        roundRect(ctx, avX - imgS / 2, avY - imgS / 2, imgS, imgS, 20);
+        roundRect(ctx, avX - imgS / 2, avY - imgS / 2, imgS, imgS, Math.round(20 * avScale));
         ctx.clip();
         ctx.drawImage(_avatarImg, avX - imgS / 2, avY - imgS / 2, imgS, imgS);
         ctx.restore();
       } else if (avatar.isGameRole) {
         ctx.save();
-        const boxS = 100;
+        const boxS = Math.round(avBaseBox * avScale);
         const bx = avX - boxS / 2, by = avY - boxS / 2;
         ctx.fillStyle = "#FFFFFF";
         ctx.strokeStyle = "rgba(15,23,42,0.10)";
         ctx.lineWidth = 2;
-        roundRect(ctx, bx, by, boxS, boxS, 20);
+        roundRect(ctx, bx, by, boxS, boxS, Math.round(20 * avScale));
         ctx.fill();
         ctx.stroke();
         ctx.fillStyle = "rgba(15,23,42,0.45)";
-        ctx.font = "bold 20px system-ui, sans-serif";
+        ctx.font = `bold ${Math.round(24 * avScale)}px system-ui, sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText("游戏角色", avX, avY);
         ctx.restore();
       } else {
         ctx.save();
-        ctx.font = "80px serif";
+        ctx.font = `${Math.round(avBaseFont * avScale)}px serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(avatar.icon, avX, avY);
@@ -3221,12 +3238,12 @@ function openSaveImageModal() {
         const def = MEM_STICKERS.find((x) => x.id === id) || MEM_STICKERS[0];
         const sx = (Number(st?.x ?? 50) / 100) * CARD_W;
         const sy = (Number(st?.y ?? 22) / 100) * CARD_H;
-        const sc = Math.max(0.6, Math.min(1.8, Number(st?.s ?? 1)));
+        const sc = Math.max(0.2, Math.min(2, Number(st?.s ?? 1)));
         const r = Number(st?.r ?? 0) * Math.PI / 180;
         ctx.save();
         ctx.translate(sx, sy);
         ctx.rotate(r);
-        ctx.font = `${Math.round(40 * sc)}px serif`;
+        ctx.font = `${Math.round(CARD_W * 0.085 * sc)}px serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(def.icon, 0, 0);
@@ -3234,7 +3251,7 @@ function openSaveImageModal() {
       });
     }
 
-    // 文本信息不绘制，存图仅保留视觉元素（背景/贴纸/角色）
+    ctx.restore();
   }
 
   /** Canvas 圆角矩形辅助 */
@@ -3691,100 +3708,180 @@ function wireMemorialInline({ inModal = false } = {}) {
   $$("[data-mem-sticker]").forEach((b) => b.addEventListener("click", () => setOrBuy("sticker", String(b.dataset.memSticker || ""))));
   $$("[data-mem-avatar]").forEach((b) => b.addEventListener("click", () => setOrBuy("avatar", String(b.dataset.memAvatar || ""))));
 
-  // Multi-sticker interactions: select & drag
+  // Sticker & avatar interactions: select, drag, scale
   try {
     const card = document.querySelector(".mem-card");
     const stickersWrap = document.querySelector(".mem-stickers");
-    if (card && stickersWrap) {
-      let draggingIdx = null;
+    const avatarWrap = document.querySelector("[data-mem-avatar-drag]");
+    const scaleBar = document.getElementById("memScaleBar");
+    const scaleSlider = document.getElementById("memScaleSlider");
+    const scaleValue = document.getElementById("memScaleValue");
+
+    if (card) {
+      let dragging = null; // { type: "sticker", idx } or { type: "avatar" }
       let pointerId = null;
-      let draggingBtn = null;
+      let draggingEl = null;
       let lastClientX = null;
       let lastClientY = null;
+      let dragOffsetX = 0;
+      let dragOffsetY = 0;
+      let didMove = false;
+      let wasAlreadySelected = false;
 
       const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
       const posToPct = (clientX, clientY) => {
         const r = card.getBoundingClientRect();
-        const x = ((clientX - r.left) / Math.max(1, r.width)) * 100;
-        const y = ((clientY - r.top) / Math.max(1, r.height)) * 100;
-        return { x: clamp(x, 4, 96), y: clamp(y, 6, 92) };
+        const x = ((clientX - r.left) / Math.max(1, r.width)) * 100 + dragOffsetX;
+        const y = ((clientY - r.top) / Math.max(1, r.height)) * 100 + dragOffsetY;
+        return { x: clamp(x, -30, 130), y: clamp(y, -30, 130) };
       };
 
-      const setActive = (idx) => {
-        if (!Array.isArray(state.memorial.stickers)) state.memorial.stickers = [];
-        const i = clamp(Number(idx) || 0, 0, Math.max(0, state.memorial.stickers.length - 1));
-        state.memorial.activeStickerIdx = i;
-        saveState();
-        render();
+      const refreshUI = () => { if (inModal) openMemorialEditModal(); else render(); };
+
+      const deselectAll = () => {
+        if (state._memSelected) {
+          state._memSelected = null;
+          saveState();
+          refreshUI();
+        }
       };
 
-      // Click-to-select (bind directly to sticker buttons to avoid relying on wrapper events)
-      stickersWrap.querySelectorAll("[data-mem-sticker-idx]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const idx = Number(btn.getAttribute("data-mem-sticker-idx") || 0);
-          setActive(idx);
-        });
+      // Click anywhere on card shell → deselect if not on interactive element, and block propagation
+      const shell = card.closest(".mem-card-shell") || card;
+      shell.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (!e.target.closest("[data-mem-avatar-drag]") && !e.target.closest("[data-mem-sticker-idx]") && !e.target.closest(".mem-scale-bar")) {
+          deselectAll();
+        }
       });
 
+      // Scale slider
+      if (scaleSlider) {
+        scaleSlider.addEventListener("input", () => {
+          const v = Number(scaleSlider.value) / 100;
+          if (scaleValue) scaleValue.textContent = `${scaleSlider.value}%`;
+          if (state._memSelected === "avatar") {
+            state.memorial.avatarScale = clamp(v, 0.2, 2);
+            if (avatarWrap) {
+              avatarWrap.style.transform = `translate(-50%,-50%) scale(${v})`;
+            }
+          } else if (state._memSelected === "sticker") {
+            const idx = state.memorial.activeStickerIdx || 0;
+            if (Array.isArray(state.memorial.stickers) && state.memorial.stickers[idx]) {
+              state.memorial.stickers[idx].s = clamp(v, 0.2, 2);
+              const el = stickersWrap?.querySelector(`[data-mem-sticker-idx="${idx}"]`);
+              if (el) {
+                const r = Number(state.memorial.stickers[idx].r ?? 0);
+                el.style.transform = `translate(-50%,-50%) rotate(${r}deg) scale(${v})`;
+              }
+            }
+          }
+          saveState();
+        });
+      }
+
       const onMove = (e) => {
-        if (draggingIdx == null) return;
+        if (!dragging) return;
         if (pointerId != null && e.pointerId != null && e.pointerId !== pointerId) return;
-        if (!Array.isArray(state.memorial.stickers) || !state.memorial.stickers[draggingIdx]) return;
+        didMove = true;
         const cx = Number.isFinite(e.clientX) ? e.clientX : lastClientX;
         const cy = Number.isFinite(e.clientY) ? e.clientY : lastClientY;
         if (!Number.isFinite(cx) || !Number.isFinite(cy)) return;
         lastClientX = cx;
         lastClientY = cy;
         const p = posToPct(cx, cy);
-        state.memorial.stickers[draggingIdx].x = p.x;
-        state.memorial.stickers[draggingIdx].y = p.y;
-        // Update element position without full render for smoothness
-        const el = draggingBtn || stickersWrap.querySelector(`[data-mem-sticker-idx="${draggingIdx}"]`);
-        if (el) {
-          el.style.left = `${p.x}%`;
-          el.style.top = `${p.y}%`;
+
+        if (dragging.type === "sticker") {
+          if (!Array.isArray(state.memorial.stickers) || !state.memorial.stickers[dragging.idx]) return;
+          state.memorial.stickers[dragging.idx].x = p.x;
+          state.memorial.stickers[dragging.idx].y = p.y;
+          if (draggingEl) { draggingEl.style.left = `${p.x}%`; draggingEl.style.top = `${p.y}%`; }
+        } else if (dragging.type === "avatar") {
+          state.memorial.avatarX = p.x;
+          state.memorial.avatarY = p.y;
+          if (draggingEl) { draggingEl.style.left = `${p.x}%`; draggingEl.style.top = `${p.y}%`; }
         }
         e.preventDefault?.();
       };
 
       const endDrag = () => {
-        if (draggingIdx == null) return;
-        draggingIdx = null;
+        if (!dragging) return;
+        const tapToggle = !didMove && wasAlreadySelected;
+        dragging = null;
         pointerId = null;
-        draggingBtn = null;
+        draggingEl = null;
         lastClientX = null;
         lastClientY = null;
+        dragOffsetX = 0;
+        dragOffsetY = 0;
+        didMove = false;
+        wasAlreadySelected = false;
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", endDrag);
         window.removeEventListener("pointercancel", endDrag);
+        if (tapToggle) {
+          state._memSelected = null;
+        }
         saveState();
+        refreshUI();
       };
 
-      // Drag start (bind directly to sticker buttons for better browser compatibility)
-      stickersWrap.querySelectorAll("[data-mem-sticker-idx]").forEach((btn) => {
-        btn.addEventListener("pointerdown", (e) => {
-          const idx = Number(btn.getAttribute("data-mem-sticker-idx") || 0);
-          if (!Number.isFinite(idx)) return;
-          draggingIdx = clamp(idx, 0, Math.max(0, (state.memorial?.stickers || []).length - 1));
-          pointerId = e.pointerId;
-          draggingBtn = btn;
-          lastClientX = e.clientX;
-          lastClientY = e.clientY;
-          try {
-            btn.setPointerCapture(pointerId);
-          } catch {}
-          // Also select on drag start
-          if (state.memorial.activeStickerIdx !== draggingIdx) {
-            state.memorial.activeStickerIdx = draggingIdx;
-            saveState();
-          }
-          // Start tracking on window so drag stays responsive even if events don't bubble via wrapper.
-          window.addEventListener("pointermove", onMove, { passive: false });
-          window.addEventListener("pointerup", endDrag, { passive: true });
-          window.addEventListener("pointercancel", endDrag, { passive: true });
-          e.preventDefault();
+      const startDrag = (type, idx, el, e) => {
+        didMove = false;
+        wasAlreadySelected = (type === "avatar" && state._memSelected === "avatar")
+          || (type === "sticker" && state._memSelected === "sticker" && state.memorial.activeStickerIdx === idx);
+
+        dragging = { type, idx };
+        pointerId = e.pointerId;
+        draggingEl = el;
+        lastClientX = e.clientX;
+        lastClientY = e.clientY;
+
+        const r = card.getBoundingClientRect();
+        const cursorPctX = ((e.clientX - r.left) / Math.max(1, r.width)) * 100;
+        const cursorPctY = ((e.clientY - r.top) / Math.max(1, r.height)) * 100;
+        let currentX, currentY;
+        if (type === "avatar") {
+          currentX = Number(state.memorial.avatarX ?? 50);
+          currentY = Number(state.memorial.avatarY ?? 48);
+        } else {
+          currentX = Number(state.memorial.stickers?.[idx]?.x ?? 50);
+          currentY = Number(state.memorial.stickers?.[idx]?.y ?? 50);
+        }
+        dragOffsetX = currentX - cursorPctX;
+        dragOffsetY = currentY - cursorPctY;
+
+        try { el.setPointerCapture(pointerId); } catch {}
+        if (type === "sticker") {
+          if (state.memorial.activeStickerIdx !== idx) { state.memorial.activeStickerIdx = idx; }
+          state._memSelected = "sticker";
+        } else {
+          state._memSelected = "avatar";
+        }
+        saveState();
+        window.addEventListener("pointermove", onMove, { passive: false });
+        window.addEventListener("pointerup", endDrag, { passive: true });
+        window.addEventListener("pointercancel", endDrag, { passive: true });
+        e.preventDefault();
+      };
+
+      // Sticker drag start
+      if (stickersWrap) {
+        stickersWrap.querySelectorAll("[data-mem-sticker-idx]").forEach((btn) => {
+          btn.addEventListener("pointerdown", (e) => {
+            const idx = Number(btn.getAttribute("data-mem-sticker-idx") || 0);
+            if (!Number.isFinite(idx)) return;
+            startDrag("sticker", clamp(idx, 0, Math.max(0, (state.memorial?.stickers || []).length - 1)), btn, e);
+          });
         });
-      });
+      }
+
+      // Avatar drag start
+      if (avatarWrap) {
+        avatarWrap.addEventListener("pointerdown", (e) => {
+          startDrag("avatar", null, avatarWrap, e);
+        });
+      }
     }
   } catch {
     // ignore
