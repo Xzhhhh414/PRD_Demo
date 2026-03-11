@@ -259,9 +259,6 @@ const SHOP_ITEMS = {
 
 const LOTTERY_COST = 100;
 const LOTTERY_POOL = [
-  // 头像框
-  { id: "lp_frame_gold",   icon: "🖼️", title: "金色十周年头像框",   kind: "frame",   qty: 500 },
-  { id: "lp_frame_retro",  icon: "🎞️", title: "复古胶片头像框",     kind: "frame",   qty: 400 },
   // 优惠券
   { id: "lp_voucher10",    icon: "🏷️", title: "满50减10优惠券",     kind: "voucher", qty: 1500, desc: "购买游戏满50元减10元，有效期30天" },
   { id: "lp_voucher5",     icon: "🎀", title: "满30减5优惠券",       kind: "voucher", qty: 2000, desc: "购买游戏满30元减5元，有效期30天" },
@@ -983,8 +980,8 @@ function openRegClaimModal({ coinsEarned, remaining, fromRect, onDone, redPacket
     $("#btnRegContinue")?.addEventListener("click", () => {
       if ($("#chkSkipClaimModal")?.checked) _skipClaimModal = true;
       closeModal();
+      render();
       flyGrantToSticky({ fromRect, grant: { points: coinsEarned, coupons: 0 } }).then(() => {
-        render();
         if (onDone) onDone();
       });
     });
@@ -998,7 +995,16 @@ function openRegClaimModal({ coinsEarned, remaining, fromRect, onDone, redPacket
   };
 
   if (redPacketAmount) {
-    openRedPacketModal({ redPacketAmount, onClose: showCoinModal });
+    openRedPacketModal({ redPacketAmount, onClose: () => {
+      if (_skipClaimModal) {
+        render();
+        flyGrantToSticky({ fromRect, grant: { points: coinsEarned, coupons: 0 } }).then(() => {
+          if (onDone) onDone();
+        });
+      } else {
+        showCoinModal();
+      }
+    }});
   } else {
     showCoinModal();
   }
@@ -5115,11 +5121,21 @@ function wireRecapInline() {
       const grant = { points: per.points || 0, coupons: per.coupons || 0 };
       addPoints(state, grant.points || 0);
       addCoupons(state, grant.coupons || 0);
+      const rpTriggered = getRedPacketRemaining(state) > 0 && Math.random() < RED_PACKET_DEFAULT_CHANCE;
+      const rpAmount = rpTriggered ? rollRedPacket(state) : null;
       saveState();
       const trackId = b.closest?.(".carousel__track")?.id || "";
       const currentIdx = Number(b.closest?.(".mini-card")?.getAttribute("data-card-idx") || 0);
-      render();
-      flyGrantToSticky({ fromRect, grant }).then(() => scheduleScrollToNextCard(trackId, currentIdx));
+      const doneCallback = () => scheduleScrollToNextCard(trackId, currentIdx);
+      if (_skipClaimModal && !rpAmount) {
+        render();
+        flyGrantToSticky({ fromRect, grant }).then(doneCallback);
+      } else {
+        openRegClaimModal({
+          coinsEarned: grant.points, remaining: 0, fromRect,
+          onDone: doneCallback, redPacketAmount: rpAmount,
+        });
+      }
     }),
   );
 
@@ -5149,8 +5165,8 @@ function wireRecapInline() {
       requestCarouselInit(trackId, currentIdx);
       const doneCallback = allDone ? () => scheduleScrollToNextCard(trackId, currentIdx) : undefined;
       if (_skipClaimModal && !rpAmount) {
+        render();
         flyGrantToSticky({ fromRect, grant: { points: coins, coupons: 0 } }).then(() => {
-          render();
           if (doneCallback) doneCallback();
         });
       } else {
@@ -5213,9 +5229,19 @@ function wireRecapInline() {
       const fromRect = b.getBoundingClientRect();
       addPoints(state, grant.points || 0);
       addCoupons(state, grant.coupons || 0);
+      const rpTriggered = getRedPacketRemaining(state) > 0 && Math.random() < RED_PACKET_DEFAULT_CHANCE;
+      const rpAmount = rpTriggered ? rollRedPacket(state) : null;
       saveState();
-      render();
-      flyGrantToSticky({ fromRect, grant }).then(() => scheduleScrollToNextCard(trackId, currentIdx));
+      const doneCallback = () => scheduleScrollToNextCard(trackId, currentIdx);
+      if (_skipClaimModal && !rpAmount) {
+        render();
+        flyGrantToSticky({ fromRect, grant }).then(doneCallback);
+      } else {
+        openRegClaimModal({
+          coinsEarned: grant.points, remaining: 0, fromRect,
+          onDone: doneCallback, redPacketAmount: rpAmount,
+        });
+      }
     }),
   );
 
@@ -5227,8 +5253,7 @@ function wireRecapInline() {
       lastBindClickCtx = { trackId, currentIdx };
       if (id === "bind_steam") return openBindSteamModal();
       if (id === "bind_roles") {
-        const fromAddLink = b.classList.contains("bind-add-link");
-        return openBindRolesModal({ autoClaim: fromAddLink });
+        return openBindRolesModal();
       }
     }),
   );
@@ -5759,11 +5784,8 @@ function openBindSteamModal() {
   });
 }
 
-function openBindRolesModal({ autoClaim = false } = {}) {
-  const isFirst = Math.max(0, Number(state.boundRolesCount || 0)) === 0;
-  const hintText = isFirst
-    ? "正式环境下，点击后会跳转到<b>游戏角色绑定页面</b>。<br>绑定完成后返回活动页，即可在卡片上领取纪念币奖励。"
-    : "正式环境下，点击后会跳转到<b>游戏角色绑定页面</b>。<br>绑定完成后纪念币将自动发放。";
+function openBindRolesModal() {
+  const hintText = "正式环境下，点击后会跳转到<b>游戏角色绑定页面</b>。<br>绑定完成后返回活动页，即可在卡片上领取纪念币奖励。";
   const body = `
     <div class="small" style="line-height:1.55">
       <div class="hint">${hintText}</div>
@@ -5788,31 +5810,21 @@ function openBindRolesModal({ autoClaim = false } = {}) {
     const newRoleIdx = state.boundRoleCards.length;
     state.boundRoleCards.push(sampleRoles[newRoleIdx % sampleRoles.length]);
 
-    if (autoClaim) {
-      const per = BIND_REWARDS.find((x) => x.id === "bind_roles")?.perRole || { points: 20, coupons: 0 };
-      state.claimedRoleRewardsCount = Math.max(0, Number(state.claimedRoleRewardsCount || 0)) + 1;
-      addPoints(state, per.points || 0);
-      addCoupons(state, per.coupons || 0);
-      saveState();
-      closeModal();
-      render();
-    } else {
-      saveState();
-      closeModal();
-      const newRewardId = `bind_role_${newRoleIdx}`;
-      requestCarouselInit("recapCarouselBind", 0);
-      render();
-      setTimeout(() => {
-        const track = document.getElementById("recapCarouselBind");
-        if (track) {
-          const cards = Array.from(track.querySelectorAll(".mini-card"));
-          const targetIdx = cards.findIndex(el => el.getAttribute("data-reward-id") === newRewardId);
-          if (targetIdx >= 0 && cards[targetIdx]) {
-            cards[targetIdx].scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-          }
+    saveState();
+    closeModal();
+    const newRewardId = `bind_role_${newRoleIdx}`;
+    requestCarouselInit("recapCarouselBind", 0);
+    render();
+    setTimeout(() => {
+      const track = document.getElementById("recapCarouselBind");
+      if (track) {
+        const cards = Array.from(track.querySelectorAll(".mini-card"));
+        const targetIdx = cards.findIndex(el => el.getAttribute("data-reward-id") === newRewardId);
+        if (targetIdx >= 0 && cards[targetIdx]) {
+          cards[targetIdx].scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
         }
-      }, 100);
-    }
+      }
+    }, 100);
     lastBindClickCtx = null;
   });
 }
@@ -6804,6 +6816,17 @@ function debugModalHtml() {
       <div class="divider"></div>
 
       <div>
+        <div><b>抽奖池测试</b></div>
+        <div class="muted small">模拟奖池已抽空的状态。</div>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button class="btn btn--ghost" id="btnLotteryDrainAll" type="button">清空奖池（全部抽完）</button>
+          <button class="btn btn--ghost" id="btnLotteryResetAll" type="button">重置奖池</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div>
         <div><b>卡片预览</b></div>
         <div class="muted small">平铺查看当前数据下所有生涯卡片的展示效果。</div>
         <div style="margin-top:8px">
@@ -6878,6 +6901,26 @@ function openDebug() {
     state.redPacket.claimed = 0;
     saveState();
     toast("已领取数已重置");
+    closeModal();
+    render();
+  });
+
+  $("#btnLotteryDrainAll")?.addEventListener("click", () => {
+    LOTTERY_POOL.forEach((p) => {
+      const already = (state.lotteryWins || []).filter((w) => w.id === p.id).length;
+      for (let i = already; i < p.qty; i++) {
+        state.lotteryWins.push({ id: p.id, kind: p.kind, title: p.title, icon: p.icon, time: new Date().toLocaleString() });
+      }
+    });
+    saveState();
+    toast("奖池已清空");
+    closeModal();
+    render();
+  });
+  $("#btnLotteryResetAll")?.addEventListener("click", () => {
+    state.lotteryWins = [];
+    saveState();
+    toast("奖池已重置");
     closeModal();
     render();
   });
