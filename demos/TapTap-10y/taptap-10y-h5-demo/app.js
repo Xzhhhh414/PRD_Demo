@@ -684,19 +684,17 @@ function addCoupons(s, delta) {
   s.walletCoupons = Math.max(0, (s.walletCoupons || 0) + delta);
 }
 
-const RED_PACKET_DEFAULT_CHANCE = 0.3;
+
 
 function getRedPacketRemaining(s) {
   const rp = s.redPacket || { stock: 0, claimed: 0 };
   return Math.max(0, rp.stock - rp.claimed);
 }
 
-function shouldTriggerRedPacket(s, rewardId) {
+function shouldTriggerRedPacket(s, isEmpty) {
   if (getRedPacketRemaining(s) <= 0) return false;
-  const claimNum = getCardClaimedTimes(s, rewardId);
-  if (claimNum <= 1) return false;
-  if (rewardId === "snap_spend") return true;
-  return Math.random() < RED_PACKET_DEFAULT_CHANCE;
+  if (isEmpty) return false;
+  return true;
 }
 
 function rollRedPacket(s) {
@@ -5121,7 +5119,7 @@ function wireRecapInline() {
       const grant = { points: per.points || 0, coupons: per.coupons || 0 };
       addPoints(state, grant.points || 0);
       addCoupons(state, grant.coupons || 0);
-      const rpTriggered = getRedPacketRemaining(state) > 0 && Math.random() < RED_PACKET_DEFAULT_CHANCE;
+      const rpTriggered = shouldTriggerRedPacket(state, false);
       const rpAmount = rpTriggered ? rollRedPacket(state) : null;
       saveState();
       const trackId = b.closest?.(".carousel__track")?.id || "";
@@ -5150,10 +5148,11 @@ function wireRecapInline() {
       const maxClaims = getMaxClaims(rewardId, snap);
       const ct = getCardClaimedTimes(state, rewardId);
       if (ct >= maxClaims) return;
+      const isEmptyCard = !!b.closest(".mini-card--empty");
       const coins = 10 + Math.floor(Math.random() * 21);
       incrCardClaimedTimes(state, rewardId);
       addPoints(state, coins);
-      const rpTriggered = shouldTriggerRedPacket(state, rewardId);
+      const rpTriggered = shouldTriggerRedPacket(state, isEmptyCard);
       const rpAmount = rpTriggered ? rollRedPacket(state) : null;
       const allDone = getCardClaimedTimes(state, rewardId) >= maxClaims;
       if (allDone) markClaimed(state, rewardId);
@@ -5229,7 +5228,7 @@ function wireRecapInline() {
       const fromRect = b.getBoundingClientRect();
       addPoints(state, grant.points || 0);
       addCoupons(state, grant.coupons || 0);
-      const rpTriggered = getRedPacketRemaining(state) > 0 && Math.random() < RED_PACKET_DEFAULT_CHANCE;
+      const rpTriggered = shouldTriggerRedPacket(state, false);
       const rpAmount = rpTriggered ? rollRedPacket(state) : null;
       saveState();
       const doneCallback = () => scheduleScrollToNextCard(trackId, currentIdx);
@@ -5600,10 +5599,11 @@ function wireFirstRecap() {
       const ct = getCardClaimedTimes(state, rewardId);
       if (ct >= maxClaims) return;
       wireFirstRecap._claiming = true;
+      const isEmptyCard = !!btn.closest(".firstrecap-card")?.querySelector(".arrival-v2__hero--empty");
       const coins = 10 + Math.floor(Math.random() * 21);
       incrCardClaimedTimes(state, rewardId);
       addPoints(state, coins);
-      const rpTriggered = shouldTriggerRedPacket(state, rewardId);
+      const rpTriggered = shouldTriggerRedPacket(state, isEmptyCard);
       const rpAmount = rpTriggered ? rollRedPacket(state) : null;
       const allDone = getCardClaimedTimes(state, rewardId) >= maxClaims;
       if (allDone) markClaimed(state, rewardId);
@@ -5688,14 +5688,39 @@ function wireFirstRecap() {
         const grant = { points: (per.points || 0) * pending, coupons: (per.coupons || 0) * pending };
         addPoints(state, grant.points || 0);
         addCoupons(state, grant.coupons || 0);
+        const rpTriggered = shouldTriggerRedPacket(state, false);
+        const rpAmount = rpTriggered ? rollRedPacket(state) : null;
         saveState();
         updateFirstRecapCurrencyDom();
-        const done = () => {
+        const advanceIfDone = () => {
           wireFirstRecap._claiming = false;
           queueMicrotask(() => advanceAfterClaim());
         };
-        Promise.resolve(flyGrantToSticky({ fromRect, grant })).then(done).catch(done);
-        setTimeout(() => (wireFirstRecap._claiming = false), 2200);
+        if (_skipClaimModal && !rpAmount) {
+          render();
+          flyGrantToSticky({ fromRect, grant }).then(advanceIfDone).catch(advanceIfDone);
+          setTimeout(() => (wireFirstRecap._claiming = false), 2200);
+        } else {
+          openRegClaimModal({ coinsEarned: grant.points, remaining: 0, fromRect, redPacketAmount: rpAmount });
+          const origContinue = $("#btnRegContinue");
+          const origExchange = $("#btnRegExchange");
+          if (origContinue) {
+            origContinue.replaceWith(origContinue.cloneNode(true));
+            const newBtn = $("#btnRegContinue");
+            newBtn?.addEventListener("click", () => {
+              closeModal();
+              flyGrantToSticky({ fromRect, grant }).then(() => { advanceIfDone(); render(); });
+            });
+          }
+          if (origExchange) {
+            origExchange.replaceWith(origExchange.cloneNode(true));
+            $("#btnRegExchange")?.addEventListener("click", () => {
+              closeModal();
+              flyGrantToSticky({ fromRect, grant }).then(() => { advanceIfDone(); render(); });
+              openShopPage();
+            });
+          }
+        }
         return;
       }
       // Steam one-time
@@ -5705,6 +5730,8 @@ function wireFirstRecap() {
       const grant = { points: r.grant?.points || 0, coupons: r.grant?.coupons || 0 };
       addPoints(state, grant.points || 0);
       addCoupons(state, grant.coupons || 0);
+      const rpTriggeredSteam = shouldTriggerRedPacket(state, false);
+      const rpAmountSteam = rpTriggeredSteam ? rollRedPacket(state) : null;
       saveState();
       updateFirstRecapCurrencyDom();
       {
@@ -5712,8 +5739,31 @@ function wireFirstRecap() {
           wireFirstRecap._claiming = false;
           queueMicrotask(() => advanceAfterClaim());
         };
-        Promise.resolve(flyGrantToSticky({ fromRect, grant })).then(done).catch(done);
-        setTimeout(() => (wireFirstRecap._claiming = false), 2200);
+        if (_skipClaimModal && !rpAmountSteam) {
+          render();
+          flyGrantToSticky({ fromRect, grant }).then(done).catch(done);
+          setTimeout(() => (wireFirstRecap._claiming = false), 2200);
+        } else {
+          openRegClaimModal({ coinsEarned: grant.points, remaining: 0, fromRect, redPacketAmount: rpAmountSteam });
+          const origContinue = $("#btnRegContinue");
+          const origExchange = $("#btnRegExchange");
+          if (origContinue) {
+            origContinue.replaceWith(origContinue.cloneNode(true));
+            const newBtn = $("#btnRegContinue");
+            newBtn?.addEventListener("click", () => {
+              closeModal();
+              flyGrantToSticky({ fromRect, grant }).then(() => { done(); render(); });
+            });
+          }
+          if (origExchange) {
+            origExchange.replaceWith(origExchange.cloneNode(true));
+            $("#btnRegExchange")?.addEventListener("click", () => {
+              closeModal();
+              flyGrantToSticky({ fromRect, grant }).then(() => { done(); render(); });
+              openShopPage();
+            });
+          }
+        }
       }
       return;
     }
