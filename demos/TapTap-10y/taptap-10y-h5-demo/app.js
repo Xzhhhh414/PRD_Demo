@@ -894,7 +894,7 @@ function openLotteryResultModal({ hit, add, cost } = {}) {
       </div>
       <div class="divider"></div>
       <div class="muted small">当前点券：<b>${fmt(wallet)}</b></div>
-      <div class="muted small" style="margin-top:6px">点券可在「我的钱包」中查看与使用。</div>
+      <div class="muted small" style="margin-top:6px">点券可购买站内游戏、PC CDKey、云玩服务等。</div>
     </div>
   `;
   openModal({
