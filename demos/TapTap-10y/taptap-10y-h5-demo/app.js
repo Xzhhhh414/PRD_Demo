@@ -262,9 +262,6 @@ const LOTTERY_POOL = [
   // 头像框
   { id: "lp_frame_gold",   icon: "🖼️", title: "金色十周年头像框",   kind: "frame",   qty: 500 },
   { id: "lp_frame_retro",  icon: "🎞️", title: "复古胶片头像框",     kind: "frame",   qty: 400 },
-  // 点券
-  { id: "lp_coupon50",     icon: "🎫", title: "50 点券",             kind: "coupon",  qty: 1000, value: 50 },
-  { id: "lp_coupon20",     icon: "🎟️", title: "20 点券",            kind: "coupon",  qty: 2000, value: 20 },
   // 优惠券
   { id: "lp_voucher10",    icon: "🏷️", title: "满50减10优惠券",     kind: "voucher", qty: 1500, desc: "购买游戏满50元减10元，有效期30天" },
   { id: "lp_voucher5",     icon: "🎀", title: "满30减5优惠券",       kind: "voucher", qty: 2000, desc: "购买游戏满30元减5元，有效期30天" },
@@ -424,6 +421,7 @@ function loadState() {
     firstRecapRun: { startPoints: 0, startCoupons: 0, doneModalShown: false },
     capsule: { revealed: [], claimed: [] },
     redPacket: { stock: 100, claimed: 0 },
+    shareBadgeClaimed: false,
   };
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -748,6 +746,28 @@ function toast(msg) {
   el.classList.remove("hidden");
   clearTimeout(toast._t);
   toast._t = setTimeout(() => el.classList.add("hidden"), 2200);
+}
+
+function showBadgeOverlay() {
+  const existing = document.getElementById("badgeOverlay");
+  if (existing) existing.remove();
+  const overlay = document.createElement("div");
+  overlay.id = "badgeOverlay";
+  overlay.className = "badge-overlay";
+  overlay.innerHTML = `
+    <div class="badge-overlay__card">
+      <div style="font-size:56px;margin-bottom:12px">\u{1F3C5}</div>
+      <div style="font-size:20px;font-weight:700;color:#ffd700;margin-bottom:8px">恭喜获得「Tap十周年徽章」！</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.55);line-height:1.6">感谢你分享十周年名片，徽章已收入囊中<br>可在个人主页装备展示</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.3);margin-top:16px">点击任意处继续</div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add("badge-overlay--visible"));
+  overlay.addEventListener("click", () => {
+    overlay.classList.remove("badge-overlay--visible");
+    setTimeout(() => { overlay.remove(); render(); }, 300);
+  }, { once: true });
 }
 
 // When opening a modal from within another modal (single modal container),
@@ -2033,6 +2053,7 @@ function stickyStatsView(s) {
     <section class="card sticky-stats__card" style="border-radius:0; box-shadow:none;">
       <div class="sticky-hub">
         <div class="sticky-hub__left">
+          ${!s.shareBadgeClaimed ? `<div class="badge-bubble badge-bubble--sticky"><span class="badge-bubble__icon">\u{1F3C5}</span> 十周年徽章</div>` : ""}
           <div class="sticky-hub__thumb" id="btnOpenMemorial" role="button" tabindex="0" aria-label="编辑十周年名片" style="--mem-bg:${color.bg};">
             <div class="sticky-hub__avatar">${avatarDisplayHtml(avatar, String(s.profile?.nickname || ""), { size: "small" })}</div>
             ${stickersHtml}
@@ -2488,7 +2509,10 @@ function memorialInlineView(s, recap, { editOnly = false } = {}) {
     <section class="card">
       <div class="row">
         <p class="h1 grow">十周年名片</p>
-        <button class="btn btn--brand" id="btnShareMemorial" type="button" style="min-height:36px; padding:8px 10px">分享</button>
+        <span style="position:relative; display:inline-block">
+          <button class="btn btn--brand" id="btnShareMemorial" type="button" style="min-height:36px; padding:8px 10px">分享</button>
+          ${!s.shareBadgeClaimed ? `<div class="badge-bubble badge-bubble--share"><span class="badge-bubble__icon">\u{1F3C5}</span> 分享领取十周年徽章</div>` : ""}
+        </span>
       </div>
       <p class="muted small" style="margin:6px 0 0">用纪念币兑换装饰，DIY 一张属于你的纪念卡。</p>
 
@@ -2694,14 +2718,13 @@ function openShareMemorialModal({ onClose } = {}) {
 
   if (typeof onClose === "function") _modalAfterClose.push(onClose);
 
-  // NOTE: Do NOT show extra nickname/ID text under modal title.
-  // The nickname/ID should stay inside the memorial card itself.
   const nick = String(state.profile?.nickname || "").trim() || "TapTap 用户";
   const pid = String(state.profile?.id || "").trim() || "—";
 
   const body = `
     <div class="small" style="line-height:1.55">
       ${memorialCardOnlyHtml(state, recap)}
+
       <div class="divider"></div>
       <div class="share-qr">
         <div class="share-qr__box" aria-label="二维码">${qr}</div>
@@ -3105,13 +3128,22 @@ function openMemorialEditModal() {
       closeBtnEl?.before(saveImgBtn);
     }
     if (!header.querySelector("#btnShareMemorial")) {
+      const shareWrap = document.createElement("span");
+      shareWrap.style.cssText = "position:relative; display:inline-block; margin-right:8px;";
       const shareBtn = document.createElement("button");
       shareBtn.className = "btn btn--brand";
       shareBtn.id = "btnShareMemorial";
       shareBtn.type = "button";
-      shareBtn.style.cssText = "min-height:32px; padding:6px 12px; font-size:12px; margin-right:8px;";
+      shareBtn.style.cssText = "min-height:32px; padding:6px 12px; font-size:12px;";
       shareBtn.textContent = "分享";
-      closeBtnEl?.before(shareBtn);
+      shareWrap.appendChild(shareBtn);
+      if (!state.shareBadgeClaimed) {
+        const bubble = document.createElement("div");
+        bubble.className = "badge-bubble badge-bubble--share";
+        bubble.innerHTML = `<span class="badge-bubble__icon">\u{1F3C5}</span> 分享领取十周年徽章`;
+        shareWrap.appendChild(bubble);
+      }
+      closeBtnEl?.before(shareWrap);
     }
   }
   wireMemorialInline({ inModal: true });
@@ -3662,7 +3694,17 @@ function shopModalView(s) {
 }
 
 function wireMemorialInline({ inModal = false } = {}) {
-  $("#btnShareMemorial")?.addEventListener("click", () => openShareMemorialModal());
+  $("#btnShareMemorial")?.addEventListener("click", () => {
+    const isFirst = !state.shareBadgeClaimed;
+    if (isFirst) {
+      state.shareBadgeClaimed = true;
+      saveState();
+      openShareMemorialModal();
+      setTimeout(() => showBadgeOverlay(), 80);
+      return;
+    }
+    openShareMemorialModal();
+  });
   $("#btnSaveImage")?.addEventListener("click", () => openSaveImageModal());
 
   const MEM_PRICING = { color: 20, sticker: 15, avatar: 30 };
