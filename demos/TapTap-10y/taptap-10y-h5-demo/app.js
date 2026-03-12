@@ -260,15 +260,29 @@ const SHOP_ITEMS = {
 
 const LOTTERY_COST = 100;
 const LOTTERY_POOL = [
-  // 优惠券
-  { id: "lp_voucher10",    icon: "🏷️", title: "满50减10优惠券",     kind: "voucher", qty: 1500, desc: "购买游戏满50元减10元，有效期30天" },
-  { id: "lp_voucher5",     icon: "🎀", title: "满30减5优惠券",       kind: "voucher", qty: 2000, desc: "购买游戏满30元减5元，有效期30天" },
+  // PC CDKEY 优惠券
+  { id: "lp_pc10",   icon: "🏷️", title: "PC CDKEY 无门槛 10券",         kind: "voucher", qty: 2000, desc: "PC CDKEY 购买无门槛，面值10元" },
+  { id: "lp_pc15",   icon: "🏷️", title: "PC CDKEY 无门槛 15券",         kind: "voucher", qty: 1500, desc: "PC CDKEY 购买无门槛，面值15元" },
+  { id: "lp_pc20",   icon: "🎫", title: "PC CDKEY 满50减20券",           kind: "voucher", qty: 1000, desc: "PC CDKEY 购买满50元可用，面值20元" },
+  { id: "lp_pc30",   icon: "🎫", title: "PC CDKEY 满100减30券",          kind: "voucher", qty: 600,  desc: "PC CDKEY 购买满100元可用，面值30元" },
+  // Tap直购游戏优惠券
+  { id: "lp_tap5",   icon: "🎀", title: "Tap直购游戏 无门槛 5券",        kind: "voucher", qty: 2000, desc: "Tap直购游戏无门槛，面值5元" },
+  { id: "lp_tap10",  icon: "🎀", title: "Tap直购游戏 无门槛 10券",       kind: "voucher", qty: 1500, desc: "Tap直购游戏无门槛，面值10元" },
+  { id: "lp_tap15",  icon: "🎟️", title: "Tap直购游戏 满30减15券",       kind: "voucher", qty: 1000, desc: "Tap直购游戏满30元可用，面值15元" },
+  { id: "lp_tap20",  icon: "🎟️", title: "Tap直购游戏 满50减20券",       kind: "voucher", qty: 600,  desc: "Tap直购游戏满50元可用，面值20元" },
+  // 游戏免单券
+  { id: "lp_free_dave",    icon: "🤿", title: "《潜水员戴夫》免单券",     kind: "voucher", qty: 0, desc: "可免费兑换《潜水员戴夫》" },
+  { id: "lp_free_guigu",   icon: "⛰️", title: "《鬼谷八荒》DLC 免单券",  kind: "voucher", qty: 200, desc: "可免费兑换《鬼谷八荒》DLC" },
+  { id: "lp_free_terra",   icon: "⛏️", title: "《泰拉瑞亚》免单券",      kind: "voucher", qty: 200, desc: "可免费兑换《泰拉瑞亚》" },
+  { id: "lp_free_daxia",   icon: "⚔️", title: "《大侠立志传》免单券",    kind: "voucher", qty: 200, desc: "可免费兑换《大侠立志传》" },
+  { id: "lp_free_limeng",  icon: "👻", title: "《小小梦魇》DLC 免单券",   kind: "voucher", qty: 200, desc: "可免费兑换《小小梦魇》DLC" },
+  { id: "lp_free_maoshen", icon: "🐱", title: "《猫神牧场》安卓版免单券", kind: "voucher", qty: 200, desc: "可免费兑换《猫神牧场》安卓版" },
+  { id: "lp_free_hanhan",  icon: "🤪", title: "《全面憨憨战争模拟器》免单券", kind: "voucher", qty: 200, desc: "可免费兑换《全面憨憨战争模拟器》" },
+  { id: "lp_free_huoshan", icon: "🌋", title: "《火山的女儿》免单券",     kind: "voucher", qty: 200, desc: "可免费兑换《火山的女儿》" },
+  { id: "lp_free_miaosi",  icon: "🎵", title: "《喵斯快跑》免单券",       kind: "voucher", qty: 200, desc: "可免费兑换《喵斯快跑》" },
+  { id: "lp_free_chonggou",icon: "🔧", title: "《重构》免单券",           kind: "voucher", qty: 200, desc: "可免费兑换《重构》" },
   // 云玩时长
-  { id: "lp_cloud60",      icon: "☁️", title: "云玩时长 60 分钟",    kind: "cloud",   qty: 800, minutes: 60 },
-  { id: "lp_cloud30",      icon: "🌤️", title: "云玩时长 30 分钟",   kind: "cloud",   qty: 1200, minutes: 30 },
-  // CDKey
-  { id: "lp_cdkey_a",      icon: "🔑", title: "游戏A CDKey",          kind: "cdkey",   qty: 200, cdkey: "TAPTAP-10Y-XXXX-AAAA" },
-  { id: "lp_cdkey_b",      icon: "🗝️", title: "游戏B CDKey",        kind: "cdkey",   qty: 0, cdkey: "TAPTAP-10Y-XXXX-BBBB" },
+  { id: "lp_cloud_1d",     icon: "☁️", title: "云玩手游1日卡",           kind: "cloud",   qty: 1000 },
 ];
 
 const EXCHANGE_ITEMS = [
@@ -3610,7 +3624,7 @@ function lotteryPoolItemHtml(item, s) {
     <div class="pool-item ${depleted ? "pool-item--depleted" : ""}" data-kind="${item.kind}">
       <span class="pool-item__icon">${item.icon}</span>
       <span class="pool-item__name">${escapeHtml(item.title)}</span>
-      ${depleted ? `<span class="pool-item__tag">已抽完</span>` : ""}
+      ${depleted ? `<span class="pool-item__tag">无库存</span>` : ""}
     </div>
   `;
 }

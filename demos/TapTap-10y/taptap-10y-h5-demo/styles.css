@@ -2261,7 +2261,14 @@ html.is-firstrecap .firstrecap-body::before{
   display:grid;
   grid-template-columns: repeat(5, 1fr);
   gap:8px;
+  max-height:240px;
+  overflow-y:auto;
+  padding-right:4px;
 }
+.pool-grid::-webkit-scrollbar{width:6px}
+.pool-grid::-webkit-scrollbar-track{background:rgba(15,23,42,.04);border-radius:3px}
+.pool-grid::-webkit-scrollbar-thumb{background:rgba(15,23,42,.18);border-radius:3px}
+.pool-grid::-webkit-scrollbar-thumb:hover{background:rgba(15,23,42,.3)}
 .pool-item{
   position:relative;
   display:flex;
