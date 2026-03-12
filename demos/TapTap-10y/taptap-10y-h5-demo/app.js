@@ -29,6 +29,7 @@ const STORAGE_KEY = "taptap10y_state_v1";
  *   firstRecapDone?: boolean;
  *   firstRecapFlow?: { phase: "snap" | "bind" | "done"; idx: number };
  *   firstRecapRun?: { startPoints: number; startCoupons: number; doneModalShown: boolean };
+ *   coinLog?: Array<{amount: number, source: string, time: string}>;
  * }} PhaseState */
 
 const DEFAULT_PRESET_KEY = "test";
@@ -390,6 +391,7 @@ function loadState() {
     },
     memorialUnlocks: { colors: ["mc_cream"], stickers: ["ms_star"], avatars: ["ma_bunny", "ma_cat", "ma_robot", "ma_fox", "ma_panda", "ma_penguin"] },
     daily: { lotteryDayKey: "", checkinDays: 0, checkinStreak: 0, lastCheckinDay: "", welfareLotteryDay: "" },
+    coinLog: [],
     lotteryWins: [],
     exchangeOwned: [],
     exchangeRecords: [],
@@ -675,8 +677,31 @@ function ensureCareerSnapshot(s) {
   };
 }
 
-function addPoints(s, delta) {
+function addPoints(s, delta, source) {
   s.points = Math.max(0, (s.points || 0) + delta);
+  if (source && delta !== 0) {
+    if (!Array.isArray(s.coinLog)) s.coinLog = [];
+    s.coinLog.push({ amount: delta, source, time: new Date().toISOString() });
+  }
+}
+function spendPoints(s, cost, source) {
+  s.points = Math.max(0, (s.points || 0) - cost);
+  if (source && cost > 0) {
+    if (!Array.isArray(s.coinLog)) s.coinLog = [];
+    s.coinLog.push({ amount: -cost, source, time: new Date().toISOString() });
+  }
+}
+const SNAP_CARD_NAMES = {
+  snap_reg_active: "相伴时光", snap_time_habit: "夜行者", snap_spend: "剁手记录",
+  snap_reserve: "新作预约", snap_top3games: "冒险旅程", snap_playtime: "游玩时光",
+  snap_profile: "喜爱类型", snap_achievements: "游戏成就", snap_beloved: "我的挚爱",
+  snap_tapexclusive: "独家宝藏", snap_editorpick: "编辑之选", snap_review_voice: "玩家之声",
+  snap_community_pub: "社区足迹", snap_community_likes: "社区点赞", snap_night_community: "深夜冲浪",
+  snap_badges: "徽章墙", snap_friend_msgs: "同行伙伴", snap_dev_create: "游戏创作",
+};
+function snapCardSource(rewardId) {
+  const name = SNAP_CARD_NAMES[rewardId];
+  return name ? name + "卡片" : "回顾卡片";
 }
 
 function addCoupons(s, delta) {
@@ -2140,7 +2165,7 @@ function wireStickyStats() {
 
     const isDouble = newStreak >= CHECKIN_STREAK_GOAL;
     const reward = isDouble ? CHECKIN_BASE * 2 : CHECKIN_BASE;
-    addPoints(state, reward);
+    addPoints(state, reward, "每日签到");
     saveState();
     const fromRect = $("#btnCheckin")?.getBoundingClientRect();
     if (fromRect) flyGrantToSticky({ fromRect, grant: { points: reward, coupons: 0 } });
@@ -3542,6 +3567,39 @@ function openShopModal() {
   wireShop({ inModal: true });
 }
 
+const _SNAP_NAME_SET = new Set(Object.values(SNAP_CARD_NAMES));
+function _fixLogSource(src) {
+  if (_SNAP_NAME_SET.has(src)) return src + "卡片";
+  return src;
+}
+
+function openCoinLogModal() {
+  const log = Array.isArray(state.coinLog) ? [...state.coinLog].reverse() : [];
+
+  let rowsHtml;
+  if (log.length === 0) {
+    rowsHtml = `<div style="padding:32px 0;text-align:center;color:rgba(15,23,42,.35);font-size:13px">暂无纪念币记录</div>`;
+  } else {
+    rowsHtml = `<div class="coin-log-list" style="max-height:400px;overflow-y:auto">` +
+      log.map(e => {
+        const d = new Date(e.time);
+        const timeStr = `${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+        const isEarn = e.amount > 0;
+        const amountStr = isEarn ? `<span style="color:#16a34a;font-weight:700">+${e.amount}</span>` : `<span style="color:#dc2626;font-weight:700">${e.amount}</span>`;
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(15,23,42,.06)">
+          <div>
+            <div style="font-size:14px;font-weight:600;color:#0F172A">${escapeHtml(_fixLogSource(e.source))}</div>
+            <div style="font-size:12px;color:rgba(15,23,42,.4);margin-top:2px">${timeStr}</div>
+          </div>
+          <div style="font-size:15px;text-align:right">${amountStr}</div>
+        </div>`;
+      }).join("") + `</div>`;
+  }
+
+  openModal({ title: "纪念币明细", bodyHtml: rowsHtml, footerHtml: `<button class="btn" id="btnCoinLogClose">关闭</button>` });
+  $("#btnCoinLogClose")?.addEventListener("click", () => { closeModal(); openShopModal(); });
+}
+
 const LOTTERY_KIND_LABELS = { frame: "头像框", coupon: "点券", voucher: "优惠券", cloud: "云玩时长", cdkey: "CDKey" };
 
 function lotteryPoolItemHtml(item, s) {
@@ -3660,8 +3718,9 @@ function shopModalView(s) {
 
   return `
     <div>
-      <div style="margin-bottom:16px">
+      <div style="margin-bottom:16px;display:flex;align-items:center;gap:10px">
         <span class="pill pill--brand">当前纪念币：<b>${fmt(s.points)}</b></span>
+        <button class="btn btn--sm" id="btnCoinLog" type="button" style="font-size:12px;padding:4px 10px">纪念币明细</button>
       </div>
 
       ${prizesDrawerHtml}
@@ -3819,7 +3878,7 @@ function wireMemorialInline({ inModal = false } = {}) {
       cost,
       onConfirm: () => {
         if ((state.points || 0) < cost) return;
-        state.points -= cost;
+        spendPoints(state, cost, `名片解锁：${titleOf[kind](id)}`);
         list.push(id);
         saveState();
         toast("已解锁");
@@ -4052,7 +4111,7 @@ function wireMemorialInline({ inModal = false } = {}) {
           title: `兑换：${item.title}`,
           cost: item.cost,
           onConfirm: () => {
-            state.points -= item.cost;
+            spendPoints(state, item.cost, `名片兑换：${item.title}`);
             state.inventory.frames.push(item.id);
             saveState();
             toast(`已兑换：${item.title}`);
@@ -4067,7 +4126,7 @@ function wireMemorialInline({ inModal = false } = {}) {
           title: `兑换：${item.title}`,
           cost: item.cost,
           onConfirm: () => {
-            state.points -= item.cost;
+            spendPoints(state, item.cost, `名片兑换：${item.title}`);
             state.inventory.badges.push(item.id);
             saveState();
             toast(`已兑换：${item.title}`);
@@ -4098,7 +4157,7 @@ function wireMemorialInline({ inModal = false } = {}) {
         cost: MEM_SHOP.lottery.cost,
         onConfirm: () => {
           if (!state.daily || typeof state.daily !== "object") state.daily = { lotteryDayKey: "" };
-          state.points -= MEM_SHOP.lottery.cost;
+          spendPoints(state, MEM_SHOP.lottery.cost, "名片每日抽点券");
           state.daily.lotteryDayKey = today;
           // No pity: random 1 coupon or none.
           const hit = Math.random() < 0.5;
@@ -5117,7 +5176,7 @@ function wireRecapInline() {
       const fromRect = b.getBoundingClientRect();
       state.claimedRoleRewardsCount = roleIdx + 1;
       const grant = { points: per.points || 0, coupons: per.coupons || 0 };
-      addPoints(state, grant.points || 0);
+      addPoints(state, grant.points || 0, "角色数据卡领取");
       addCoupons(state, grant.coupons || 0);
       const rpTriggered = shouldTriggerRedPacket(state, false);
       const rpAmount = rpTriggered ? rollRedPacket(state) : null;
@@ -5151,7 +5210,7 @@ function wireRecapInline() {
       const isEmptyCard = !!b.closest(".mini-card--empty");
       const coins = 10 + Math.floor(Math.random() * 21);
       incrCardClaimedTimes(state, rewardId);
-      addPoints(state, coins);
+      addPoints(state, coins, snapCardSource(rewardId));
       const rpTriggered = shouldTriggerRedPacket(state, isEmptyCard);
       const rpAmount = rpTriggered ? rollRedPacket(state) : null;
       const allDone = getCardClaimedTimes(state, rewardId) >= maxClaims;
@@ -5194,7 +5253,7 @@ function wireRecapInline() {
         if (!grant) return;
         if (!grant.points && (!ENABLE_COUPONS || !grant.coupons)) return;
         markClaimed(state, id);
-        addPoints(state, grant.points || 0);
+        addPoints(state, grant.points || 0, snapCardSource(id));
         addCoupons(state, grant.coupons || 0);
         saveState();
         render();
@@ -5214,7 +5273,7 @@ function wireRecapInline() {
         const per = r.perRole || { points: 0, coupons: 0 };
         state.claimedRoleRewardsCount = claimedCount + pending;
         const grant = { points: (per.points || 0) * pending, coupons: (per.coupons || 0) * pending };
-        addPoints(state, grant.points || 0);
+        addPoints(state, grant.points || 0, "角色数据卡领取");
         addCoupons(state, grant.coupons || 0);
         saveState();
         render();
@@ -5226,7 +5285,7 @@ function wireRecapInline() {
       markClaimed(state, id);
       const grant = { points: r.grant?.points || 0, coupons: r.grant?.coupons || 0 };
       const fromRect = b.getBoundingClientRect();
-      addPoints(state, grant.points || 0);
+      addPoints(state, grant.points || 0, id === "bind_steam" ? "Steam卡领取" : "绑定奖励");
       addCoupons(state, grant.coupons || 0);
       const rpTriggered = shouldTriggerRedPacket(state, false);
       const rpAmount = rpTriggered ? rollRedPacket(state) : null;
@@ -5602,7 +5661,7 @@ function wireFirstRecap() {
       const isEmptyCard = !!btn.closest(".firstrecap-card")?.querySelector(".arrival-v2__hero--empty");
       const coins = 10 + Math.floor(Math.random() * 21);
       incrCardClaimedTimes(state, rewardId);
-      addPoints(state, coins);
+      addPoints(state, coins, snapCardSource(rewardId));
       const rpTriggered = shouldTriggerRedPacket(state, isEmptyCard);
       const rpAmount = rpTriggered ? rollRedPacket(state) : null;
       const allDone = getCardClaimedTimes(state, rewardId) >= maxClaims;
@@ -5658,7 +5717,7 @@ function wireFirstRecap() {
         if (!grant.points && (!ENABLE_COUPONS || !grant.coupons)) return;
         wireFirstRecap._claiming = true;
         markClaimed(state, id);
-        addPoints(state, grant.points || 0);
+        addPoints(state, grant.points || 0, snapCardSource(id));
         addCoupons(state, grant.coupons || 0);
         saveState();
         // Match hall behavior: wait for fly animation to finish, then advance.
@@ -5686,7 +5745,7 @@ function wireFirstRecap() {
         wireFirstRecap._claiming = true;
         state.claimedRoleRewardsCount = claimedCount + pending;
         const grant = { points: (per.points || 0) * pending, coupons: (per.coupons || 0) * pending };
-        addPoints(state, grant.points || 0);
+        addPoints(state, grant.points || 0, "角色数据卡领取");
         addCoupons(state, grant.coupons || 0);
         const rpTriggered = shouldTriggerRedPacket(state, false);
         const rpAmount = rpTriggered ? rollRedPacket(state) : null;
@@ -5728,7 +5787,7 @@ function wireFirstRecap() {
       wireFirstRecap._claiming = true;
       markClaimed(state, id);
       const grant = { points: r.grant?.points || 0, coupons: r.grant?.coupons || 0 };
-      addPoints(state, grant.points || 0);
+      addPoints(state, grant.points || 0, "Steam卡领取");
       addCoupons(state, grant.coupons || 0);
       const rpTriggeredSteam = shouldTriggerRedPacket(state, false);
       const rpAmountSteam = rpTriggeredSteam ? rollRedPacket(state) : null;
@@ -6231,7 +6290,7 @@ function wireDiscoverInline() {
         openGameStoryModal(g, () => {
           if (!state.capsule.claimed.includes(g.id)) {
             state.capsule.claimed.push(g.id);
-            addPoints(state, g.points);
+            addPoints(state, g.points, "发现好游戏");
             saveState();
             render();
             const stickyEl = document.querySelector(".sticky-hub");
@@ -6254,7 +6313,7 @@ function wireDiscoverInline() {
         if (!state.capsule) state.capsule = { revealed: [], claimed: [] };
         if (!state.capsule.claimed.includes(g.id)) {
           state.capsule.claimed.push(g.id);
-          addPoints(state, g.points);
+          addPoints(state, g.points, "发现好游戏");
           saveState();
           render();
           const stickyEl = document.querySelector(".sticky-hub");
@@ -6380,7 +6439,7 @@ function wireDiscoverInline() {
       const playTime = Number(state.playtest.feedback?.[g.id] || 0);
       if (playTime > 0 && !state.playtest.checkedInGames.includes(g.id)) {
         state.playtest.checkedInGames.push(g.id);
-        addPoints(state, CHECKIN_COINS_PER_GAME);
+        addPoints(state, CHECKIN_COINS_PER_GAME, "游乐场打卡");
         totalGranted += CHECKIN_COINS_PER_GAME;
       }
     });
@@ -6399,7 +6458,7 @@ function wireDiscoverInline() {
     if (!state.playtest.feedback) state.playtest.feedback = {};
     state.playtest.feedback[g.id] = 1;
     state.playtest.checkedInGames.push(g.id);
-    addPoints(state, CHECKIN_COINS_PER_GAME);
+    addPoints(state, CHECKIN_COINS_PER_GAME, "游乐场打卡");
     saveState();
     render();
   });
@@ -6556,10 +6615,13 @@ function shopItemCard(kind, item, s) {
 }
 
 function wireShop({ inModal = false } = {}) {
+  // 纪念币明细入口
+  $("#btnCoinLog")?.addEventListener("click", () => { closeModal(); openCoinLogModal(); });
+
   // 抽奖按钮
   $("#btnWelfareLottery")?.addEventListener("click", () => {
     if (state.points < LOTTERY_COST) return toast("纪念币不足");
-    state.points -= LOTTERY_COST;
+    spendPoints(state, LOTTERY_COST, "福利商店抽奖");
     if (!Array.isArray(state.lotteryWins)) state.lotteryWins = [];
 
     const forceKind = state._testForceKind || null;
@@ -6709,7 +6771,7 @@ function wireShop({ inModal = false } = {}) {
       });
       $("#btnExOk")?.addEventListener("click", () => {
         if (!enough) { closeModal(); if (inModal) openShopModal(); return; }
-        state.points -= item.cost;
+        spendPoints(state, item.cost, `福利商店兑换：${item.title}`);
         state.exchangeOwned.push(id);
         if (!Array.isArray(state.exchangeRecords)) state.exchangeRecords = [];
         state.exchangeRecords.push({
