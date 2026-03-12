@@ -6496,3 +6496,51 @@ html.is-firstrecap .firstrecap-body::before{
   opacity: 1;
   transform: scale(1);
 }
+
+/* Claim share bubble */
+.modal-share-link{
+  background: none;
+  border: none;
+  color: rgba(255,255,255,.6);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color .15s;
+}
+.modal-share-link:hover{
+  color: rgba(255,255,255,.9);
+}
+.share-tip-bubble{
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #ff6348, #ffa502);
+  border-radius: 14px;
+  padding: 4px 10px;
+  box-shadow: 0 3px 10px rgba(255,99,72,.4);
+  pointer-events: none;
+  animation: shareTipPulse 2s ease-in-out infinite;
+  z-index: 2;
+}
+.share-tip-bubble b{
+  font-size: 12px;
+}
+.share-tip-bubble__arrow{
+  position: absolute;
+  bottom: 100%;
+  right: 10px;
+  width: 0; height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid #ff6348;
+}
+@keyframes shareTipPulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.04)}
+}

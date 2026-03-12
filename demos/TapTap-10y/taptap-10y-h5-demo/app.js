@@ -303,6 +303,19 @@ const EXCHANGE_ITEMS = [
   { id: "ex_gift_c",       icon: "🕹️", title: "游戏C 礼包码",   cost: 100, qty: 999, type: "giftcode", key: "GIFT-TAPTAP-10Y-CCCC" },
 ];
 
+const FEATURED_GAMES = [
+  { icon: "🤿", title: "潜水员戴夫", tag: "经营 · 冒险", price: "¥68", url: "https://www.taptap.cn/app/280121", bg: "linear-gradient(135deg,#4fc3f7,#0288d1)" },
+  { icon: "⛰️", title: "鬼谷八荒", tag: "修仙 · 角色扮演", price: "¥68", url: "https://www.taptap.cn/app/218282", bg: "linear-gradient(135deg,#a5d6a7,#388e3c)" },
+  { icon: "⛏️", title: "泰拉瑞亚", tag: "沙盒 · 冒险", price: "¥25", url: "https://www.taptap.cn/app/38016", bg: "linear-gradient(135deg,#81c784,#2e7d32)" },
+  { icon: "⚔️", title: "大侠立志传", tag: "武侠 · RPG", price: "¥48", url: "https://www.taptap.cn/app/214459", bg: "linear-gradient(135deg,#ffcc80,#e65100)" },
+  { icon: "👻", title: "小小梦魇", tag: "冒险 · 解谜", price: "¥98", url: "https://www.taptap.cn/app/225077", bg: "linear-gradient(135deg,#b39ddb,#4527a0)" },
+  { icon: "🐱", title: "猫神牧场", tag: "模拟 · 经营", price: "¥30", url: "https://www.taptap.cn/app/375622", bg: "linear-gradient(135deg,#ffab91,#d84315)" },
+  { icon: "🤪", title: "全面憨憨战争模拟器", tag: "策略 · 搞怪", price: "¥38", url: "https://www.taptap.cn/app/229084", bg: "linear-gradient(135deg,#ef9a9a,#c62828)" },
+  { icon: "🌋", title: "火山的女儿", tag: "养成 · 剧情", price: "¥58", url: "https://www.taptap.cn/app/227498", bg: "linear-gradient(135deg,#f48fb1,#ad1457)" },
+  { icon: "🎵", title: "喵斯快跑", tag: "音乐 · 节奏", price: "¥30", url: "https://www.taptap.cn/app/74046", bg: "linear-gradient(135deg,#80deea,#00838f)" },
+  { icon: "🔧", title: "重构", tag: "解谜 · 独立", price: "¥18", url: "https://www.taptap.cn/app/166519", bg: "linear-gradient(135deg,#90caf9,#1565c0)" },
+];
+
 const MEM_CARD_COLORS = [
   // Background themes (kept name `MEM_CARD_COLORS` for storage compatibility)
   { id: "mc_cream", label: "奶油", bg: "radial-gradient(520px 260px at 20% 10%, rgba(255,255,255,.32), transparent 60%), repeating-linear-gradient(135deg, rgba(15,23,42,.04) 0 10px, rgba(15,23,42,0) 10px 20px), #F7E3C5", panel: "#FFF7EB", accent: "#F2B46B" },
@@ -435,6 +448,7 @@ function loadState() {
     capsule: { revealed: [], claimed: [] },
     redPacket: { stock: 100, claimed: 0 },
     shareBadgeClaimed: false,
+    sharedClaimBonus: false,
   };
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -945,7 +959,42 @@ function openLotteryResultModal({ hit, add, cost } = {}) {
 
 let _skipClaimModal = false;
 
+function injectHeaderShareBtn(btnId, tipId, alreadyShared) {
+  const header = document.querySelector("#modal .modal__header");
+  if (!header) return;
+  const wrap = document.createElement("div");
+  wrap.style.cssText = "position:relative;flex-shrink:0;margin-left:auto";
+  if (!alreadyShared) {
+    const tip = document.createElement("div");
+    tip.className = "share-tip-bubble";
+    tip.id = tipId;
+    tip.innerHTML = `🎉 首次分享领 <b>100</b> 纪念币<div class="share-tip-bubble__arrow"></div>`;
+    wrap.appendChild(tip);
+  }
+  const btn = document.createElement("button");
+  btn.className = "modal-share-link";
+  btn.id = btnId;
+  btn.textContent = "分享";
+  wrap.appendChild(btn);
+  const closeBtn = header.querySelector("#modalClose");
+  if (closeBtn) header.insertBefore(wrap, closeBtn);
+  else header.appendChild(wrap);
+  btn.addEventListener("click", () => {
+    if (!state.sharedClaimBonus) {
+      state.sharedClaimBonus = true;
+      addPoints(state, 100, "首次分享奖励");
+      saveState();
+      toast("分享成功，获得 100 纪念币！");
+      const t = document.getElementById(tipId);
+      if (t) t.remove();
+    } else {
+      toast("已分享");
+    }
+  });
+}
+
 function openRedPacketModal({ redPacketAmount, onClose }) {
+  const hasSharedClaim = !!state.sharedClaimBonus;
   const body = `
     <div class="reg-reward-modal">
       <div style="margin:12px 0;padding:18px 20px;border-radius:14px;background:linear-gradient(135deg,rgba(255,68,68,.12),rgba(255,160,60,.10));border:1px solid rgba(255,68,68,.25);text-align:center">
@@ -967,6 +1016,7 @@ function openRedPacketModal({ redPacketAmount, onClose }) {
     hideClose: true,
     lockClose: true,
   });
+  injectHeaderShareBtn("btnRPShare", "rpShareTip", hasSharedClaim);
   $("#btnRPContinue")?.addEventListener("click", () => {
     closeModal();
     if (onClose) onClose();
@@ -977,11 +1027,32 @@ function openRedPacketModal({ redPacketAmount, onClose }) {
   });
 }
 
+function getTotalClaimCount(s) {
+  let total = 0;
+  const cc = s.cardClaimedTimes || {};
+  for (const k of Object.keys(cc)) total += Number(cc[k] || 0);
+  total += Math.max(0, Number(s.claimedRoleRewardsCount || 0));
+  if ((s.claimedRewardIds || []).includes("bind_steam")) total += 1;
+  return total;
+}
+function claimPercentile(totalClaims) {
+  if (totalClaims <= 1) return 10;
+  if (totalClaims <= 3) return 30;
+  if (totalClaims <= 5) return 50;
+  if (totalClaims <= 10) return 70;
+  if (totalClaims <= 20) return 85;
+  if (totalClaims <= 40) return 93;
+  return 99;
+}
+
 function openRegClaimModal({ coinsEarned, remaining, fromRect, onDone, redPacketAmount }) {
   const showCoinModal = () => {
     const poolIcons = EXCHANGE_ITEMS.slice(0, 4).map(item =>
       `<div class="reg-reward-modal__pool-item"><span class="reg-reward-modal__pool-icon">${item.icon}</span><span class="reg-reward-modal__pool-name">${escapeHtml(item.title)}</span></div>`
     ).join("");
+    const totalClaims = getTotalClaimCount(state);
+    const pct = claimPercentile(totalClaims);
+    const hasSharedClaim = !!state.sharedClaimBonus;
     const body = `
       <div class="reg-reward-modal">
         <div class="reg-reward-modal__coins" style="margin-top:8px">
@@ -989,6 +1060,7 @@ function openRegClaimModal({ coinsEarned, remaining, fromRect, onDone, redPacket
           <span class="reg-reward-modal__coin-num">${coinsEarned}</span>
           <span class="reg-reward-modal__coin-unit">\u4E2A</span>
         </div>
+        <div style="font-size:12px;color:rgba(255,255,255,.55);margin:6px 0 2px">你已领取 <b style="color:rgba(255,255,255,.85)">${totalClaims}</b> 次纪念币，超过 <b style="color:#00cfac">${pct}%</b> 玩家</div>
         <div class="reg-reward-modal__hint">\u7EAA\u5FF5\u5E01\u53EF\u5728\u5151\u6362\u533A\u5151\u6362\u5956\u54C1</div>
         <div class="reg-reward-modal__pool-wrap">
           <div class="reg-reward-modal__pool-label">\u7EAA\u5FF5\u5E01\u53EF\u5151\u6362</div>
@@ -1014,6 +1086,7 @@ function openRegClaimModal({ coinsEarned, remaining, fromRect, onDone, redPacket
       hideClose: true,
       lockClose: true,
     });
+    injectHeaderShareBtn("btnClaimShare", "claimShareTip", hasSharedClaim);
     $("#btnRegContinue")?.addEventListener("click", () => {
       if ($("#chkSkipClaimModal")?.checked) _skipClaimModal = true;
       closeModal();
@@ -3762,6 +3835,25 @@ function shopModalView(s) {
           <span class="welfare-section__title">🎁 兑换</span>
         </div>
         <div class="exchange-grid">${exchangeHtml}</div>
+      </div>
+
+      <div class="divider" style="margin:20px 0"></div>
+      <div class="welfare-section">
+        <div class="welfare-section__header">
+          <span class="welfare-section__title">🎮 买断制游戏推荐</span>
+        </div>
+        <div class="featured-games" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:8px">
+          ${FEATURED_GAMES.map(g => `
+            <a class="featured-game-card" href="${g.url}" target="_blank" style="display:flex;gap:10px;padding:10px;border-radius:12px;background:rgba(15,23,42,.03);border:1px solid rgba(15,23,42,.06);text-decoration:none;color:inherit;transition:background .15s">
+              <div style="width:48px;height:48px;border-radius:10px;background:${g.bg || 'rgba(15,23,42,.08)'};display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${g.icon}</div>
+              <div style="min-width:0">
+                <div style="font-size:13px;font-weight:700;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(g.title)}</div>
+                <div style="font-size:11px;color:rgba(15,23,42,.45);margin-top:2px">${escapeHtml(g.tag)}</div>
+                <div style="font-size:12px;font-weight:700;color:var(--brand);margin-top:2px">${g.price}</div>
+              </div>
+            </a>
+          `).join("")}
+        </div>
       </div>
     </div>
   `;
