@@ -744,10 +744,11 @@ function getRedPacketRemaining(s) {
   return Math.max(0, rp.stock - rp.claimed);
 }
 
+const RED_PACKET_CHANCE = 0.3;
 function shouldTriggerRedPacket(s, isEmpty) {
   if (getRedPacketRemaining(s) <= 0) return false;
   if (isEmpty) return false;
-  return true;
+  return Math.random() < RED_PACKET_CHANCE;
 }
 
 function rollRedPacket(s) {
