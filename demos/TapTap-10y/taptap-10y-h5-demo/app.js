@@ -3020,6 +3020,8 @@ function openShareMemorialModal({ onClose } = {}) {
 
 function openShareRecapModal({ onClose } = {}) {
   const recap = state.careerSnapshot?.recap || recapDataForState(state);
+  const _rTs = parseCnDateToTs(recap?.regDate);
+  if (_rTs && _rTs >= new Date(2026, 3, 10).getTime()) return;
   const url = shareUrlForRoute("sharerecap");
   const qr = qrSvgHtml(url);
 
@@ -3065,71 +3067,47 @@ function buildSharePosterSvg(s, recap, nick, pid, url, qr) {
   const days = (togetherDays || 0) % 365;
   const totalCoins = calcCareerCoinsTotal(s);
 
-  const fmtVal = (n) => fmt(Number(n || 0));
-  const fmtHours = (h) => { const v = Number(h || 0); if (v <= 0) return ""; if (v < 1) return Math.max(0.1, v).toFixed(1); return fmt(Math.floor(v)); };
-  const fmtWan = (n) => { const v = Number(n || 0); if (v <= 0) return "0"; if (v < 10000) return fmt(v); const w = v / 10000; return (w >= 1 && w % 1 < 0.05) ? Math.floor(w) + "万" : w.toFixed(1) + "万"; };
+  let companionVal = "0";
+  if (years >= 1) companionVal = `${years}年${days}天`;
+  else if (togetherDays > 0) companionVal = `${togetherDays}天`;
 
-  const devGames = (Array.isArray(recap?.devGames) ? recap.devGames : []).filter(g => String(g.name || "").trim());
-  const dims = [
-    { label: "动作", val: Number(recap.radarAction || 0) },
-    { label: "策略", val: Number(recap.radarStrategy || 0) },
-    { label: "RPG", val: Number(recap.radarRPG || 0) },
-    { label: "冒险", val: Number(recap.radarAdventure || 0) },
-    { label: "模拟", val: Number(recap.radarSim || 0) },
-    { label: "休闲", val: Number(recap.radarCasual || 0) },
-  ];
-  const tagsCount = dims.filter(d => d.val > 0).length;
-  const topDim = dims.reduce((a, b) => b.val > a.val ? b : a, dims[0]);
+  const gamesPlayed = Number(recap.gamesPlayedTotal || 0);
+  const playHours = Number(recap.playTimeHours || 0);
+  const achievements = Number(recap.achievementsTotal || 0);
+  const fmtH = (h) => { if (h <= 0) return "0"; if (h < 1) return Math.max(0.1, h).toFixed(1); return fmt(Math.floor(h)); };
+
   const belovedName = String(recap.belovedGameName || "").trim();
+  const belovedIcon = String(recap.belovedGameIcon || "").trim() || "🎮";
+  const hasBelovedGame = !!belovedName;
 
-  const allKpis = [
-    togetherDays > 0 && { label: "相伴时光", value: years >= 1 ? `${years}年${days}天` : `${togetherDays}天` },
-    Number(recap.gamesPlayedTotal || 0) > 0 && { label: "游玩游戏", value: fmtVal(recap.gamesPlayedTotal) },
-    fmtHours(recap.playTimeHours) && { label: "游玩时长", value: fmtHours(recap.playTimeHours) + "h" },
-    Number(recap.lateNightOpenCount || 0) > 0 && { label: "深夜探索", value: fmtVal(recap.lateNightOpenCount) + "次" },
-    Number(recap.reserveCount || 0) > 0 && { label: "预约新作", value: fmtVal(recap.reserveCount) },
-    Number(recap.spendTotal || 0) > 0 && { label: "累计消费", value: fmtVal(Math.floor(recap.spendTotal)) + "元" },
-    tagsCount > 0 && { label: "喜爱类型", value: topDim.label + "类" },
-    Number(recap.achievementsTotal || 0) > 0 && { label: "游戏成就", value: fmtVal(recap.achievementsTotal) },
-    belovedName && { label: "我的挚爱", value: escapeXml(belovedName.length > 6 ? belovedName.slice(0, 5) + "…" : belovedName) },
-    Number(recap.exclusivePlayed || 0) > 0 && { label: "独家宝藏", value: fmtVal(recap.exclusivePlayed) },
-    Number(recap.editorPickPlayed || 0) > 0 && { label: "编辑之选", value: fmtVal(recap.editorPickPlayed) },
-    Number(recap.reviewsCount || 0) > 0 && { label: "玩家评价", value: fmtVal(recap.reviewsCount) },
-    Number(recap.communityPublished || 0) > 0 && { label: "发布内容", value: fmtVal(recap.communityPublished) },
-    Number(recap.communityLikesReceived || 0) > 0 && { label: "获赞", value: fmtWan(recap.communityLikesReceived) },
-    Number(recap.nightSurfDays || 0) > 0 && { label: "深夜冲浪", value: fmtVal(recap.nightSurfDays) + "天" },
-    Number(recap.platformBadgesTotal || 0) > 0 && { label: "徽章收藏", value: fmtVal(recap.platformBadgesTotal) },
-    Number(recap.friendsCount || 0) > 0 && { label: "好友", value: fmtVal(recap.friendsCount) },
-    Number(recap.followersCount || 0) > 0 && { label: "粉丝", value: fmtWan(recap.followersCount) },
-    devGames.length > 0 && { label: "游戏创作", value: String(devGames.length) },
-  ].filter(Boolean);
+  const stats = [
+    { label: "相伴时光", value: companionVal },
+    { label: "冒险旅程", value: gamesPlayed > 0 ? fmt(gamesPlayed) : "0" },
+    { label: "游玩时光", value: playHours > 0 ? fmtH(playHours) + "h" : "0" },
+    { label: "成就", value: achievements > 0 ? fmt(achievements) : "0" },
+  ];
 
-  const kpiCols = 4;
-  const kpiCellW = Math.floor(900 / kpiCols);
-  const totalRows = Math.ceil(allKpis.length / kpiCols);
-  const kpisSvg = allKpis.map((k, i) => {
-    const row = Math.floor(i / kpiCols);
-    const isLastRow = row === totalRows - 1;
-    const itemsInRow = isLastRow ? allKpis.length - row * kpiCols : kpiCols;
-    const colInRow = i - row * kpiCols;
-    const rowOffset = isLastRow ? (kpiCols - itemsInRow) * kpiCellW / 2 : 0;
-    const cx = 130 + rowOffset + colInRow * kpiCellW + kpiCellW / 2;
-    const cy = row * 120;
+  const statCellW = Math.floor(900 / 4);
+  const statsSvg = stats.map((k, i) => {
+    const cx = 130 + i * statCellW + statCellW / 2;
     return `
-      <text x="${cx}" y="${cy}" text-anchor="middle" font-size="22" font-weight="600" fill="rgba(15,23,42,.45)">${escapeXml(k.label)}</text>
-      <text x="${cx}" y="${cy + 48}" text-anchor="middle" font-size="38" font-weight="900" fill="#0F172A">${escapeXml(k.value)}</text>
+      <text x="${cx}" y="0" text-anchor="middle" font-size="24" font-weight="600" fill="rgba(15,23,42,.45)">${escapeXml(k.label)}</text>
+      <text x="${cx}" y="56" text-anchor="middle" font-size="44" font-weight="900" fill="#0F172A">${escapeXml(k.value)}</text>
     `;
   }).join("");
 
   const qrSized = String(qr).replace("<svg ", `<svg x="390" y="0" width="300" height="300" `);
 
-  const kpiY = 280;
-  const kpiRows = Math.ceil(allKpis.length / kpiCols);
-  const kpiH = kpiRows * 120 + 20;
-  const coinY = kpiY + kpiH + 60;
+  const belovedY = 230;
+  const belovedH = 420;
+  const statsY = belovedY + belovedH + 60;
+  const statsH = 140;
+  const coinY = statsY + statsH + 60;
   const coinH = 200;
   const ctaY = coinY + coinH + 50;
   const qrY = ctaY + 80;
+
+  const belovedTitleText = hasBelovedGame ? `我的年度挚爱「${escapeXml(belovedName)}」` : "我的年度挚爱";
 
   return `
     <svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
@@ -3138,24 +3116,29 @@ function buildSharePosterSvg(s, recap, nick, pid, url, qr) {
           <stop offset="0" stop-color="${escapeXml(color.panel)}"/>
           <stop offset="1" stop-color="#FFFFFF"/>
         </linearGradient>
+        <clipPath id="belovedClip"><rect x="90" y="${belovedY + 55}" width="900" height="${belovedH - 55}" rx="24"/></clipPath>
       </defs>
       <rect width="${W}" height="${H}" fill="url(#bg)"/>
       <circle cx="160" cy="180" r="280" fill="${escapeXml(color.accent)}" opacity="0.08"/>
       <circle cx="920" cy="240" r="320" fill="${escapeXml(color.accent)}" opacity="0.06"/>
 
-      <text x="90" y="100" font-size="32" font-weight="700" fill="#334155">${escapeXml(nick)}</text>
-      <text x="90" y="145" font-size="24" font-weight="600" fill="#64748B">ID ${escapeXml(pid)}</text>
-      <text x="990" y="100" text-anchor="end" font-size="48" font-weight="900" fill="#0F172A">TapTap 十周年</text>
-      <rect x="900" y="115" width="90" height="32" rx="10" fill="${escapeXml(color.accent)}"/>
-      <text x="945" y="138" text-anchor="middle" font-size="18" font-weight="800" fill="#FFFFFF">TapTap</text>
+      <text x="90" y="100" font-size="48" font-weight="900" fill="#0F172A">TapTap 十周年</text>
+      <rect x="430" y="75" width="90" height="32" rx="10" fill="${escapeXml(color.accent)}"/>
+      <text x="475" y="98" text-anchor="middle" font-size="18" font-weight="800" fill="#FFFFFF">TapTap</text>
 
-      <line x1="90" y1="200" x2="990" y2="200" stroke="rgba(15,23,42,.08)" stroke-width="2"/>
+      <text x="90" y="165" font-size="30" font-weight="700" fill="#334155">@${escapeXml(nick)}</text>
+      <text x="90" y="200" font-size="22" font-weight="600" fill="#94A3B8">ID ${escapeXml(pid)}</text>
 
-      <rect x="90" y="${kpiY - 30}" width="900" height="${kpiH + 50}" rx="28" fill="rgba(255,255,255,.7)" stroke="rgba(15,23,42,.05)" stroke-width="2"/>
-      <g transform="translate(0 ${kpiY + 20})">${kpisSvg}</g>
+      <text x="90" y="${belovedY + 35}" font-size="28" font-weight="800" fill="#0F172A">${belovedTitleText}</text>
+      <rect x="90" y="${belovedY + 55}" width="900" height="${belovedH - 55}" rx="24" fill="${hasBelovedGame ? "rgba(255,255,255,.85)" : "rgba(148,163,184,.12)"}" stroke="rgba(15,23,42,.06)" stroke-width="2"/>
+      <text x="540" y="${belovedY + 55 + (belovedH - 55) / 2 + 30}" text-anchor="middle" font-size="120">${belovedIcon}</text>
+      ${!hasBelovedGame ? `<text x="540" y="${belovedY + 55 + (belovedH - 55) / 2 + 85}" text-anchor="middle" font-size="24" font-weight="600" fill="#94A3B8">等你来发现</text>` : ""}
+
+      <rect x="90" y="${statsY}" width="900" height="${statsH}" rx="28" fill="rgba(255,255,255,.7)" stroke="rgba(15,23,42,.05)" stroke-width="2"/>
+      <g transform="translate(0 ${statsY + 30})">${statsSvg}</g>
 
       <rect x="90" y="${coinY}" width="900" height="${coinH}" rx="36" fill="rgba(255,255,255,.85)" stroke="rgba(15,23,42,.08)" stroke-width="2"/>
-      <text x="540" y="${coinY + 55}" text-anchor="middle" font-size="28" font-weight="700" fill="#334155">领取纪念币</text>
+      <text x="540" y="${coinY + 55}" text-anchor="middle" font-size="28" font-weight="700" fill="#334155">可领取纪念币</text>
       <text x="540" y="${coinY + 120}" text-anchor="middle" font-size="72" font-weight="900" fill="${escapeXml(color.accent)}">${fmt(totalCoins)}</text>
       <text x="590" y="${coinY + 120}" font-size="28" font-weight="700" fill="${escapeXml(color.accent)}">枚</text>
       <text x="540" y="${coinY + 170}" text-anchor="middle" font-size="22" font-weight="600" fill="#64748B">可兑换游戏及 TapTap 专属福利</text>
@@ -4971,7 +4954,11 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
             <span class="home-hero__info-btn" onclick="openDataRulesModal()">!</span>
           </div>
         </div>
-        <button class="btn btn--brand recap-card__share" id="btnToggleShare" type="button">分享</button>
+        ${(() => {
+          const regTs = parseCnDateToTs(snap.regDate);
+          const cutoff = new Date(2026, 3, 10).getTime();
+          return (!regTs || regTs < cutoff) ? `<button class="btn btn--brand recap-card__share" id="btnToggleShare" type="button">分享</button>` : "";
+        })()}
       </div>
       <div class="divider"></div>
       ${snapshotSection}
@@ -5185,55 +5172,24 @@ function miniCardHtml(card, idx, s, recap) {
 
 function shareCardHtml(s, recap, { variant, nick, pid } = {}) {
   const color = MEM_CARD_COLORS[0];
-
   const totalCoins = calcCareerCoinsTotal(s);
 
   const togetherDays = calcDaysSince(parseCnDateToTs(recap.regDate));
   const years = Math.floor((togetherDays || 0) / 365);
   const days = (togetherDays || 0) % 365;
-  let companionText = "";
-  if (years >= 1) companionText = `相伴 ${years} 年 ${days} 天`;
-  else if (togetherDays > 0) companionText = `相伴 ${togetherDays} 天`;
-  else companionText = "今天刚加入";
 
-  const fmtVal = (n) => fmt(Number(n || 0));
-  const fmtHours = (h) => { const v = Number(h || 0); if (v <= 0) return ""; if (v < 1) return Math.max(0.1, v).toFixed(1); return fmt(Math.floor(v)); };
-  const fmtWan = (n) => { const v = Number(n || 0); if (v <= 0) return "0"; if (v < 10000) return fmt(v); const w = v / 10000; return (w >= 1 && w % 1 < 0.05) ? Math.floor(w) + "万" : w.toFixed(1) + "万"; };
+  let companionVal = "0";
+  if (years >= 1) companionVal = `${years}年${days}天`;
+  else if (togetherDays > 0) companionVal = `${togetherDays}天`;
 
-  const devGames = (Array.isArray(recap?.devGames) ? recap.devGames : []).filter(g => String(g.name || "").trim());
-  const dims = [
-    { label: "动作", val: Number(recap.radarAction || 0) },
-    { label: "策略", val: Number(recap.radarStrategy || 0) },
-    { label: "RPG", val: Number(recap.radarRPG || 0) },
-    { label: "冒险", val: Number(recap.radarAdventure || 0) },
-    { label: "模拟", val: Number(recap.radarSim || 0) },
-    { label: "休闲", val: Number(recap.radarCasual || 0) },
-  ];
-  const tagsCount = dims.filter(d => d.val > 0).length;
-  const topDim = dims.reduce((a, b) => b.val > a.val ? b : a, dims[0]);
+  const gamesPlayed = Number(recap.gamesPlayedTotal || 0);
+  const playHours = Number(recap.playTimeHours || 0);
+  const achievements = Number(recap.achievementsTotal || 0);
+  const fmtH = (h) => { if (h <= 0) return "0"; if (h < 1) return Math.max(0.1, h).toFixed(1); return fmt(Math.floor(h)); };
+
   const belovedName = String(recap.belovedGameName || "").trim();
-
-  const allKpis = [
-    togetherDays > 0 && { label: "相伴时光", value: years >= 1 ? `${years}年${days}天` : `${togetherDays}天` },
-    Number(recap.gamesPlayedTotal || 0) > 0 && { label: "游玩游戏", value: fmtVal(recap.gamesPlayedTotal) },
-    fmtHours(recap.playTimeHours) && { label: "游玩时长", value: fmtHours(recap.playTimeHours) + "h" },
-    Number(recap.lateNightOpenCount || 0) > 0 && { label: "深夜探索", value: fmtVal(recap.lateNightOpenCount) + "次" },
-    Number(recap.reserveCount || 0) > 0 && { label: "预约新作", value: fmtVal(recap.reserveCount) },
-    Number(recap.spendTotal || 0) > 0 && { label: "累计消费", value: fmtVal(Math.floor(recap.spendTotal)) + "元" },
-    tagsCount > 0 && { label: "喜爱类型", value: topDim.label + "类" },
-    Number(recap.achievementsTotal || 0) > 0 && { label: "游戏成就", value: fmtVal(recap.achievementsTotal) },
-    belovedName && { label: "我的挚爱", value: escapeHtml(belovedName.length > 6 ? belovedName.slice(0, 5) + "…" : belovedName) },
-    Number(recap.exclusivePlayed || 0) > 0 && { label: "独家宝藏", value: fmtVal(recap.exclusivePlayed) },
-    Number(recap.editorPickPlayed || 0) > 0 && { label: "编辑之选", value: fmtVal(recap.editorPickPlayed) },
-    Number(recap.reviewsCount || 0) > 0 && { label: "玩家评价", value: fmtVal(recap.reviewsCount) },
-    Number(recap.communityPublished || 0) > 0 && { label: "社区足迹", value: fmtVal(recap.communityPublished) },
-    Number(recap.communityLikesReceived || 0) > 0 && { label: "获赞数", value: fmtWan(recap.communityLikesReceived) },
-    Number(recap.nightSurfDays || 0) > 0 && { label: "深夜冲浪", value: fmtVal(recap.nightSurfDays) + "天" },
-    Number(recap.platformBadgesTotal || 0) > 0 && { label: "徽章收藏", value: fmtVal(recap.platformBadgesTotal) },
-    Number(recap.friendsCount || 0) > 0 && { label: "好友", value: fmtVal(recap.friendsCount) },
-    Number(recap.followersCount || 0) > 0 && { label: "粉丝", value: fmtWan(recap.followersCount) },
-    devGames.length > 0 && { label: "游戏创作", value: String(devGames.length) },
-  ].filter(Boolean);
+  const belovedIcon = String(recap.belovedGameIcon || "").trim() || "🎮";
+  const hasBelovedGame = !!belovedName;
 
   return `
     <div class="sc2" id="shareCard" style="--sc2-bg:${color.bg}; --sc2-accent:${color.accent}; --sc2-panel:${color.panel};">
@@ -5242,9 +5198,36 @@ function shareCardHtml(s, recap, { variant, nick, pid } = {}) {
         <span class="sc2__badge">TapTap</span>
       </div>
 
-      <div class="sc2__kpis">
-        ${nick ? `<div class="sc2__kpi sc2__kpi--user"><div class="sc2__kpi-label">${escapeHtml(nick)}</div><div class="sc2__kpi-value sc2__kpi-value--id">ID ${escapeHtml(pid || "—")}</div></div>` : ""}
-        ${allKpis.map(k => `<div class="sc2__kpi"><div class="sc2__kpi-label">${k.label}</div><div class="sc2__kpi-value">${k.value}</div></div>`).join("")}
+      ${nick ? `<div class="sc2__user-row">
+        <span class="sc2__user-nick">@${escapeHtml(nick)}</span>
+        <span class="sc2__user-id">ID ${escapeHtml(pid || "—")}</span>
+      </div>` : ""}
+
+      <div class="sc2__beloved">
+        <div class="sc2__beloved-title">我的年度挚爱${hasBelovedGame ? `「${escapeHtml(belovedName)}」` : ""}</div>
+        <div class="sc2__beloved-cover${hasBelovedGame ? "" : " sc2__beloved-cover--empty"}">
+          <span class="sc2__beloved-icon">${hasBelovedGame ? belovedIcon : "🎮"}</span>
+          ${!hasBelovedGame ? `<span class="sc2__beloved-empty-text">等你来发现</span>` : ""}
+        </div>
+      </div>
+
+      <div class="sc2__stats-row">
+        <div class="sc2__stat-item">
+          <div class="sc2__stat-label">相伴时光</div>
+          <div class="sc2__stat-value">${companionVal}</div>
+        </div>
+        <div class="sc2__stat-item">
+          <div class="sc2__stat-label">冒险旅程</div>
+          <div class="sc2__stat-value">${gamesPlayed > 0 ? fmt(gamesPlayed) : "0"}</div>
+        </div>
+        <div class="sc2__stat-item">
+          <div class="sc2__stat-label">游玩时光</div>
+          <div class="sc2__stat-value">${playHours > 0 ? fmtH(playHours) + "h" : "0"}</div>
+        </div>
+        <div class="sc2__stat-item">
+          <div class="sc2__stat-label">成就</div>
+          <div class="sc2__stat-value">${achievements > 0 ? fmt(achievements) : "0"}</div>
+        </div>
       </div>
 
       <div class="sc2__coins-banner">
@@ -5680,9 +5663,11 @@ function wireFirstRecap() {
             </div>
           </div>
         `;
+        const _regTs = parseCnDateToTs((state.careerSnapshot?.recap || recapDataForState(state))?.regDate);
+        const _isNewPlayer = _regTs && _regTs >= new Date(2026, 3, 10).getTime();
         const footer = `
           <button class="btn" id="btnFirstRecapGoHall" type="button">前往活动会场</button>
-          <button class="btn btn--brand" id="btnFirstRecapShare" type="button">分享我的十年回顾</button>
+          ${!_isNewPlayer ? `<button class="btn btn--brand" id="btnFirstRecapShare" type="button">分享我的十年回顾</button>` : ""}
         `;
 
         const reopenDoneModal = () => {
@@ -7085,7 +7070,7 @@ function openDebug() {
 
   $("#btnNewPlayerRecapJson")?.addEventListener("click", () => {
     const emptyRecap = {
-      regDate: new Date().toLocaleDateString("zh-CN", { year: "numeric", month: "numeric", day: "numeric" }).replace(/\//g, "年").replace(/年(\d+)$/, "年$1日").replace(/(\d+)日$/, "月$1日"),
+      regDate: "2026年4月11日",
       downloadsCount: 0,
       spendTotal: 0,
       platformBadgesTotal: 0, platformBadges: [],
