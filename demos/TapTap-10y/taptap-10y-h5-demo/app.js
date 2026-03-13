@@ -981,16 +981,19 @@ function injectHeaderShareBtn(btnId, tipId, alreadyShared) {
   if (closeBtn) header.insertBefore(wrap, closeBtn);
   else header.appendChild(wrap);
   btn.addEventListener("click", () => {
-    if (!state.sharedClaimBonus) {
-      state.sharedClaimBonus = true;
-      addPoints(state, 100, "首次分享奖励");
-      saveState();
-      toast("分享成功，获得 100 纪念币！");
-      const t = document.getElementById(tipId);
-      if (t) t.remove();
-    } else {
-      toast("已分享");
-    }
+    const shareText = "TapTap 十周年啦🎉 领纪念币抽点券红包，兑换限定头像框、游戏免单券等超多福利，还有机会获得「TapTap金钞」！快来一起庆祝吧～" + "\n" + (location.href || "");
+    openShareSheet({
+      title: "分享活动",
+      shareText,
+      onDone: () => {
+        if (!state.sharedClaimBonus) {
+          state.sharedClaimBonus = true;
+          addPoints(state, 100, "首次分享奖励");
+          saveState();
+          toast("分享成功，获得 100 纪念币！");
+        }
+      },
+    });
   });
 }
 
@@ -2828,6 +2831,48 @@ function shareMemorialTextForShare() {
   return `我的 TapTap 十周年名片：${nick}（ID ${pid}）。#十年同行`;
 }
 
+function openShareSheet({ title, shareText, url, onDone }) {
+  const bodyHtml = `
+    <div style="text-align:center;padding:8px 0">
+      <div style="font-size:14px;color:rgba(15,23,42,.65);margin-bottom:16px">✅ 口令已生成，分享至</div>
+      <div style="display:flex;justify-content:center;gap:28px;margin-bottom:20px">
+        <button class="share-channel" data-channel="wechat" type="button">
+          <div class="share-channel__icon" style="background:#07C160"><svg viewBox="0 0 24 24" width="28" height="28" fill="#fff"><path d="M9.5 4C5.36 4 2 6.69 2 10c0 1.8 1.03 3.43 2.67 4.54l-.67 2.01 2.37-1.19c.83.26 1.72.4 2.63.4.34 0 .67-.02 1-.06A5.46 5.46 0 0 1 9.5 14c0-3.31 3.13-6 7-6 .17 0 .33.01.5.02C15.93 5.66 13.02 4 9.5 4zm-2.7 4a.9.9 0 1 1 0-1.8.9.9 0 0 1 0 1.8zm5.4 0a.9.9 0 1 1 0-1.8.9.9 0 0 1 0 1.8zM16.5 9c-3.31 0-6 2.24-6 5s2.69 5 6 5c.7 0 1.37-.1 2-.3l1.8.9-.5-1.5C21.1 17.18 22 15.68 22 14c0-2.76-2.69-5-5.5-5zm-1.7 3.2a.7.7 0 1 1 0-1.4.7.7 0 0 1 0 1.4zm3.4 0a.7.7 0 1 1 0-1.4.7.7 0 0 1 0 1.4z"/></svg></div>
+          <span class="share-channel__label">微信</span>
+        </button>
+        <button class="share-channel" data-channel="moments" type="button">
+          <div class="share-channel__icon" style="background:#07C160"><svg viewBox="0 0 24 24" width="28" height="28" fill="#fff"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="3.5" r="1.2"/><circle cx="12" cy="20.5" r="1.2"/><circle cx="3.5" cy="12" r="1.2"/><circle cx="20.5" cy="12" r="1.2"/><circle cx="6" cy="6" r="1.2"/><circle cx="18" cy="18" r="1.2"/><circle cx="18" cy="6" r="1.2"/><circle cx="6" cy="18" r="1.2"/></svg></div>
+          <span class="share-channel__label">朋友圈</span>
+        </button>
+        <button class="share-channel" data-channel="qq" type="button">
+          <div class="share-channel__icon" style="background:#12B7F5"><svg viewBox="0 0 24 24" width="28" height="28" fill="#fff"><path d="M12 2C8.13 2 5 5.13 5 9v1.35c-.63.87-1.5 2.45-1.5 3.65 0 .9.3 1.48.6 1.83-.1.55-.3 1.4-.3 2.17 0 1.05.55 1.7.55 1.7s.5.8 1.65 1.3c1 .43 2 .5 2 .5s.8.5 2.5.5h3c1.7 0 2.5-.5 2.5-.5s1-.07 2-.5c1.15-.5 1.65-1.3 1.65-1.3s.55-.65.55-1.7c0-.77-.2-1.62-.3-2.17.3-.35.6-.93.6-1.83 0-1.2-.87-2.78-1.5-3.65V9c0-3.87-3.13-7-7-7z"/></svg></div>
+          <span class="share-channel__label">QQ</span>
+        </button>
+        <button class="share-channel" data-channel="copy" type="button">
+          <div class="share-channel__icon" style="background:#64748B"><svg viewBox="0 0 24 24" width="28" height="28" fill="#fff"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></div>
+          <span class="share-channel__label">复制口令</span>
+        </button>
+      </div>
+      <div style="margin:0 4px;padding:12px;border-radius:10px;background:rgba(15,23,42,.04);font-size:12px;color:rgba(15,23,42,.55);line-height:1.6;text-align:left;user-select:text" id="shareSheetText">${escapeHtml(shareText)}</div>
+    </div>
+  `;
+  openModal({ title: title || "分享", bodyHtml, footerHtml: "" });
+  $$(".share-channel").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const ch = btn.dataset.channel;
+      if (ch === "copy") {
+        try {
+          await navigator.clipboard.writeText(shareText);
+          toast("口令已复制，快去分享吧");
+        } catch { toast("复制失败"); }
+      } else {
+        toast(`已唤起${btn.querySelector(".share-channel__label")?.textContent || ""}分享（demo 模拟）`);
+      }
+      if (onDone) onDone();
+    });
+  });
+}
+
 function openShareMemorialModal({ onClose } = {}) {
   const recap = state.careerSnapshot?.recap || recapDataForState(state);
   const url = shareUrlForRoute("sharememorial");
@@ -2873,22 +2918,9 @@ function openShareMemorialModal({ onClose } = {}) {
     });
   }
 
-  $("#btnShareTo")?.addEventListener("click", async () => {
+  $("#btnShareTo")?.addEventListener("click", () => {
     const text = shareMemorialTextForShare();
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: "TapTap十周年名片", text, url });
-        return;
-      }
-    } catch {
-      // ignore; fallback to copy
-    }
-    try {
-      await navigator.clipboard.writeText(url);
-      toast("已复制链接，可粘贴分享");
-    } catch {
-      toast("分享失败（浏览器权限限制）");
-    }
+    openShareSheet({ title: "分享我的十周年名片", shareText: text + "\n" + url });
   });
 
   $("#btnDownloadShareImg")?.addEventListener("click", () => {
@@ -2996,22 +3028,9 @@ function openShareRecapModal({ onClose } = {}) {
 
   openModal({ title: "分享 TapTap 十周年", bodyHtml: body, footerHtml: footer });
 
-  $("#btnShareTo")?.addEventListener("click", async () => {
+  $("#btnShareTo")?.addEventListener("click", () => {
     const text = shareRecapTextForShare(recap);
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: "我的TapTap十年回顾", text, url });
-        return;
-      }
-    } catch {
-      // fallback to copy
-    }
-    try {
-      await navigator.clipboard.writeText(url);
-      toast("已复制链接，可粘贴分享");
-    } catch {
-      toast("分享失败（浏览器权限限制）");
-    }
+    openShareSheet({ title: "分享 TapTap 十周年", shareText: text + "\n" + url });
   });
 
   $("#btnDownloadShareImg")?.addEventListener("click", () => {
@@ -3838,24 +3857,6 @@ function shopModalView(s) {
         <div class="exchange-grid">${exchangeHtml}</div>
       </div>
 
-      <div class="divider" style="margin:20px 0"></div>
-      <div class="welfare-section">
-        <div class="welfare-section__header">
-          <span class="welfare-section__title">🎮 买断制游戏推荐</span>
-        </div>
-        <div class="featured-games" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:8px">
-          ${FEATURED_GAMES.map(g => `
-            <a class="featured-game-card" href="${g.url}" target="_blank" style="display:flex;gap:10px;padding:10px;border-radius:12px;background:rgba(15,23,42,.03);border:1px solid rgba(15,23,42,.06);text-decoration:none;color:inherit;transition:background .15s">
-              <div style="width:48px;height:48px;border-radius:10px;background:${g.bg || 'rgba(15,23,42,.08)'};display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${g.icon}</div>
-              <div style="min-width:0">
-                <div style="font-size:13px;font-weight:700;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(g.title)}</div>
-                <div style="font-size:11px;color:rgba(15,23,42,.45);margin-top:2px">${escapeHtml(g.tag)}</div>
-                <div style="font-size:12px;font-weight:700;color:var(--brand);margin-top:2px">${g.price}</div>
-              </div>
-            </a>
-          `).join("")}
-        </div>
-      </div>
     </div>
   `;
 }
@@ -6262,6 +6263,26 @@ function discoverInlineView(s) {
             ${playPagesHtml}
           </div>
           ${playDotsHtml ? `<div class="carousel__dots" id="playDots">${playDotsHtml}</div>` : ""}
+        </div>
+      </section>
+    </div>
+
+    <div class="home-module" id="section-featured-games">
+      <section class="card">
+        <div class="row" style="align-items:baseline">
+          <p class="h1 grow">🎮 买断制游戏推荐<br><span style="font-weight:400;font-size:13px;color:rgba(15,23,42,.35)">Featured Games</span></p>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px">
+          ${FEATURED_GAMES.map(g => `
+            <a href="${g.url}" target="_blank" style="display:flex;gap:10px;padding:10px;border-radius:12px;background:rgba(15,23,42,.03);border:1px solid rgba(15,23,42,.06);text-decoration:none;color:inherit;transition:background .15s">
+              <div style="width:48px;height:48px;border-radius:10px;background:${g.bg || 'rgba(15,23,42,.08)'};display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${g.icon}</div>
+              <div style="min-width:0">
+                <div style="font-size:13px;font-weight:700;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(g.title)}</div>
+                <div style="font-size:11px;color:rgba(15,23,42,.45);margin-top:2px">${escapeHtml(g.tag)}</div>
+                <div style="font-size:12px;font-weight:700;color:var(--brand);margin-top:2px">${g.price}</div>
+              </div>
+            </a>
+          `).join("")}
         </div>
       </section>
     </div>

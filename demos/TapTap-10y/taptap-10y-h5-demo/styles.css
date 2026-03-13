@@ -6544,3 +6544,17 @@ html.is-firstrecap .firstrecap-body::before{
   0%,100%{transform:scale(1)}
   50%{transform:scale(1.04)}
 }
+.share-channel{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  background:none;border:none;cursor:pointer;padding:0;
+  transition:transform .12s;
+}
+.share-channel:active{transform:scale(.92)}
+.share-channel__icon{
+  width:52px;height:52px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+.share-channel__label{
+  font-size:11px;color:rgba(15,23,42,.55);white-space:nowrap;
+}
