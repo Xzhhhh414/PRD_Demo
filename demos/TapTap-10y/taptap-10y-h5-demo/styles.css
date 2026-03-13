@@ -3808,6 +3808,13 @@ html.is-firstrecap .firstrecap-body::before{
   position: relative;
   z-index: 1;
 }
+.modal[data-variant="reg-reward"] .modal__header #modalClose{
+  order: -1;
+  color: rgba(255,255,255,.7);
+}
+.modal[data-variant="reg-reward"] .modal__header #modalClose:hover{
+  color: #fff;
+}
 .modal[data-variant="reg-reward"] .modal__title{
   color: #fff;
   text-align: center;

@@ -958,8 +958,6 @@ function openLotteryResultModal({ hit, add, cost } = {}) {
   $("#btnLotteryResultWallet")?.addEventListener("click", openWalletModal);
 }
 
-let _skipClaimModal = false;
-
 function injectHeaderShareBtn(btnId, tipId, alreadyShared) {
   const header = document.querySelector("#modal .modal__header");
   if (!header) return;
@@ -1049,7 +1047,39 @@ function claimPercentile(totalClaims) {
   return 99;
 }
 
-function openRegClaimModal({ coinsEarned, remaining, fromRect, onDone, redPacketAmount }) {
+function claimCardOnce(rewardId, trackId, cardIdx) {
+  const recap = recapDataForState(state);
+  const snap = state.careerSnapshot?.recap || recap;
+  const maxClaims = getMaxClaims(rewardId, snap);
+  const ct = getCardClaimedTimes(state, rewardId);
+  if (ct >= maxClaims) {
+    render();
+    scheduleScrollToNextCard(trackId, Number(cardIdx) || 0);
+    return;
+  }
+  const isEmptyCard = ct === 0 && maxClaims <= 1;
+  const coins = 10 + Math.floor(Math.random() * 21);
+  incrCardClaimedTimes(state, rewardId);
+  addPoints(state, coins, snapCardSource(rewardId));
+  const rpTriggered = shouldTriggerRedPacket(state, isEmptyCard);
+  const rpAmount = rpTriggered ? rollRedPacket(state) : null;
+  const allDone = getCardClaimedTimes(state, rewardId) >= maxClaims;
+  if (allDone) markClaimed(state, rewardId);
+  saveState();
+  const newRem = Math.max(0, maxClaims - getCardClaimedTimes(state, rewardId));
+  requestCarouselInit(trackId, Number(cardIdx) || 0);
+  const doneCallback = allDone ? () => scheduleScrollToNextCard(trackId, Number(cardIdx) || 0) : undefined;
+  render();
+  const fallbackRect = document.querySelector(".sticky-hub")?.getBoundingClientRect() || null;
+  openRegClaimModal({
+    coinsEarned: coins, remaining: newRem, fromRect: fallbackRect,
+    onDone: doneCallback, redPacketAmount: rpAmount,
+    rewardId, trackId, cardIdx,
+  });
+}
+
+function openRegClaimModal({ coinsEarned, remaining, fromRect, onDone, redPacketAmount, rewardId, trackId, cardIdx }) {
+  if (!fromRect) fromRect = document.querySelector(".sticky-hub")?.getBoundingClientRect() || { left: window.innerWidth / 2, top: 60, width: 0, height: 0 };
   const showCoinModal = () => {
     const poolIcons = EXCHANGE_ITEMS.slice(0, 4).map(item =>
       `<div class="reg-reward-modal__pool-item"><span class="reg-reward-modal__pool-icon">${item.icon}</span><span class="reg-reward-modal__pool-name">${escapeHtml(item.title)}</span></div>`
@@ -1057,6 +1087,7 @@ function openRegClaimModal({ coinsEarned, remaining, fromRect, onDone, redPacket
     const totalClaims = getTotalClaimCount(state);
     const pct = claimPercentile(totalClaims);
     const hasSharedClaim = !!state.sharedClaimBonus;
+    const canContinue = remaining > 0 && !!rewardId;
     const body = `
       <div class="reg-reward-modal">
         <div class="reg-reward-modal__coins" style="margin-top:8px">
@@ -1072,35 +1103,32 @@ function openRegClaimModal({ coinsEarned, remaining, fromRect, onDone, redPacket
         </div>
       </div>
     `;
+    const continueLabel = canContinue ? "继续领取" : "开心收下";
     const footer = `
-      <div style="width:100%;display:flex;justify-content:center;margin-bottom:8px">
-        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.6);cursor:pointer">
-          <input type="checkbox" id="chkSkipClaimModal" style="cursor:pointer" />
-          不再提示
-        </label>
-      </div>
-      <button class="btn reg-reward-modal__btn reg-reward-modal__btn--continue" id="btnRegContinue">开心收下</button>
-      <button class="btn btn--brand reg-reward-modal__btn reg-reward-modal__btn--exchange" id="btnRegExchange">\u53BB\u5151\u6362</button>
+      <button class="btn reg-reward-modal__btn reg-reward-modal__btn--continue" id="btnRegContinue">${continueLabel}</button>
+      <button class="btn btn--brand reg-reward-modal__btn reg-reward-modal__btn--exchange" id="btnRegExchange">去兑换福利</button>
     `;
     openModal({
       title: "\u606D\u559C\u83B7\u5F97\u7EAA\u5FF5\u5E01",
       bodyHtml: body,
       footerHtml: footer,
       variant: "reg-reward",
-      hideClose: true,
-      lockClose: true,
+      hideClose: false,
+      lockClose: false,
     });
     injectHeaderShareBtn("btnClaimShare", "claimShareTip", hasSharedClaim);
     $("#btnRegContinue")?.addEventListener("click", () => {
-      if ($("#chkSkipClaimModal")?.checked) _skipClaimModal = true;
       closeModal();
       render();
       flyGrantToSticky({ fromRect, grant: { points: coinsEarned, coupons: 0 } }).then(() => {
-        if (onDone) onDone();
+        if (canContinue) {
+          claimCardOnce(rewardId, trackId, cardIdx);
+        } else {
+          if (onDone) onDone();
+        }
       });
     });
     $("#btnRegExchange")?.addEventListener("click", () => {
-      if ($("#chkSkipClaimModal")?.checked) _skipClaimModal = true;
       closeModal();
       render();
       if (onDone) onDone();
@@ -1109,16 +1137,7 @@ function openRegClaimModal({ coinsEarned, remaining, fromRect, onDone, redPacket
   };
 
   if (redPacketAmount) {
-    openRedPacketModal({ redPacketAmount, onClose: () => {
-      if (_skipClaimModal) {
-        render();
-        flyGrantToSticky({ fromRect, grant: { points: coinsEarned, coupons: 0 } }).then(() => {
-          if (onDone) onDone();
-        });
-      } else {
-        showCoinModal();
-      }
-    }});
+    openRedPacketModal({ redPacketAmount, onClose: showCoinModal });
   } else {
     showCoinModal();
   }
@@ -2058,7 +2077,6 @@ function render() {
   try {
     if (route !== "home") {
       wireRecapInline._didAutoFocus = false;
-      _skipClaimModal = false;
     }
   } catch {}
 
@@ -5289,15 +5307,10 @@ function wireRecapInline() {
       const trackId = b.closest?.(".carousel__track")?.id || "";
       const currentIdx = Number(b.closest?.(".mini-card")?.getAttribute("data-card-idx") || 0);
       const doneCallback = () => scheduleScrollToNextCard(trackId, currentIdx);
-      if (_skipClaimModal && !rpAmount) {
-        render();
-        flyGrantToSticky({ fromRect, grant }).then(doneCallback);
-      } else {
-        openRegClaimModal({
-          coinsEarned: grant.points, remaining: 0, fromRect,
-          onDone: doneCallback, redPacketAmount: rpAmount,
-        });
-      }
+      openRegClaimModal({
+        coinsEarned: grant.points, remaining: 0, fromRect,
+        onDone: doneCallback, redPacketAmount: rpAmount,
+      });
     }),
   );
 
@@ -5327,17 +5340,11 @@ function wireRecapInline() {
       const currentIdx = Number(b.closest?.(".mini-card")?.getAttribute("data-card-idx") || 0);
       requestCarouselInit(trackId, currentIdx);
       const doneCallback = allDone ? () => scheduleScrollToNextCard(trackId, currentIdx) : undefined;
-      if (_skipClaimModal && !rpAmount) {
-        render();
-        flyGrantToSticky({ fromRect, grant: { points: coins, coupons: 0 } }).then(() => {
-          if (doneCallback) doneCallback();
-        });
-      } else {
-        openRegClaimModal({
-          coinsEarned: coins, remaining: newRem, fromRect,
-          onDone: doneCallback, redPacketAmount: rpAmount,
-        });
-      }
+      openRegClaimModal({
+        coinsEarned: coins, remaining: newRem, fromRect,
+        onDone: doneCallback, redPacketAmount: rpAmount,
+        rewardId, trackId, cardIdx: currentIdx,
+      });
     }),
   );
 
@@ -5396,15 +5403,10 @@ function wireRecapInline() {
       const rpAmount = rpTriggered ? rollRedPacket(state) : null;
       saveState();
       const doneCallback = () => scheduleScrollToNextCard(trackId, currentIdx);
-      if (_skipClaimModal && !rpAmount) {
-        render();
-        flyGrantToSticky({ fromRect, grant }).then(doneCallback);
-      } else {
-        openRegClaimModal({
-          coinsEarned: grant.points, remaining: 0, fromRect,
-          onDone: doneCallback, redPacketAmount: rpAmount,
-        });
-      }
+      openRegClaimModal({
+        coinsEarned: grant.points, remaining: 0, fromRect,
+        onDone: doneCallback, redPacketAmount: rpAmount,
+      });
     }),
   );
 
@@ -5775,34 +5777,14 @@ function wireFirstRecap() {
       updateFirstRecapCurrencyDom();
       const newRem = Math.max(0, maxClaims - getCardClaimedTimes(state, rewardId));
       const fromRect = btn.getBoundingClientRect();
-      openRegClaimModal({ coinsEarned: coins, remaining: newRem, fromRect, redPacketAmount: rpAmount });
-      const origContinue = $("#btnRegContinue");
-      const origExchange = $("#btnRegExchange");
       const advanceIfDone = () => {
         wireFirstRecap._claiming = false;
         if (allDone) queueMicrotask(() => advanceAfterClaim());
       };
-      if (origContinue) {
-        origContinue.replaceWith(origContinue.cloneNode(true));
-        const newBtn = $("#btnRegContinue");
-        newBtn?.addEventListener("click", () => {
-          closeModal();
-          flyGrantToSticky({ fromRect, grant: { points: coins, coupons: 0 } }).then(() => {
-            advanceIfDone();
-            render();
-          });
-        });
-      }
-      if (origExchange) {
-        origExchange.replaceWith(origExchange.cloneNode(true));
-        const newBtn = $("#btnRegExchange");
-        newBtn?.addEventListener("click", () => {
-          closeModal();
-          advanceIfDone();
-          render();
-          openShopModal();
-        });
-      }
+      openRegClaimModal({
+        coinsEarned: coins, remaining: newRem, fromRect, redPacketAmount: rpAmount,
+        onDone: advanceIfDone,
+      });
       setTimeout(() => (wireFirstRecap._claiming = false), 5000);
       return;
     }
@@ -5860,31 +5842,7 @@ function wireFirstRecap() {
           wireFirstRecap._claiming = false;
           queueMicrotask(() => advanceAfterClaim());
         };
-        if (_skipClaimModal && !rpAmount) {
-          render();
-          flyGrantToSticky({ fromRect, grant }).then(advanceIfDone).catch(advanceIfDone);
-          setTimeout(() => (wireFirstRecap._claiming = false), 2200);
-        } else {
-          openRegClaimModal({ coinsEarned: grant.points, remaining: 0, fromRect, redPacketAmount: rpAmount });
-          const origContinue = $("#btnRegContinue");
-          const origExchange = $("#btnRegExchange");
-          if (origContinue) {
-            origContinue.replaceWith(origContinue.cloneNode(true));
-            const newBtn = $("#btnRegContinue");
-            newBtn?.addEventListener("click", () => {
-              closeModal();
-              flyGrantToSticky({ fromRect, grant }).then(() => { advanceIfDone(); render(); });
-            });
-          }
-          if (origExchange) {
-            origExchange.replaceWith(origExchange.cloneNode(true));
-            $("#btnRegExchange")?.addEventListener("click", () => {
-              closeModal();
-              flyGrantToSticky({ fromRect, grant }).then(() => { advanceIfDone(); render(); });
-              openShopPage();
-            });
-          }
-        }
+        openRegClaimModal({ coinsEarned: grant.points, remaining: 0, fromRect, redPacketAmount: rpAmount, onDone: advanceIfDone });
         return;
       }
       // Steam one-time
@@ -5898,37 +5856,11 @@ function wireFirstRecap() {
       const rpAmountSteam = rpTriggeredSteam ? rollRedPacket(state) : null;
       saveState();
       updateFirstRecapCurrencyDom();
-      {
-        const done = () => {
-          wireFirstRecap._claiming = false;
-          queueMicrotask(() => advanceAfterClaim());
-        };
-        if (_skipClaimModal && !rpAmountSteam) {
-          render();
-          flyGrantToSticky({ fromRect, grant }).then(done).catch(done);
-          setTimeout(() => (wireFirstRecap._claiming = false), 2200);
-        } else {
-          openRegClaimModal({ coinsEarned: grant.points, remaining: 0, fromRect, redPacketAmount: rpAmountSteam });
-          const origContinue = $("#btnRegContinue");
-          const origExchange = $("#btnRegExchange");
-          if (origContinue) {
-            origContinue.replaceWith(origContinue.cloneNode(true));
-            const newBtn = $("#btnRegContinue");
-            newBtn?.addEventListener("click", () => {
-              closeModal();
-              flyGrantToSticky({ fromRect, grant }).then(() => { done(); render(); });
-            });
-          }
-          if (origExchange) {
-            origExchange.replaceWith(origExchange.cloneNode(true));
-            $("#btnRegExchange")?.addEventListener("click", () => {
-              closeModal();
-              flyGrantToSticky({ fromRect, grant }).then(() => { done(); render(); });
-              openShopPage();
-            });
-          }
-        }
-      }
+      const done = () => {
+        wireFirstRecap._claiming = false;
+        queueMicrotask(() => advanceAfterClaim());
+      };
+      openRegClaimModal({ coinsEarned: grant.points, remaining: 0, fromRect, redPacketAmount: rpAmountSteam, onDone: done });
       return;
     }
 
