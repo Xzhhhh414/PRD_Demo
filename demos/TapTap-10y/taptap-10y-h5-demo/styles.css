@@ -5998,6 +5998,23 @@ html.is-firstrecap .firstrecap-body::before{
   color: #fff;
   min-height: 130px;
 }
+.rolecard-single--syncing{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.rolecard__sync-hint{
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,.7);
+  animation: syncPulse 1.5s ease-in-out infinite;
+}
+@keyframes syncPulse{
+  0%,100%{ opacity:.5 }
+  50%{ opacity:1 }
+}
 
 /* ── Add Role Button (compact) ── */
 /* ── Bind section header with add link ── */

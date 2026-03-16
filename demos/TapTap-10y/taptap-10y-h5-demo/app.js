@@ -386,6 +386,7 @@ function loadState() {
     boundRolesCount: 0,
     claimedRoleRewardsCount: 0,
     boundRoleCards: [],
+    roleSyncDone: true,
     allRolesBound: false,
     enteredAt: 0,
     careerSnapshotPreset: DEFAULT_PRESET_KEY,
@@ -4783,9 +4784,9 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         if (games <= 0) {
           return `
             <div class="steamcard steamcard--empty">
-              <div class="steamcard__empty-steamtext" style="font-size: 16px;">你的 Steam 旅程还未开始。<br>第一款佳作，也许正在等你启动。</div>
+              <div class="steamcard__empty-steamtext" style="font-size: 16px;">一位神秘的 Steam 玩家。<br>期待你，谱写属于自己的游戏旅程。</div>
             </div>
-          `;
+          `;s
         }
 
         const fmtValue = (v) => {
@@ -4830,16 +4831,21 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
       const roleCards = Array.isArray(s.boundRoleCards) ? s.boundRoleCards.filter(c => c && String(c.name || "").trim()) : [];
       const claimedCount = Math.max(0, Number(s.claimedRoleRewardsCount || 0));
 
+      const roleSyncDone = s.roleSyncDone !== false;
       const cards = roleCards.map((c, i) => {
         const roleClaimed = i < claimedCount;
-        const statsHtml = (c.stats || []).map(st =>
+        const syncing = !roleSyncDone;
+        const statsHtml = syncing ? "" : (c.stats || []).map(st =>
           `<div class="rolecard__stat"><span class="rolecard__stat-num">${escapeHtml(String(st.value))}</span><span class="rolecard__stat-label">${escapeHtml(String(st.label))}</span></div>`
         ).join("");
-        return {
-          label: `绑定角色 ${i + 1}`,
-          _roleClaimed: roleClaimed,
-          _roleOrigIdx: i,
-          value: `
+        const cardBody = syncing
+          ? `
+            <div class="rolecard-single rolecard-single--syncing" style="background:${c.bg || "#e2e8f0"}">
+              <div class="rolecard__game" style="font-size:15px;font-weight:700;margin-bottom:8px">${escapeHtml(String(c.game || c.name || ""))}</div>
+              <div class="rolecard__sync-hint">数据同步中…</div>
+            </div>
+          `
+          : `
             <div class="rolecard-single" style="background:${c.bg || "#e2e8f0"}">
               <div class="rolecard__top">
                 <img class="rolecard__avatar" src="${c.avatar || ""}" alt="" />
@@ -4851,7 +4857,12 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
               ${c.job || c.level ? `<div class="rolecard__meta">${c.job ? escapeHtml(c.job) : ""}${c.job && c.level ? "　" : ""}${c.level ? "Lv." + c.level : ""}</div>` : ""}
               <div class="rolecard__stats">${statsHtml}</div>
             </div>
-          `,
+          `;
+        return {
+          label: `绑定角色 ${i + 1}`,
+          _roleClaimed: roleClaimed,
+          _roleOrigIdx: i,
+          value: cardBody,
           desc: "",
           rewardId: `bind_role_${i}`,
           visible: true,
@@ -6902,6 +6913,12 @@ function debugModalHtml() {
           </div>
           <input id="inpRolesClaimed" type="number" min="0" step="1" style="width:120px; border-radius:12px; border:1px solid var(--border); background: rgba(255,255,255,.02); color: var(--text); padding:10px" />
         </div>
+        <div class="row" style="margin-top:8px">
+          <label class="pill" style="cursor:pointer">
+            <input id="chkRoleSyncDone" type="checkbox" style="margin-right:8px" />
+            角色数据同步完成
+          </label>
+        </div>
       </div>
 
       <div class="divider"></div>
@@ -6996,6 +7013,7 @@ function openDebug() {
   const inp = $("#inpPoints");
   const txt = $("#txtRecapJson");
   const chkSteam = $("#chkSteam");
+  const chkRoleSyncDone = $("#chkRoleSyncDone");
   const inpRoles = $("#inpRoles");
   const inpRolesClaimed = $("#inpRolesClaimed");
   const inpNick = $("#inpNick");
@@ -7024,6 +7042,7 @@ function openDebug() {
   inp.value = String(state.points ?? 0);
   txt.value = JSON.stringify(currentRecap(), null, 2);
   chkSteam.checked = !!state.boundSteam;
+  if (chkRoleSyncDone) chkRoleSyncDone.checked = state.roleSyncDone !== false;
   inpRoles.value = String(state.boundRolesCount ?? 0);
   inpRolesClaimed.value = String(state.claimedRoleRewardsCount ?? 0);
   if (inpRedPacketStock) inpRedPacketStock.value = String(state.redPacket?.stock ?? 100);
@@ -7137,6 +7156,7 @@ function openDebug() {
     state.boundSteam = !!chkSteam.checked;
     state.boundRolesCount = Math.max(0, Number(inpRoles.value || 0));
     state.claimedRoleRewardsCount = Math.max(0, Number(inpRolesClaimed.value || 0));
+    state.roleSyncDone = chkRoleSyncDone ? !!chkRoleSyncDone.checked : true;
     state.boundData = state.boundRolesCount > 0; // keep legacy flag for demo enrichment
 
     // Memorial profile fields
