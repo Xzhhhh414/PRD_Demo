@@ -3794,6 +3794,34 @@ html.is-firstrecap .firstrecap-body::before{
 .modal[data-variant="reg-reward"]{
   border-radius: 22px;
   overflow: hidden;
+  animation: modalPopIn .25s ease-out both;
+}
+.modal[data-variant="reg-reward"].modal--closing{
+  animation: modalPopOut .2s ease-in both;
+}
+@keyframes modalPopIn{
+  from{ opacity:0; transform: translate(-50%,-50%) scale(.88); }
+  to{ opacity:1; transform: translate(-50%,-50%) scale(1); }
+}
+@keyframes modalPopOut{
+  from{ opacity:1; transform: translate(-50%,-50%) scale(1); }
+  to{ opacity:0; transform: translate(-50%,-50%) scale(.88); }
+}
+@media (max-width: 520px){
+  .modal[data-variant="reg-reward"]{
+    animation: modalSlideIn .25s ease-out both;
+  }
+  .modal[data-variant="reg-reward"].modal--closing{
+    animation: modalSlideOut .2s ease-in both;
+  }
+}
+@keyframes modalSlideIn{
+  from{ opacity:0; transform: translateY(40px); }
+  to{ opacity:1; transform: none; }
+}
+@keyframes modalSlideOut{
+  from{ opacity:1; transform: none; }
+  to{ opacity:0; transform: translateY(40px); }
 }
 .modal[data-variant="reg-reward"]::before{
   content:"";

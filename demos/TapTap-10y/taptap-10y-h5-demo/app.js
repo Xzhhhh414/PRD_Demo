@@ -839,6 +839,7 @@ function openModal({ title, bodyHtml, footerHtml, hideClose = false, lockClose =
   closeBtn?.classList.toggle("hidden", !!hideClose);
   closeBtn?.setAttribute("aria-hidden", hideClose ? "true" : "false");
   const modal = $("#modal");
+  modal?.classList.remove("modal--closing");
   modal?.setAttribute("data-lock-close", lockClose ? "1" : "0");
   modal?.setAttribute("data-variant", String(variant || ""));
   $("#modalBackdrop").classList.remove("hidden");
@@ -847,24 +848,34 @@ function openModal({ title, bodyHtml, footerHtml, hideClose = false, lockClose =
 }
 
 function closeModal() {
-  $("#modalBackdrop").classList.add("hidden");
   const modal = $("#modal");
-  modal?.classList.add("hidden");
-  $("#modalBackdrop").setAttribute("aria-hidden", "true");
-  const closeBtn = $("#modalClose");
-  closeBtn?.classList.remove("hidden");
-  closeBtn?.setAttribute("aria-hidden", "false");
-  modal?.setAttribute("data-lock-close", "0");
-  modal?.setAttribute("data-variant", "");
+  const variant = modal?.getAttribute("data-variant") || "";
 
-  // Restore previous modal view if needed.
-  const cb = _modalAfterClose.pop();
-  if (typeof cb === "function") {
-    try {
-      cb();
-    } catch {
-      // ignore
+  const doHide = () => {
+    if (!modal?.classList.contains("modal--closing") && variant === "reg-reward") return;
+    $("#modalBackdrop").classList.add("hidden");
+    modal?.classList.add("hidden");
+    modal?.classList.remove("modal--closing");
+    $("#modalBackdrop").setAttribute("aria-hidden", "true");
+    const closeBtn = $("#modalClose");
+    closeBtn?.classList.remove("hidden");
+    closeBtn?.setAttribute("aria-hidden", "false");
+    modal?.setAttribute("data-lock-close", "0");
+    modal?.setAttribute("data-variant", "");
+
+    const cb = _modalAfterClose.pop();
+    if (typeof cb === "function") {
+      try { cb(); } catch { /* ignore */ }
     }
+  };
+
+  if (variant === "reg-reward" && modal && !modal.classList.contains("hidden")) {
+    modal.classList.add("modal--closing");
+    const finish = () => { doHide(); };
+    modal.addEventListener("animationend", finish, { once: true });
+    setTimeout(finish, 250);
+  } else {
+    doHide();
   }
 }
 
@@ -1121,19 +1132,21 @@ function openRegClaimModal({ coinsEarned, remaining, fromRect, onDone, redPacket
     $("#btnRegContinue")?.addEventListener("click", () => {
       closeModal();
       render();
-      flyGrantToSticky({ fromRect, grant: { points: coinsEarned, coupons: 0 } }).then(() => {
-        if (canContinue) {
-          claimCardOnce(rewardId, trackId, cardIdx);
-        } else {
+      if (canContinue) {
+        claimCardOnce(rewardId, trackId, cardIdx);
+      } else {
+        flyGrantToSticky({ fromRect, grant: { points: coinsEarned, coupons: 0 } }).then(() => {
           if (onDone) onDone();
-        }
-      });
+        });
+      }
     });
     $("#btnRegExchange")?.addEventListener("click", () => {
       closeModal();
       render();
-      if (onDone) onDone();
-      openShopModal();
+      flyGrantToSticky({ fromRect, grant: { points: coinsEarned, coupons: 0 } }).then(() => {
+        if (onDone) onDone();
+        openShopModal();
+      });
     });
   };
 
