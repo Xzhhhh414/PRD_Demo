@@ -3689,6 +3689,49 @@ function openShopModal() {
   wireShop({ inModal: true });
 }
 
+function openLotteryOddsModal() {
+  const totalQty = LOTTERY_POOL.reduce((sum, p) => sum + Math.max(0, p.qty), 0);
+  const rows = LOTTERY_POOL.map(p => {
+    const qty = Math.max(0, p.qty);
+    const pct = totalQty > 0 ? (qty / totalQty * 100) : 0;
+    const pctStr = qty <= 0 ? "—" : (pct < 0.01 ? "<0.01%" : pct.toFixed(2) + "%");
+    const soldOut = qty <= 0;
+    return `<tr${soldOut ? ' style="opacity:.4"' : ""}>
+      <td style="padding:6px 8px"><span style="margin-right:4px">${p.icon}</span>${escapeHtml(p.title)}</td>
+      <td style="padding:6px 8px;text-align:center">${soldOut ? "无库存" : fmt(qty)}</td>
+      <td style="padding:6px 8px;text-align:right;font-weight:700">${pctStr}</td>
+    </tr>`;
+  }).join("");
+  const body = `
+    <div class="lottery-rules">
+      <div class="lottery-rules__section">
+        <div class="lottery-rules__title">【规则说明】</div>
+        <div class="lottery-rules__text">
+          1. 参与十周年活动的各项玩法，可获得纪念币；<br>
+          2. 每次抽奖消耗 <b>${LOTTERY_COST}</b> 纪念币，不限抽奖次数；<br>
+          3. 获奖用户可在「我的奖品」中查看中奖信息；<br>
+          4. 活动奖品数量有限，已抽完的奖品不再产出；<br>
+        </div>
+      </div>
+      <div class="lottery-rules__section">
+        <div class="lottery-rules__title">【奖品概率公示】</div>
+        <div style="overflow:auto;border:1px solid var(--border);border-radius:10px;margin-top:8px">
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead><tr style="background:rgba(0,0,0,.04);position:sticky;top:0">
+              <th style="padding:8px;text-align:left">奖品名称</th>
+              <th style="padding:8px;text-align:center">数量</th>
+              <th style="padding:8px;text-align:right">概率</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+  _modalAfterClose.push(() => { openShopModal(); });
+  openModal({ title: "抽奖规则", bodyHtml: body, footerHtml: `<button class="btn btn--brand" onclick="closeModal()">知道了</button>` });
+}
+
 const _SNAP_NAME_SET = new Set(Object.values(SNAP_CARD_NAMES));
 function _fixLogSource(src) {
   if (_SNAP_NAME_SET.has(src)) return src + "卡片";
@@ -3852,6 +3895,7 @@ function shopModalView(s) {
         <div class="lottery-action">
           <button class="btn btn--brand lottery-action__btn" id="btnWelfareLottery"
             ${lotteryDisabled ? "disabled" : ""}>${lotteryBtnText}</button>
+          <button class="btn btn--ghost lottery-action__odds-btn" id="btnLotteryOdds" type="button">抽奖规则</button>
         </div>
         <div class="lottery-test-bar">
           <label class="lottery-test-bar__label">测试：指定必中类型</label>
@@ -6684,6 +6728,9 @@ function wireShop({ inModal = false } = {}) {
   // 纪念币明细入口
   $("#btnCoinLog")?.addEventListener("click", () => { closeModal(); openCoinLogModal(); });
   $("#btnMyPrizes")?.addEventListener("click", () => { closeModal(); openPrizesModal(); });
+
+  // 概率公示
+  $("#btnLotteryOdds")?.addEventListener("click", () => { closeModal(); openLotteryOddsModal(); });
 
   // 抽奖按钮
   $("#btnWelfareLottery")?.addEventListener("click", () => {

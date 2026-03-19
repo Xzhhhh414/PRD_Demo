@@ -2246,6 +2246,17 @@ html.is-firstrecap .firstrecap-body::before{
   border-radius:999px;
   flex-shrink:0;
 }
+.lottery-action__odds-btn{
+  font-size:12px;
+  padding:6px 12px;
+  border-radius:999px;
+  flex-shrink:0;
+}
+.lottery-rules{font-size:13px;color:var(--text);line-height:1.7}
+.lottery-rules__section{margin-bottom:14px}
+.lottery-rules__section:last-child{margin-bottom:0}
+.lottery-rules__title{font-weight:700;margin-bottom:4px}
+.lottery-rules__text{color:var(--muted)}
 .lottery-hint{
   font-size:12px;
   color:rgba(15,23,42,.5);
