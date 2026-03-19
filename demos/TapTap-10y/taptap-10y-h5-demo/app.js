@@ -304,16 +304,16 @@ const EXCHANGE_ITEMS = [
 ];
 
 const FEATURED_GAMES = [
-  { icon: "🤿", title: "潜水员戴夫", tag: "经营 · 冒险", price: "¥68", url: "https://www.taptap.cn/app/280121", bg: "linear-gradient(135deg,#4fc3f7,#0288d1)" },
-  { icon: "⛰️", title: "鬼谷八荒", tag: "修仙 · 角色扮演", price: "¥68", url: "https://www.taptap.cn/app/218282", bg: "linear-gradient(135deg,#a5d6a7,#388e3c)" },
-  { icon: "⛏️", title: "泰拉瑞亚", tag: "沙盒 · 冒险", price: "¥25", url: "https://www.taptap.cn/app/38016", bg: "linear-gradient(135deg,#81c784,#2e7d32)" },
-  { icon: "⚔️", title: "大侠立志传", tag: "武侠 · RPG", price: "¥48", url: "https://www.taptap.cn/app/214459", bg: "linear-gradient(135deg,#ffcc80,#e65100)" },
-  { icon: "👻", title: "小小梦魇", tag: "冒险 · 解谜", price: "¥98", url: "https://www.taptap.cn/app/225077", bg: "linear-gradient(135deg,#b39ddb,#4527a0)" },
-  { icon: "🐱", title: "猫神牧场", tag: "模拟 · 经营", price: "¥30", url: "https://www.taptap.cn/app/375622", bg: "linear-gradient(135deg,#ffab91,#d84315)" },
-  { icon: "🤪", title: "全面憨憨战争模拟器", tag: "策略 · 搞怪", price: "¥38", url: "https://www.taptap.cn/app/229084", bg: "linear-gradient(135deg,#ef9a9a,#c62828)" },
-  { icon: "🌋", title: "火山的女儿", tag: "养成 · 剧情", price: "¥58", url: "https://www.taptap.cn/app/227498", bg: "linear-gradient(135deg,#f48fb1,#ad1457)" },
-  { icon: "🎵", title: "喵斯快跑", tag: "音乐 · 节奏", price: "¥30", url: "https://www.taptap.cn/app/74046", bg: "linear-gradient(135deg,#80deea,#00838f)" },
-  { icon: "🔧", title: "重构", tag: "解谜 · 独立", price: "¥18", url: "https://www.taptap.cn/app/166519", bg: "linear-gradient(135deg,#90caf9,#1565c0)" },
+  { icon: "🤿", title: "潜水员戴夫", tag: "经营 · 冒险", price: "¥68", origPrice: "¥98", discount: "-31%", rating: 9.4, url: "https://www.taptap.cn/app/280121", bg: "linear-gradient(135deg,#4fc3f7,#0288d1)" },
+  { icon: "⛰️", title: "鬼谷八荒", tag: "修仙 · 角色扮演", price: "¥68", origPrice: "¥98", discount: "-31%", rating: 7.8, url: "https://www.taptap.cn/app/218282", bg: "linear-gradient(135deg,#a5d6a7,#388e3c)" },
+  { icon: "⛏️", title: "泰拉瑞亚", tag: "沙盒 · 冒险", price: "¥25", origPrice: "¥25", discount: "", rating: 9.4, url: "https://www.taptap.cn/app/38016", bg: "linear-gradient(135deg,#81c784,#2e7d32)" },
+  { icon: "⚔️", title: "大侠立志传", tag: "武侠 · RPG", price: "¥48", origPrice: "¥68", discount: "-29%", rating: 7.5, url: "https://www.taptap.cn/app/214459", bg: "linear-gradient(135deg,#ffcc80,#e65100)" },
+  { icon: "👻", title: "小小梦魇", tag: "冒险 · 解谜", price: "¥98", origPrice: "¥128", discount: "-23%", rating: 9.0, url: "https://www.taptap.cn/app/225077", bg: "linear-gradient(135deg,#b39ddb,#4527a0)" },
+  { icon: "🐱", title: "猫神牧场", tag: "模拟 · 经营", price: "¥30", origPrice: "¥30", discount: "", rating: 8.6, url: "https://www.taptap.cn/app/375622", bg: "linear-gradient(135deg,#ffab91,#d84315)" },
+  { icon: "🤪", title: "全面憨憨战争模拟器", tag: "策略 · 搞怪", price: "¥38", origPrice: "¥50", discount: "-24%", rating: 8.1, url: "https://www.taptap.cn/app/229084", bg: "linear-gradient(135deg,#ef9a9a,#c62828)" },
+  { icon: "🌋", title: "火山的女儿", tag: "养成 · 剧情", price: "¥58", origPrice: "¥78", discount: "-26%", rating: 8.3, url: "https://www.taptap.cn/app/227498", bg: "linear-gradient(135deg,#f48fb1,#ad1457)" },
+  { icon: "🎵", title: "喵斯快跑", tag: "音乐 · 节奏", price: "¥30", origPrice: "¥30", discount: "", rating: 9.5, url: "https://www.taptap.cn/app/74046", bg: "linear-gradient(135deg,#80deea,#00838f)" },
+  { icon: "🔧", title: "重构", tag: "解谜 · 独立", price: "¥18", origPrice: "¥18", discount: "", rating: 8.9, url: "https://www.taptap.cn/app/166519", bg: "linear-gradient(135deg,#90caf9,#1565c0)" },
 ];
 
 const MEM_CARD_COLORS = [
@@ -6258,16 +6258,21 @@ function discoverInlineView(s) {
           <p class="h1 grow">🎮 买断制游戏推荐<br><span style="font-weight:400;font-size:13px;color:rgba(15,23,42,.35)">Featured Games</span></p>
         </div>
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px">
-          ${FEATURED_GAMES.map(g => `
-            <a href="${g.url}" target="_blank" style="display:flex;gap:10px;padding:10px;border-radius:12px;background:rgba(15,23,42,.03);border:1px solid rgba(15,23,42,.06);text-decoration:none;color:inherit;transition:background .15s">
-              <div style="width:48px;height:48px;border-radius:10px;background:${g.bg || 'rgba(15,23,42,.08)'};display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${g.icon}</div>
-              <div style="min-width:0">
-                <div style="font-size:13px;font-weight:700;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(g.title)}</div>
-                <div style="font-size:11px;color:rgba(15,23,42,.45);margin-top:2px">${escapeHtml(g.tag)}</div>
-                <div style="font-size:12px;font-weight:700;color:var(--brand);margin-top:2px">${g.price}</div>
+          ${FEATURED_GAMES.map(g => {
+            const hasDiscount = g.discount && g.discount !== "";
+            const priceHtml = hasDiscount
+              ? `<span class="fg-price">${g.price}</span><span class="fg-orig-price">${g.origPrice}</span><span class="fg-discount">${g.discount}</span>`
+              : `<span class="fg-price">${g.price}</span>`;
+            return `
+            <a href="${g.url}" target="_blank" class="featured-game-card">
+              <div class="featured-game-card__icon" style="background:${g.bg || 'rgba(15,23,42,.08)'}">${g.icon}</div>
+              <div style="min-width:0;flex:1">
+                <div class="featured-game-card__title">${escapeHtml(g.title)}</div>
+                <div class="featured-game-card__meta"><span class="fg-star">★ ${g.rating.toFixed(1)}</span>${escapeHtml(g.tag)}</div>
+                <div class="featured-game-card__price">${priceHtml}</div>
               </div>
-            </a>
-          `).join("")}
+            </a>`;
+          }).join("")}
         </div>
       </section>
     </div>

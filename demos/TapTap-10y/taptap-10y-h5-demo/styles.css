@@ -2257,6 +2257,36 @@ html.is-firstrecap .firstrecap-body::before{
 .lottery-rules__section:last-child{margin-bottom:0}
 .lottery-rules__title{font-weight:700;margin-bottom:4px}
 .lottery-rules__text{color:var(--muted)}
+
+.featured-game-card{
+  display:flex;gap:10px;padding:10px;border-radius:12px;
+  background:rgba(15,23,42,.03);border:1px solid rgba(15,23,42,.06);
+  text-decoration:none;color:inherit;transition:background .15s;
+}
+.featured-game-card:hover{background:rgba(15,23,42,.06)}
+.featured-game-card__icon{
+  width:48px;height:48px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;flex-shrink:0;
+}
+.featured-game-card__title{
+  font-size:13px;font-weight:700;color:#0F172A;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.featured-game-card__meta{
+  font-size:11px;color:rgba(15,23,42,.45);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.fg-star{color:var(--brand);font-weight:700;margin-right:4px}
+.featured-game-card__price{
+  margin-top:3px;display:flex;align-items:baseline;gap:4px;flex-wrap:wrap;
+}
+.fg-price{font-size:14px;font-weight:700;color:var(--brand)}
+.fg-orig-price{font-size:11px;color:rgba(15,23,42,.3);text-decoration:line-through}
+.fg-discount{
+  font-size:10px;font-weight:700;color:#fff;
+  background:rgba(15,23,42,.35);border-radius:3px;padding:0 3px;line-height:1.5;
+}
 .lottery-hint{
   font-size:12px;
   color:rgba(15,23,42,.5);
