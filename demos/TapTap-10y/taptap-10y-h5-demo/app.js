@@ -6255,25 +6255,16 @@ function discoverInlineView(s) {
     <div class="home-module" id="section-featured-games">
       <section class="card">
         <div class="row" style="align-items:baseline">
-          <p class="h1 grow">🎮 买断制游戏推荐<br><span style="font-weight:400;font-size:13px;color:rgba(15,23,42,.35)">Featured Games</span></p>
+          <p class="h1 grow">🏷️ 游戏特卖会<br><span style="font-weight:400;font-size:13px;color:rgba(15,23,42,.35)">Game Sale</span></p>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px">
-          ${FEATURED_GAMES.map(g => {
-            const hasDiscount = g.discount && g.discount !== "";
-            const priceHtml = hasDiscount
-              ? `<span class="fg-price">${g.price}</span><span class="fg-orig-price">${g.origPrice}</span><span class="fg-discount">${g.discount}</span>`
-              : `<span class="fg-price">${g.price}</span>`;
-            return `
-            <a href="${g.url}" target="_blank" class="featured-game-card">
-              <div class="featured-game-card__icon" style="background:${g.bg || 'rgba(15,23,42,.08)'}">${g.icon}</div>
-              <div style="min-width:0;flex:1">
-                <div class="featured-game-card__title">${escapeHtml(g.title)}</div>
-                <div class="featured-game-card__meta"><span class="fg-star">★ ${g.rating.toFixed(1)}</span>${escapeHtml(g.tag)}</div>
-                <div class="featured-game-card__price">${priceHtml}</div>
-              </div>
-            </a>`;
-          }).join("")}
-        </div>
+        <a href="https://www.taptap.cn/events/game-sale" target="_blank" class="game-sale-banner">
+          <div class="game-sale-banner__bg"></div>
+          <div class="game-sale-banner__content">
+            <div class="game-sale-banner__title">十周年游戏特卖</div>
+            <div class="game-sale-banner__desc">精选买断制游戏限时折扣，最低 3 折起</div>
+            <span class="game-sale-banner__cta">立即前往 →</span>
+          </div>
+        </a>
       </section>
     </div>
 
