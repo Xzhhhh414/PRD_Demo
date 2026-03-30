@@ -632,36 +632,31 @@ function getMaxClaims(rewardId, snap) {
   const years = Math.floor((td || 0) / 365);
   switch (rewardId) {
     case "snap_reg_active": return Math.min(10, Math.max(1, years));
-    case "snap_time_habit": return Math.min(10, Math.max(1, Math.floor(Number(snap?.lateNightOpenCount || 0) / 50)));
-    case "snap_reserve": return Math.min(10, Math.max(1, Math.floor(Number(snap?.reserveCount || 0) / 10)));
-    case "snap_spend": return Math.min(10, Math.max(1, Math.floor(Number(snap?.spendTotal || 0) / 100)));
-    case "snap_top3games": return Math.min(10, Math.max(1, Math.floor(Number(snap?.gamesPlayedTotal || 0) / 50)));
-    case "snap_playtime": return Math.min(10, Math.max(1, Math.floor(Number(snap?.playTimeHours || 0) / 200)));
+    case "snap_time_habit": return Math.min(10, Math.max(1, Math.floor(Number(snap?.lateNightOpenCount || 0) / 2)));
+    case "snap_reserve": return Math.min(10, Math.max(1, Number(snap?.reserveCount || 0)));
+    case "snap_spend": return Math.min(20, Math.max(2, Math.floor(Number(snap?.spendTotal || 0) / 50)));
+    case "snap_top3games": return Math.min(10, Math.max(1, Math.floor(Number(snap?.gamesPlayedTotal || 0) / 2)));
+    case "snap_playtime": return Math.min(10, Math.max(1, Math.floor(Number(snap?.playTimeHours || 0) / 3)));
     case "snap_profile": {
       const dims = [snap?.radarAction, snap?.radarStrategy, snap?.radarRPG, snap?.radarAdventure, snap?.radarSim, snap?.radarCasual];
-      return Math.min(10, Math.max(1, dims.filter(v => Number(v || 0) > 0).length));
+      const tagCount = dims.filter(v => Number(v || 0) > 0).length;
+      return Math.min(10, Math.max(1, Math.floor(tagCount / 10)));
     }
-    case "snap_achievements": {
-      const base = Math.max(1, Math.floor(Number(snap?.achievementsTotal || 0) / 50));
-      return Math.min(10, base + Number(snap?.platinumAchievementsTotal || 0));
-    }
+    case "snap_achievements": return Math.min(10, Math.max(1, Math.floor(Number(snap?.achievementsTotal || 0) / 5)));
+    case "snap_achievements_platinum": return Math.min(10, Math.max(1, Number(snap?.platinumAchievementsTotal || 0)));
     case "snap_beloved": return 1;
-    case "snap_tapexclusive": return Math.min(10, Math.max(1, Math.floor(Number(snap?.exclusivePlayed || 0) / 10)));
-    case "snap_editorpick": return Math.min(10, Math.max(1, Math.floor(Number(snap?.editorPickPlayed || 0) / 10)));
-    case "snap_review_voice": {
-      const base = Math.max(1, Math.floor(Number(snap?.reviewsCount || 0) / 50));
-      return Math.min(10, base + Number(snap?.zuitiReviewsCount || snap?.zuitiCount || 0));
-    }
-    case "snap_community_pub": return Math.min(10, Math.max(1, Math.floor(Number(snap?.communityPublished || 0) / 100)));
-    case "snap_community_likes": return Math.min(10, Math.max(1, Math.floor(Number(snap?.communityLikesReceived || 0) / 500)));
-    case "snap_night_community": return Math.min(10, Math.max(1, Math.floor(Number(snap?.nightSurfDays || 0) / 15)));
-    case "snap_badges": {
-      const base = Math.max(1, Math.floor(Number(snap?.platformBadgesTotal || 0) / 10));
-      return Math.min(10, base + Number(snap?.blackGoldBadgesCount || 0));
-    }
+    case "snap_tapexclusive": return Math.min(10, Math.max(1, Number(snap?.exclusivePlayed || 0) * 2));
+    case "snap_editorpick": return Math.min(10, Math.max(1, Number(snap?.editorPickPlayed || 0)));
+    case "snap_review_voice": return Math.min(10, Math.max(1, Number(snap?.reviewsCount || 0)));
+    case "snap_review_zuiti": return Math.min(10, Math.max(1, Number(snap?.zuitiReviewsCount || snap?.zuitiCount || 0)));
+    case "snap_community_pub": return Math.min(10, Math.max(1, Number(snap?.communityPublished || 0)));
+    case "snap_community_likes": return Math.min(10, Math.max(1, Math.floor(Number(snap?.communityLikesReceived || 0) / 10)));
+    case "snap_night_community": return Math.min(10, Math.max(1, Number(snap?.nightSurfDays || 0)));
+    case "snap_badges": return Math.min(10, Math.max(1, Number(snap?.platformBadgesTotal || 0)));
+    case "snap_badges_blackgold": return Math.min(10, Math.max(1, Number(snap?.blackGoldBadgesCount || 0)));
     case "snap_friend_msgs": {
-      const fc = Math.floor(Number(snap?.friendsCount || 0) / 50);
-      const fl = Math.floor(Number(snap?.followersCount || 0) / 500);
+      const fc = Math.floor(Number(snap?.friendsCount || 0) / 2);
+      const fl = Math.floor(Number(snap?.followersCount || 0) / 20);
       return Math.min(10, Math.max(1, fc + fl));
     }
     case "snap_dev_create": {
@@ -884,38 +879,42 @@ function openDataRulesModal() {
   const body = `
     <div class="data-rules-modal">
       <div class="data-rules-modal__section">
-        <div class="data-rules-modal__title">数据说明</div>
+        <div class="data-rules-modal__title">领奖次数规则</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px">数据为空时仍可领取 1 次纪念币。有数据时领取次数如下：</div>
         <ul class="data-rules-modal__list">
-          <li>消费包括买断制手游（含DLC）、买断制PC游戏（含DLC）、云玩等所有消费内容，不含 Steam CDKey</li>
-          <li>深夜定义为 22:00–4:59</li>
+          <li><b>相伴时光</b>：每多 1 年注册年数 +1 次，上限 10 次</li>
+          <li><b>夜行者</b>：每 2 天深夜时段打开 +1 次，上限 10 次</li>
+          <li><b>剁手记录</b>：消费额度影响领取次数，上限 20 次</li>
+          <li><b>新作预约</b>：每预约 1 款 +1 次，上限 10 次</li>
+          <li><b>冒险旅程</b>：每玩 2 款游戏 +1 次，上限 10 次</li>
+          <li><b>游玩时光</b>：每游玩 3 小时 +1 次，上限 10 次</li>
+          <li><b>喜爱类型</b>：每涉猎 10 个类型 +1 次，上限 10 次</li>
+          <li><b>游戏成就</b>：每 5 个成就 +1 次（上限 10 次）；若有白金成就，每个白金额外 +1 次（上限 10 次）</li>
+          <li><b>我的挚爱</b>：固定 1 次</li>
+          <li><b>独家宝藏</b>：每玩 1 款独家游戏 +2 次，上限 10 次</li>
+          <li><b>编辑之选</b>：每玩 1 款编辑推荐游戏 +1 次，上限 10 次</li>
+          <li><b>玩家之声</b>：每 1 条评价 +1 次（上限 10 次）；若有嘴替评价，每条额外 +1 次（上限 10 次）</li>
+          <li><b>社区足迹</b>：每发布 1 条帖子或回复 +1 次，上限 10 次</li>
+          <li><b>社区点赞</b>：每获得 10 个赞 +1 次，上限 10 次</li>
+          <li><b>深夜冲浪</b>：每 1 天深夜冲浪 +1 次，上限 10 次</li>
+          <li><b>徽章墙</b>：每 1 枚徽章 +1 次（上限 10 次）；若有黑金徽章，每枚额外 +1 次（上限 10 次）</li>
+          <li><b>同行伙伴</b>：每 2 位好友 +1 次，每 20 位粉丝额外 +1 次，上限 10 次</li>
+          <li><b>游戏创作</b>：每 1 款作品 +1 次，上限 10 次</li>
+          <li><b>Steam / 角色数据</b>：绑定即领 1 次</li>
         </ul>
       </div>
       <div class="data-rules-modal__section">
-        <div class="data-rules-modal__title">领奖次数规则</div>
+        <div class="data-rules-modal__title">数据说明</div>
         <ul class="data-rules-modal__list">
-          <li><b>相伴时光</b>：每多 1 年相伴年数增加 1 次，最多 10 次</li>
-          <li><b>夜行者</b>：每 50 次深夜打开增加 1 次，最多 10 次</li>
-          <li><b>剁手记录</b>：每消费 100 元增加 1 次，最多 10 次</li>
-          <li><b>新作预约</b>：每预约 10 款增加 1 次，最多 10 次</li>
-          <li><b>冒险旅程</b>：每玩 50 款游戏增加 1 次，最多 10 次</li>
-          <li><b>游玩时光</b>：每游玩 200 小时增加 1 次，最多 10 次</li>
-          <li><b>喜爱类型</b>：每多涉猎 1 个类型增加 1 次，最多 10 次</li>
-          <li><b>游戏成就</b>：每 50 个成就增加 1 次，每个白金成就额外增加 1 次，最多 10 次</li>
-          <li><b>我的挚爱</b>：固定 1 次</li>
-          <li><b>独家宝藏</b>：每玩 10 款独家游戏增加 1 次，最多 10 次</li>
-          <li><b>编辑之选</b>：每玩 10 款编辑推荐游戏增加 1 次，最多 10 次</li>
-          <li><b>玩家之声</b>：每 50 条评价增加 1 次，每条嘴替评价额外增加 1 次，最多 10 次</li>
-          <li><b>社区足迹</b>：每发布 100 条帖子或回复增加 1 次，最多 10 次</li>
-          <li><b>社区点赞</b>：每获得 500 个赞增加 1 次，最多 10 次</li>
-          <li><b>深夜冲浪</b>：每 15 天深夜冲浪增加 1 次，最多 10 次</li>
-          <li><b>徽章墙</b>：每 10 枚徽章增加 1 次，每枚黑金徽章额外增加 1 次，最多 10 次</li>
-          <li><b>同行伙伴</b>：每 50 位好友增加 1 次，每 500 位粉丝额外增加 1 次，最多 10 次</li>
-          <li><b>游戏创作</b>：每多 1 款作品增加 1 次，最多 10 次</li>
+          <li>所有数据统计截止到 2026 年 4 月 10 日</li>
+          <li>消费包括买断制手游（含DLC）、买断制PC游戏（含DLC）、云玩等所有消费内容，不含 Steam CDKey，活动点券不算消费</li>
+          <li>深夜时段定义为 22:00–4:59</li>
+          <li>深夜冲浪定义：在深夜时段，进行过点赞、发布内容、评价行为</li>
         </ul>
       </div>
     </div>
   `;
-  openModal({ title: "数据规则说明", bodyHtml: body, variant: "data-rules" });
+  openModal({ title: "回顾数据规则说明", bodyHtml: body, variant: "data-rules" });
 }
 
 
@@ -3707,10 +3706,11 @@ function openLotteryOddsModal() {
       <div class="lottery-rules__section">
         <div class="lottery-rules__title">【规则说明】</div>
         <div class="lottery-rules__text">
-          1. 参与十周年活动的各项玩法，可获得纪念币；<br>
-          2. 每次抽奖消耗 <b>${LOTTERY_COST}</b> 纪念币，不限抽奖次数；<br>
-          3. 获奖用户可在「我的奖品」中查看中奖信息；<br>
-          4. 活动奖品数量有限，已抽完的奖品不再产出；<br>
+          1. 活动时间：即日起至 2026 年 6 月 17 日；<br>
+          2. 参与十周年活动的各项玩法，可获得纪念币；<br>
+          3. 每次抽奖消耗 <b>${LOTTERY_COST}</b> 纪念币，不限抽奖次数；<br>
+          4. 获奖用户可在「我的奖品」中查看中奖信息；<br>
+          5. 活动奖品数量有限，已抽完的奖品不再产出；<br>
         </div>
       </div>
       <div class="lottery-rules__section">
@@ -5018,7 +5018,7 @@ function recapInlineView(s, recap, { sortUnclaimedFirst = false } = {}) {
         <div class="home-hero__text">
           <div class="home-hero__title">🎉 回顾你与 TapTap 走过的十年时光</div>
           <div class="home-hero__note">
-            数据统计截止到 2026年4月1日
+            数据统计截止到 2026年4月10日
             <span class="home-hero__info-btn" onclick="openDataRulesModal()">!</span>
           </div>
         </div>
@@ -7394,7 +7394,7 @@ function runOpeningGate() {
         bodyHtml: `<div style="padding:16px;font-size:13px;line-height:1.8;color:var(--text-secondary);max-height:60vh;overflow-y:auto">
           <p>欢迎参与"TapTap十周年"活动！</p>
           <p>在参与TapTap十周年活动之前，请您仔细阅读并充分理解本协议及<a href="https://www.taptap.cn/doc/privacy-policy/" target="_blank" style="color:var(--brand)">《TapTap隐私政策》</a>，若您不同意本协议及《TapTap隐私政策》中的任何内容，请立即停止参加本活动。您开启"TapTap 十周年"活动将被视为已仔细阅读、充分理解并接受本协议及《TapTap隐私政策》下的所有条款。</p>
-          <p><b>1.</b> 为了生成您的十周年生涯回顾，您同意授权TapTap使用您从注册TapTap平台开始至2026年4月1日期间的相关用户信息、使用记录，并据此进行报告分析，以向您提供个性化专属展示。<br>所涉及的用户信息、使用记录包括：您的账号信息（包括ID、昵称、头像、注册日期及注册天数）；应用启动时间及次数；预约游戏记录；下载游戏记录及游戏时长（含云玩、TapPlay功能）；评价记录；浏览记录；内容发布记录；点赞及获赞记录；游戏成就及战绩记录；STEAM数据记录；徽章取得记录；游戏购买及消费记录。<br>您理解并同意，上述信息是TapTap生成您的十周年生涯回顾的必备信息，如您拒绝授权，TapTap将无法为您提供您的十周年生涯回顾。未经您的书面同意，我们保证仅在本协议及《TapTap隐私政策》约定的范围使用您的个人信息。</p>
+          <p><b>1.</b> 为了生成您的十周年生涯回顾，您同意授权TapTap使用您从注册TapTap平台开始至2026年4月10日期间的相关用户信息、使用记录，并据此进行报告分析，以向您提供个性化专属展示。<br>所涉及的用户信息、使用记录包括：您的账号信息（包括ID、昵称、头像、注册日期及注册天数）；应用启动时间及次数；预约游戏记录；下载游戏记录及游戏时长（含云玩、TapPlay功能）；评价记录；浏览记录；内容发布记录；点赞及获赞记录；游戏成就及战绩记录；STEAM数据记录；徽章取得记录；游戏购买及消费记录。<br>您理解并同意，上述信息是TapTap生成您的十周年生涯回顾的必备信息，如您拒绝授权，TapTap将无法为您提供您的十周年生涯回顾。未经您的书面同意，我们保证仅在本协议及《TapTap隐私政策》约定的范围使用您的个人信息。</p>
           <p><b>2.</b> 您的十周年生涯回顾依据您的授权范围由系统自动生成，请您理解其与实际情况可能存在偏差。</p>
           <p><b>3.</b> 您的十周年生涯回顾及其内容（包括但不限于软件、技术、程序、网页、文字、图片、音频、视频、页面设计、商标等）的知识产权由TapTap或实际权利人享有。</p>
           <p><b>4.</b> 请您注意，本次活动的结果页面会包含您的个人信息，当您选择分享您的十周年生涯回顾截图或结果页面时，其他人会看到您的相关信息，故请您谨慎选择。</p>
