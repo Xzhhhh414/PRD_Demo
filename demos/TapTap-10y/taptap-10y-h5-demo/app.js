@@ -606,22 +606,22 @@ function calcSnapshotGrants(recap) {
   const spendTotal = Number(recap?.spendTotal || 0);
 
   return {
-    snap_reg_active:      fixed(20),
+    snap_reg_active:      fixed(10),
     snap_time_habit:      fixed(10),
-    snap_spend:           fixed(15),
+    snap_spend:           fixed(10),
     snap_reserve:         fixed(10),
-    snap_top3games:       fixed(15),
-    snap_playtime:        fixed(15),
+    snap_top3games:       fixed(10),
+    snap_playtime:        fixed(10),
     snap_profile:         fixed(10),
-    snap_achievements:    fixed(15),
-    snap_beloved:         fixed(20),
-    snap_tapexclusive:    fixed(15),
-    snap_editorpick:      fixed(15),
-    snap_review_voice:    fixed(15),
-    snap_community_pub:   fixed(10),
-    snap_community_likes: fixed(10),
+    snap_achievements:    fixed(20),
+    snap_beloved:         fixed(10),
+    snap_tapexclusive:    fixed(10),
+    snap_editorpick:      fixed(10),
+    snap_review_voice:    fixed(20),
+    snap_community_pub:   fixed(20),
+    snap_community_likes: fixed(20),
     snap_night_community: fixed(10),
-    snap_badges:          fixed(15),
+    snap_badges:          fixed(20),
     snap_friend_msgs:     fixed(10),
     snap_dev_create:      fixed(20),
   };
@@ -634,7 +634,21 @@ function getMaxClaims(rewardId, snap) {
     case "snap_reg_active": return Math.min(10, Math.max(1, years));
     case "snap_time_habit": return Math.min(10, Math.max(1, Math.floor(Number(snap?.lateNightOpenCount || 0) / 2)));
     case "snap_reserve": return Math.min(10, Math.max(1, Number(snap?.reserveCount || 0)));
-    case "snap_spend": return Math.min(20, Math.max(2, Math.floor(Number(snap?.spendTotal || 0) / 50)));
+    case "snap_spend": {
+      const amt = Number(snap?.spendTotal || 0);
+      if (amt <= 0) return 1;
+      if (amt < 100) return 2;
+      if (amt < 200) return 3;
+      if (amt < 300) return 5;
+      if (amt < 400) return 7;
+      if (amt < 500) return 9;
+      if (amt < 600) return 11;
+      if (amt < 700) return 13;
+      if (amt < 800) return 15;
+      if (amt < 900) return 17;
+      if (amt < 1000) return 19;
+      return 20;
+    }
     case "snap_top3games": return Math.min(10, Math.max(1, Math.floor(Number(snap?.gamesPlayedTotal || 0) / 2)));
     case "snap_playtime": return Math.min(10, Math.max(1, Math.floor(Number(snap?.playTimeHours || 0) / 3)));
     case "snap_profile": {
@@ -2363,7 +2377,7 @@ function yesterdayKeyLocal() {
 }
 
 const CHECKIN_BASE = 50;
-const CHECKIN_STREAK_GOAL = 14;
+const CHECKIN_STREAK_GOAL = 3;
 
 function identityTitleForRecap(recap) {
   const ys = recap?.taptapCriticYears;
