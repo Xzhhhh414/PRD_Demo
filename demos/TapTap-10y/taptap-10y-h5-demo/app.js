@@ -928,7 +928,7 @@ function openDataRulesModal() {
       </div>
     </div>
   `;
-  openModal({ title: "十年时光规则说明", bodyHtml: body, variant: "data-rules" });
+  openModal({ title: "十年时光数据说明", bodyHtml: body, variant: "data-rules" });
 }
 
 
