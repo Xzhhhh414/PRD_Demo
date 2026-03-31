@@ -921,14 +921,14 @@ function openDataRulesModal() {
         <div class="data-rules-modal__title">数据说明</div>
         <ul class="data-rules-modal__list">
           <li>所有数据统计截止到 2026 年 4 月 10 日</li>
-          <li>消费包括买断制手游（含DLC）、买断制PC游戏（含DLC）、云玩等所有消费内容，不含 Steam CDKey，活动点券不算消费</li>
+          <li>消费包括买断制手游（含DLC）、买断制PC游戏（含DLC）、Steam CDKey、云玩等所有消费内容，活动点券不算消费</li>
           <li>深夜时段定义为 22:00–4:59</li>
           <li>深夜冲浪定义：在深夜时段，进行过点赞、发布内容、评价行为</li>
         </ul>
       </div>
     </div>
   `;
-  openModal({ title: "回顾数据规则说明", bodyHtml: body, variant: "data-rules" });
+  openModal({ title: "十年时光规则说明", bodyHtml: body, variant: "data-rules" });
 }
 
 
