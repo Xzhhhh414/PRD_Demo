@@ -6077,7 +6077,7 @@ function discoverInlineView(s) {
     return `
       <div class="playtime-task" style="margin-top:12px">
         <div class="playtime-task-current">
-          <div class="playtime-task-current__encourage"><span>去游乐场里寻找自己喜欢的游戏吧~</span><button class="btn btn--sm" id="btnShuffleGames" type="button" style="margin-left:auto">🎲 换一换</button></div>
+          <div class="playtime-task-current__encourage"><span>这里的每一款游戏，都由 TapTap 玩家亲手创作~</span><button class="btn btn--sm" id="btnShuffleGames" type="button" style="margin-left:auto">🎲 换一换</button></div>
           <div class="playtime-task-current__target">游玩打卡新游戏，每款可获得 <b>${fmt(CHECKIN_COINS_PER_GAME)}</b> 纪念币｜已打卡 <b>${count}</b> 款</div>
         </div>
         <div class="lottery-test-bar" style="margin-top:10px">
@@ -6252,9 +6252,8 @@ function discoverInlineView(s) {
     <div class="home-module" id="section-gamejam">
       <section class="card">
         <div class="row" style="align-items:baseline">
-          <p class="h1 grow">游戏游乐场<br><span style="font-weight:400;font-size:13px;color:rgba(15,23,42,.35)">Game Playground</span></p>
-          <span class="muted small" style="margin-right:6px">游戏来源：TapTap制造</span>
-          <button class="btn btn--brand btn--sm" id="btnTaptapMade" type="button" style="padding:3px 10px;font-size:12px;line-height:1.4">更多好游戏</button>
+          <p class="h1 grow">十周年游乐场<br><span style="font-weight:400;font-size:13px;color:rgba(15,23,42,.35)">开启关于灵感的冒险</span></p>
+          <button class="btn btn--brand" id="btnTaptapMade" type="button" style="padding:8px 20px;font-size:14px">更多 <span style="text-decoration:underline">TapTap 制造</span> 游戏</button>
         </div>
         ${playCheckinHtml(s)}
         <div class="carousel" style="margin-top:10px">
