@@ -3725,7 +3725,7 @@ function openLotteryOddsModal() {
           3. 每次抽奖消耗 <b>${LOTTERY_COST}</b> 纪念币，不限抽奖次数；<br>
           4. 获奖用户可在「我的奖品」中查看中奖信息；<br>
           5. 活动奖品数量有限，无库存的奖品无法被抽到；<br>
-          6. 奖品都只能抽到一次。玩家抽到该奖品后，该奖品的概率归入「谢谢参与」。
+          6. 奖品都只能抽到一次。玩家抽到该奖品后，该奖品的概率归入「谢谢参与」；<br>
         </div>
       </div>
       <div class="lottery-rules__section">
