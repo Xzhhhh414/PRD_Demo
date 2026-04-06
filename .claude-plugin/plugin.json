@@ -1,0 +1,8 @@
+{
+  "name": "prd-workflow",
+  "version": "1.0.0",
+  "description": "本地 AI 工作流 - Obsidian 写需求, Figma 出设计, Claude Code 编码, 多 Agent 协作",
+  "author": {
+    "name": "johnz"
+  }
+}
